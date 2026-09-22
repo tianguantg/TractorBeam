@@ -1,5 +1,7 @@
 [workspace]
 members = [
+    "crates/bridge-application",
+    "crates/flutter-bridge",
     "crates/bridge-core",
     "crates/bridge-relay",
     "crates/bridge-gui",
@@ -15,11 +17,19 @@ resolver = "3"
 version = "0.5.2" # x-release-please-version
 edition = "2024"
 license = "AGPL-3.0-or-later"
-repository = "https://github.com/mcthesw/TractorBeam"
+repository = "https://github.com/tianguantg/TractorBeam"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 
 [workspace.lints.clippy]
 all = "warn"
 pedantic = "warn"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+

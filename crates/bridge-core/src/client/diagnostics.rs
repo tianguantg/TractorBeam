@@ -137,7 +137,10 @@ impl BridgeClient {
         }
         output.push_str(&format!(
             "default_transport: {}\ndefault_mode: {}\nrelay_presets: {}\n",
-            self.loaded_config.config.default_transport,
+            self.loaded_config.config.default_transport.map_or_else(
+                || "relay_default".to_owned(),
+                |transport| transport.to_string()
+            ),
             self.loaded_config.config.default_mode,
             self.loaded_config.config.relays.len()
         ));

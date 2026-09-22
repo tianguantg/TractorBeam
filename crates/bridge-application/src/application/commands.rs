@@ -34,6 +34,16 @@ pub(super) fn handle_command(
             set_operation(snapshot, client, None);
             send_application_event(event_tx, snapshot, ApplicationEvent::StartFinished(result));
         }
+        ApplicationCommand::StopSession => {
+            set_operation(
+                snapshot,
+                client,
+                Some(ApplicationOperation::StoppingSession),
+            );
+            client.stop_session();
+            set_operation(snapshot, client, None);
+            send_application_event(event_tx, snapshot, ApplicationEvent::SessionStopped);
+        }
         ApplicationCommand::JoinRelayRoom {
             route,
             steam_id64,
@@ -217,11 +227,12 @@ pub(super) fn handle_command(
             let result = config_path.map_or_else(
                 || {
                     tracing::warn!("Could not save Relay catalog: Bundle config path unavailable");
-                    Err(())
+                    Err("无法确定配置文件位置".to_owned())
                 },
                 |path| {
                     save_client_relay_catalog_to(path, &change).map_err(|error| {
                         tracing::warn!(error = %error, "Could not save Relay catalog");
+                        error.to_string()
                     })
                 },
             );
@@ -236,6 +247,39 @@ pub(super) fn handle_command(
                 event_tx,
                 snapshot,
                 ApplicationEvent::RelayCatalogSaved(result),
+            );
+        }
+        ApplicationCommand::SavePreferences(preferences) => {
+            set_operation(
+                snapshot,
+                client,
+                Some(ApplicationOperation::SavingRelayCatalog),
+            );
+            let result = config_path.map_or_else(
+                || {
+                    tracing::warn!(
+                        "Could not save client preferences: Bundle config path unavailable"
+                    );
+                    Err("无法确定配置文件位置".to_owned())
+                },
+                |path| {
+                    save_client_config_preferences_to(path, preferences).map_err(|error| {
+                        tracing::warn!(error = %error, "Could not save client preferences");
+                        error.to_string()
+                    })
+                },
+            );
+            if let Ok(loaded_config) = &result {
+                client.replace_loaded_config(loaded_config.clone());
+                update_snapshot(snapshot, |snapshot| {
+                    snapshot.loaded_config = Some(loaded_config.clone());
+                });
+            }
+            set_operation(snapshot, client, None);
+            send_application_event(
+                event_tx,
+                snapshot,
+                ApplicationEvent::PreferencesSaved(result),
             );
         }
         ApplicationCommand::EnumerateLanAdapters => {

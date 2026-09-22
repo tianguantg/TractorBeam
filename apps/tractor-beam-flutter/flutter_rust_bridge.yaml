@@ -1,0 +1,5 @@
+rust_input: crate::api
+rust_root: ../../crates/flutter-bridge
+dart_output: lib/bridge/generated
+rust_output: ../../crates/flutter-bridge/src/frb_generated.rs
+c_output: windows/runner/frb_generated.h

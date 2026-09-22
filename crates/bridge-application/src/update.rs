@@ -12,9 +12,9 @@ const UPDATE_CHECK_TIMEOUT: Duration = Duration::from_secs(5);
 pub(crate) type UpdateCheck = Box<dyn FnOnce() -> Result<Option<AvailableUpdate>, String> + Send>;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct AvailableUpdate {
-    pub(crate) version: String,
-    pub(crate) url: String,
+pub struct AvailableUpdate {
+    pub version: String,
+    pub url: String,
 }
 
 #[derive(Debug, Deserialize)]

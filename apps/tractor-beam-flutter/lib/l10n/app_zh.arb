@@ -1,0 +1,841 @@
+{
+  "@@locale": "zh",
+  "navHome": "首页",
+  "navRoom": "房间",
+  "navSettings": "设置",
+  "navStatistics": "统计",
+  "navLogs": "日志",
+  "navAbout": "关于",
+  "switchToEnglish": "切换到 English",
+  "trayShowMonitor": "显示悬浮窗",
+  "trayOpenFull": "打开完整界面",
+  "trayHide": "隐藏窗口",
+  "trayExit": "退出程序",
+  "genericError": "操作失败",
+  "busy": "当前正忙，请稍后重试",
+  "roomRestoreRelayFailed": "无法恢复上一次的 Relay 房间，请检查节点和网络后重试。",
+  "roomRestoreLanFailed": "无法恢复上一次的局域网房间：原联机码中的端点当前不可达，请让房主重新发送联机码。",
+  "roomRestoreRelayTimeout": "恢复上一次的 Relay 房间超时，请检查网络后从历史记录重试。",
+  "roomRestoreLanManualRequired": "无法自动恢复上一次的局域网房间，请从历史记录中手动选择并加入。",
+  "latencyComplete": "延迟测试完成：{latency}ms",
+  "@latencyComplete": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      }
+    }
+  },
+  "latencyUnavailable": "无法连接到当前 Relay 节点",
+  "latencyTimeout": "延迟测试超时，无法连接到当前 Relay 节点",
+  "startupFailed": "应用初始化失败",
+  "retry": "重试",
+  "exit": "退出",
+  "openFullInterface": "打开完整界面",
+  "hideToTray": "隐藏到托盘",
+  "localPlayer": "本机",
+  "connected": "已连接",
+  "noData": "—",
+  "homeNoticeTitle": "联机游玩须知",
+  "homeNoticeHelp": "以撒联机基本操作指南与联机注意事项",
+  "connectionMode": "联机方式",
+  "connectionModeHelp": "可选择外部中继服务器（跨公网推荐）或局域网直连模式",
+  "hostInstruction": "若你当房主，请先配置联机方式，然后创建自己的房间；",
+  "memberInstructionBefore": "若你是成员，请复制房主的“联机码”，然后 ",
+  "memberInstructionAfter": " 。",
+  "joinRoom": "加入房间",
+  "launchInstructionBefore": "进入房间后，点击位于右下角的 ",
+  "launchInstructionAfter": " 按钮。",
+  "launchGame": "启动游戏",
+  "startMultiplayer": "开始联机",
+  "gameReady": "游戏已就绪",
+  "gameReadyStandby": "游戏就绪",
+  "gameReadyJoinRoomPrompt": "游戏已就绪，请加入或创建房间开始联机",
+  "dialogLeaveRoomInGameTitle": "退出联机房间",
+  "dialogLeaveRoomInGameWarning": "当前游戏联机对局正在进行中！退出房间将立即中断对局并切断与其他玩家的连接，是否确认退出？",
+  "confirmLeave": "确认退出",
+  "launchWarning": "不要通过 Steam 客户端或其它方式直接启动游戏！",
+  "externalRelay": "外部 Relay 中继",
+  "lanDirect": "局域网直连",
+  "lanSelectedHint": "已选局域网联机，直接前往创建房间即可",
+  "relayConfiguration": "Relay 中继路由配置",
+  "noRelayConfigured": "当前未配置任何 Relay 节点",
+  "addRelayHint": "请点击下方按钮添加自定义 Relay 节点。",
+  "addRelay": "添加relay",
+  "editRelay": "编辑relay",
+  "switchRelay": "切换",
+  "noOtherRelayToSwitch": "暂无其他可用 Relay 节点",
+  "testLatency": "测试延迟",
+  "selectRelayFirst": "请先选择 Relay 服务器",
+  "latencyTestUnavailable": "暂时无法测试延迟",
+  "relayAddFailed": "Relay 添加失败",
+  "relayUpdateFailed": "Relay 更新失败",
+  "relayDeleteFailed": "Relay 删除失败",
+  "relayDeleted": "节点已删除",
+  "blockSessionAndRoom": "请先退出游戏并离开房间再{action}",
+  "blockSession": "请先退出游戏再{action}",
+  "blockRoom": "请先退出房间再{action}",
+  "blockCurrentState": "当前状态下不可{action}",
+  "@blockSessionAndRoom": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@blockSession": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@blockRoom": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@blockCurrentState": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "actionSwitchConnection": "切换联机方式",
+  "actionSwitchRelay": "切换 Relay 节点",
+  "actionAddRelay": "添加 Relay 节点",
+  "actionEditRelay": "编辑 Relay 节点",
+  "monitorWindow": "悬浮窗",
+  "monitorWindowTooltip": "切换到悬浮窗模式",
+  "running": "运行中",
+  "idle": "空闲",
+  "reconnectCount": "重连 {count}",
+  "errorCount": "错误 {count}",
+  "@reconnectCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@errorCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "hookReady": "Hook 已就绪",
+  "hookConnecting": "Hook 连接中",
+  "noMembers": "暂无队员信息",
+  "relayRoute": "Relay",
+  "relayConnectionRoute": "Relay 中继",
+  "lanRoute": "局域网直连",
+  "unknownRoute": "联机方式未知",
+  "relayDefault": "Relay 默认",
+  "defaultTransport": "默认协议",
+  "fullInterface": "完整界面",
+  "launching": "启动中…",
+  "cancelling": "取消中…",
+  "gameRunning": "游戏运行中",
+  "hookDisconnected": "未连接",
+  "hookConnected": "已连接",
+  "hookReconnecting": "重连中",
+  "hookFailed": "连接失败",
+  "hookClosed": "已断开",
+  "cancel": "取消",
+  "confirm": "确认",
+  "save": "保存",
+  "delete": "删除",
+  "close": "关闭",
+  "copy": "复制",
+  "copied": "已复制到剪贴板",
+  "leaveAndJoin": "退出并加入",
+  "confirmSwitch": "确认切换",
+  "completeExit": "完全退出",
+  "hideToTrayAction": "隐藏到托盘",
+  "retryAction": "重试启动",
+  "exitAction": "退出程序",
+  "errRoomAlreadyActive": "请先退出当前房间",
+  "errAccountRequired": "请选择 Steam 账号",
+  "errSessionRunning": "游戏正在运行中，请先退出游戏",
+  "errLanAdapterRequired": "请至少选择一个网卡",
+  "errTooManyLanAdapters": "最多选择八个网卡",
+  "errLaunchNotActive": "当前没有可以取消的启动流程",
+  "errLaunchCancelPending": "正在取消游戏启动，请稍候",
+  "errLaunchGeneric": "暂时无法启动游戏",
+  "gameLaunching": "游戏正在启动中",
+  "errQueueBusy": "命令队列繁忙，请稍后重试",
+  "errPublisherUnavailable": "无法启动状态推送线程",
+  "errAlreadyInitialized": "TractorBeam 已经初始化",
+  "errNotInitialized": "应用尚未初始化",
+  "errInputDelayUnsupported": "当前工作模式不支持输入延迟控制，请使用 Fallback 或 Pure 模式",
+  "errInputDelayHookNotReady": "Hook 尚未就绪，请稍后再试",
+  "errInputDelayHookBusy": "Hook 正忙，请稍后重试输入延迟操作",
+  "errInputDelayTimedOut": "读写输入延迟超时，请稍后重试",
+  "errInputDelayGeneric": "无法处理输入延迟，请稍后重试",
+  "errConfigSaveFailed": "配置保存失败",
+  "errRelaySaveFailed": "无法保存 Relay，请查看日志了解详情",
+  "errLanProbeFailed": "局域网探测失败",
+  "errLanUnreachable": "局域网目标不可达",
+  "roomTitle": "房间",
+  "roomJoinCodeTitle": "房间联机码",
+  "roomJoinCodeHelp": "房间联机码用于邀请其他玩家加入对局，点击可复制",
+  "roomSteamAccountHelp": "当前用于联机的 Steam 账号身份，支持快速切换与手动管理",
+  "roomPartyHelp": "当前房间内的全部玩家及对局连接状态与网络质量",
+  "roomLeaving": "正在退出联机房间…",
+  "roomAlreadyInTarget": "当前已在该房间中",
+  "roomEmptySubtitle": "新建房间或输入联机码与好友联机",
+  "roomCreating": "正在创建联机房间…",
+  "roomJoining": "正在加入联机房间…",
+  "roomFailed": "房间操作失败，请重试",
+  "roomNotJoined": "当前未加入任何联机房间",
+  "createStandaloneRoom": "新建独立房间",
+  "createLanRoom": "新建局域网房间",
+  "leaveCurrentRoom": "退出当前房间",
+  "roomProcessingWait": "正在处理房间请求，请稍候…",
+  "roomHistoryEmpty": "暂无历史联机房间记录",
+  "roomSwitchFailed": "切换房间失败",
+  "roomJoinFailed": "加入房间失败",
+  "roomCreateFailed": "创建房间失败",
+  "roomLeaveFailed": "退出房间失败",
+  "roomCreatedSuccess": "已创建独立房间",
+  "roomLeftSuccess": "已退出当前房间",
+  "roomJoinedSuccess": "已成功加入房间：{code}",
+  "@roomJoinedSuccess": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "roomSwitchedSuccess": "已退出原房间并加入新房间：{code}",
+  "@roomSwitchedSuccess": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "roomLanCreatedSuccess": "已使用 {count} 张网卡创建局域网房间",
+  "@roomLanCreatedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "roomSteamAccountTitle": "Steam 账号",
+  "roomSteamAccountUnconfigured": "未配置",
+  "roomSteamMismatchTitle": "Steam 账号不一致",
+  "roomSteamMismatchMessage": "以撒游戏使用 {gameSteamId}，而房间配置为 {roomSteamId}",
+  "@roomSteamMismatchMessage": {
+    "placeholders": {
+      "gameSteamId": {
+        "type": "String"
+      },
+      "roomSteamId": {
+        "type": "String"
+      }
+    }
+  },
+  "roomSteamSyncNow": "同步为游戏账号并重连",
+  "roomPartyTitle": "联机队伍成员",
+  "memberStatusConnected": "状态：已连接",
+  "memberStatusPlaying": "状态：游戏中",
+  "memberStatusReconnecting": "状态：重连中",
+  "memberStatusDisconnected": "状态：已断开",
+  "memberStatusInactive": "状态：未连接",
+  "memberStatusConnecting": "状态：连接中",
+  "memberTagLocal": "本机",
+  "memberTagHost": "房主",
+  "memberLocalFooter": "方式：{route}    协议：{transport}",
+  "@memberLocalFooter": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "transport": {
+        "type": "String"
+      }
+    }
+  },
+  "memberPeerFooter": "抖动：{jitter}ms  丢包：{loss}%",
+  "@memberPeerFooter": {
+    "placeholders": {
+      "jitter": {
+        "type": "String"
+      },
+      "loss": {
+        "type": "String"
+      }
+    }
+  },
+  "routeRelay": "Relay中继",
+  "routeLan": "局域网",
+  "transportUdp": "UDP",
+  "transportTcp": "TCP",
+  "transportAuto": "默认",
+  "roomCurrentCode": "当前联机码",
+  "roomCodeCopied": "联机码已复制",
+  "inputCodeToJoin": "输入联机码加入",
+  "history": "历史",
+  "switchAction": "切换",
+  "roomAdapterReadFailed": "无法读取网卡",
+  "roomOnlineCount": "在线 {count}",
+  "@roomOnlineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "roomOnlineCountWithPage": "在线 {count}  {page}/{total}",
+  "@roomOnlineCountWithPage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "page": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "steamManualAccountDeleted": "已删除手动 Steam 账号",
+  "steamAccountUpdated": "Steam 账号信息已更新：{name}",
+  "@steamAccountUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "steamSwitched": "已切换 Steam 账号",
+  "steamSwitchedAndReconnected": "已切换 Steam 账号并重新连接",
+  "steamSwitchFailed": "账号切换失败",
+  "steamSwitchedTo": "已切换 Steam 账号：{name}",
+  "@steamSwitchedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "steamRefreshAccounts": "刷新账号",
+  "steamRefreshStarted": "账号刷新已开始",
+  "steamManualInput": "手动填写",
+  "steamActiveQuickSwitch": "Steam 活跃账号: {name} (点击快速切换)",
+  "@steamActiveQuickSwitch": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "steamAccountActiveTag": "活跃",
+  "steamAccountManualTag": "手动",
+  "steamAccountCurrentLogin": "Steam当前登录",
+  "roomSteamMismatchDesc": "账号不一致会导致联机失败或数据无法路由，建议同步为以撒当前使用的账号。",
+  "roomSteamSyncSuccess": "已同步为以撒账号并重新连接",
+  "roomSteamSyncFailed": "同步失败",
+  "settingsLanguageFollowSystem": "跟随系统",
+  "dialogJoinRoomTitle": "加入联机房间",
+  "dialogJoinRoomHint": "请输入 16 位或 32 位联机码",
+  "dialogJoinRoomConfirm": "加入",
+  "dialogReplaceRoomTitle": "加入新的联机房间",
+  "dialogReplaceRoomPrompt": "将退出当前房间并结束游戏联机，是否继续？",
+  "dialogSwitchHistoryTitle": "切换联机房间",
+  "dialogSwitchHistoryPrompt": "切换后将退出当前房间；如果游戏正在运行，也会结束当前联机会话。是否继续？",
+  "dialogSwitchSteamInRoomTitle": "在房间中切换 Steam 账号",
+  "dialogSwitchSteamInRoomPrompt": "切换 Steam 账号将退出当前房间{extra}。是否继续？",
+  "@dialogSwitchSteamInRoomPrompt": {
+    "placeholders": {
+      "extra": {
+        "type": "String"
+      }
+    }
+  },
+  "dialogSwitchSteamEndSession": "并结束游戏联机",
+  "dialogCreateLanTitle": "创建局域网联机",
+  "dialogCreateLanSubtitle": "请选择用于局域网联机的本机网卡（最多可多选 8 张）",
+  "dialogCreateLanConfirm": "创建局域网房间",
+  "dialogAddRelayTitle": "添加 Relay 节点",
+  "dialogEditRelayTitle": "编辑 Relay 节点",
+  "dialogRelayNameLabel": "节点名称",
+  "dialogRelayNameHint": "例：华东上海极速节点",
+  "dialogRelayHostLabel": "Relay 地址",
+  "dialogRelayHostHint": "例：relay.example.com",
+  "dialogRelayPortLabel": "端口",
+  "dialogRelayTransportLabel": "支持的传输",
+  "dialogRelayDefaultTransportLabel": "默认传输",
+  "dialogRelayDeleteConfirmTitle": "删除 Relay 节点",
+  "dialogRelayDeleteConfirmPrompt": "确认删除该节点配置吗？此操作无法撤销。",
+  "dialogManualSteamTitle": "手动填写 Steam 账号",
+  "dialogManualSteamSubtitle": "方便在未开启或多开 Steam 客户端时指定账号身份与名字",
+  "dialogManualSteamNameLabel": "用户名",
+  "dialogManualSteamIdLabel": "SteamID64",
+  "dialogManualSteamDelete": "删除当前手动账号",
+  "dialogManualSteamSave": "保存并应用账号",
+  "dialogCloseAppTitle": "关闭 Tractor Beam",
+  "dialogCloseAppPrompt": "是完全退出程序，还是隐藏到系统托盘继续保持联机？",
+  "dialogCloseAppRoomWarning": "当前正处于联机房间中！若要保持房间请隐藏到托盘；选择“完全退出”将离开并断开房间连接。",
+  "dialogCloseAppSessionWarning": "游戏正在运行中！若要保持联机请隐藏到托盘；选择“完全退出”将立即中断游戏联机会话。",
+  "dialogLaunchProgressTitle": "正在启动游戏",
+  "dialogLaunchProgressCancel": "取消启动",
+  "dialogLaunchCancelConfirmTitle": "取消启动游戏",
+  "dialogLaunchCancelConfirmPrompt": "游戏正在启动并准备注入，是否确认取消？",
+  "dialogLaunchFailureTitle": "启动失败",
+  "dialogClearLogsTitle": "清空诊断日志",
+  "dialogClearLogsPrompt": "确认清空所有已记录的控制台日志吗？此操作无法撤销。",
+  "settingsLanguageLabel": "界面语言 (Language)",
+  "settingsLanguageTitle": "界面语言",
+  "settingsLanguageHelpTooltip": "切换 Tractor Beam 界面显示语言（支持简体中文与 English）。",
+  "settingsLanguageZh": "简体中文",
+  "settingsLanguageZhSub": "中文 / 默认",
+  "settingsLanguageEn": "English",
+  "settingsLanguageEnSub": "英语 (US)",
+  "settingsInputDelayTitle": "输入延迟",
+  "settingsInputDelayHelp": "针对非官方工作模式微调对局帧缓冲延迟，平衡流畅度与操作手感",
+  "settingsInputDelayLabel": "输入延迟微调",
+  "settingsInputDelayFrames": "{frames} 帧 ({ms}ms)",
+  "@settingsInputDelayFrames": {
+    "placeholders": {
+      "frames": {
+        "type": "int"
+      },
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsInputDelayRead": "从游戏读取",
+  "settingsInputDelayWrite": "写入到游戏",
+  "settingsInputDelayOfficialNotice": "官方模式由以撒内置网络栈管理，不支持输入延迟",
+  "settingsInputDelayNotRunningNotice": "以撒游戏未运行，启动游戏后方可调节输入延迟",
+  "settingsInputDelayReadSuccess": "已从游戏读取输入延迟",
+  "settingsInputDelayWriteSuccess": "输入延迟已写入游戏",
+  "settingsWorkModeTitle": "工作模式",
+  "settingsWorkModeHelp": "决定 Hook 模块拦截与接管游戏网络流量的深度",
+  "settingsModeOfficial": "官方联机 (Official)",
+  "settingsModeFallback": "混合兼容 (Fallback)",
+  "settingsModePure": "纯净接管 (Pure)",
+  "settingsModeOfficialTitle": "Official",
+  "settingsModeFallbackTitle": "Fallback",
+  "settingsModePureTitle": "Pure",
+  "settingsInputDelayReading": "正在从以撒游戏读取延迟...",
+  "settingsInputDelayWriting": "正在向以撒游戏写入延迟...",
+  "settingsModeOfficialDesc": "完全使用以撒内置 Steam P2P 网络，桥接工具仅监控状态",
+  "settingsModeFallbackDesc": "优先通过 Relay 传输，遇阻时自动回退为官方 P2P 通信",
+  "settingsModePureDesc": "强力接管所有网络帧，保证跨网延迟与稳定性（推荐）",
+  "settingsWorkModeSavedRestartHint": "设置已保存，需重启以撒游戏以生效新工作模式",
+  "settingsTransportProtocolTitle": "底层网络传输协议",
+  "settingsTransportProtocolHelp": "Relay 模式下默认选用的底层数据包传输协议",
+  "settingsProtocolAuto": "默认 (UDP)",
+  "settingsProtocolUdp": "UDP 协议",
+  "settingsProtocolTcp": "TCP 协议",
+  "settingsRestoreDefaults": "恢复默认设置",
+  "settingsRestoreDefaultsSuccess": "已恢复默认设置",
+  "settingsProtocolAutoSub": "服务器默认",
+  "settingsProtocolUdpSub": "低延迟",
+  "settingsProtocolTcpSub": "更容易成功",
+  "settingsModeOfficialSub": "官方路由",
+  "settingsModeFallbackSub": "优先使用TB",
+  "settingsModePureSub": "仅使用TB",
+  "settingsInputDelayApplied": "生效: {frames}",
+  "@settingsInputDelayApplied": {
+    "placeholders": {
+      "frames": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsInputDelayAdjustHint": "网络状态不佳时建议调高",
+  "settingsProtocolHelpTooltip": "底层传输协议：\n默认：由 Relay 服务器能力自动决定\nUDP：低延迟，对网络抖动更敏感\nTCP：高穿透，更稳定且容易连通",
+  "settingsModeHelpTooltip": "工作模式：\nOfficial：纯官方路由（不使用 TB 专线）\nFallback：优先 TB 专线，失败自动回退官方\nPure：强制仅走 TB 专线",
+  "settingsInputDelayHelpTooltip": "输入延迟（0-5 帧）：\n降低延迟操作更跟手；网络抖动或丢包时可适当调高以保持平稳。\n官方模式由游戏自身网络管理，不支持此项调节。",
+  "statsTitle": "统计诊断",
+  "statsConnectionQuality": "连接质量",
+  "statsPacketStats": "数据包统计",
+  "statsHookStatus": "Hook 状态",
+  "statsRefreshHook": "刷新通信状态",
+  "statsTestLatency": "测延迟",
+  "logsTitle": "控制台日志",
+  "logsFilterAll": "全部",
+  "logsFilterInfo": "信息",
+  "logsFilterWarn": "警告",
+  "logsFilterError": "错误",
+  "logsAutoScroll": "自动滚动",
+  "logsClear": "清空日志",
+  "logsExport": "导出诊断包",
+  "logsSearchHint": "搜索日志 / 关键字...",
+  "aboutTitle": "关于",
+  "aboutProjectDesc": "专为《以撒的结合：忏悔+》打造的高性能低延迟联机工具",
+  "aboutVersion": "版本",
+  "aboutOpenSource": "开源仓库",
+  "aboutLicense": "开源许可 ({license})",
+  "aboutDiagnosticTitle": "诊断包导出",
+  "aboutDiagnosticDesc": "遇到严重联机或注入问题时，可导出完整日志与状态包提交反馈",
+  "aboutExportButton": "导出诊断包",
+  "pleaseJoinRoomFirst": "请先加入联机房间",
+  "errRelayNameRequired": "请输入节点名称",
+  "errRelayHostRequired": "请输入 Relay 地址",
+  "errRelayPortRange": "端口号必须为 1–65535 之间的整数",
+  "errRelayProtocolRequired": "必须至少选择一种传输协议 (TCP/UDP)",
+  "dialogRelayDeletePrompt": "确定要删除节点“{relayName}”吗？\n删除后该节点的配置将无法恢复。",
+  "@dialogRelayDeletePrompt": {
+    "placeholders": {
+      "relayName": {
+        "type": "String"
+      }
+    }
+  },
+  "dialogConfirmDelete": "确认删除",
+  "dialogCancel": "取消",
+  "dialogSave": "保存",
+  "dialogDelete": "删除",
+  "dialogClose": "关闭",
+  "dialogClearLogsPromptDetailed": "确定要清空当前的运行与排错日志吗？\n清空后内存中的历史日志将无法恢复。",
+  "dialogClearLogsConfirm": "确认清空",
+  "dialogExitAppTitle": "退出 Tractor Beam",
+  "dialogExitSessionRunningWarning": "当前游戏正在运行中，退出程序将立即终止联机会话并关闭游戏连接。是否确定退出？",
+  "dialogExitRoomWarning": "当前正处于联机房间中，退出程序将离开房间（若为房主将解散房间）。是否确定退出？",
+  "dialogExitPrompt": "确定要退出 Tractor Beam 吗？",
+  "dialogExitButton": "退出程序",
+  "dialogCloseAppHideToTray": "隐藏到托盘",
+  "dialogCloseAppFullExit": "完全退出",
+  "dialogReplaceRoomExitAndJoin": "退出并加入",
+  "dialogSwitchRoomConfirm": "确认切换",
+  "dialogSwitchSteamLanPrompt": "当前处于局域网直连房间中。切换 Steam 账号需要退出当前房间，之后请使用新身份重新建房或加入。是否退出并切换？",
+  "dialogSwitchSteamRelayPrompt": "当前正在中继房间中。切换 Steam 账号将以新身份重新连接该中继房间；如果以撒游戏正在运行，需要以新身份重新联机。是否继续？",
+  "dialogSwitchSteamConfirm": "确认切换",
+  "dialogJoinRoomByCodePrompt": "请输入房主提供的 TB-NET 联机码：",
+  "dialogJoinRoomCodeLabel": "联机码",
+  "dialogLanEndpointTitle": "选择局域网端点",
+  "dialogLanEndpointPrompt": "检测到多个可达地址，请选择要连接的端点：",
+  "dialogLanEndpointConnect": "连接",
+  "dialogLanAdaptersPrompt": "可用于局域网联机的网卡",
+  "dialogLanNoAdapters": "未检测到可用网卡",
+  "dialogLanSelectedCount": "已选择：{count}/8",
+  "@dialogLanSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dialogCreateButton": "创建",
+  "dialogDeleteSteamAccountTitle": "删除 Steam 账号",
+  "dialogDeleteSteamAccountPrompt": "确定要删除手动账号“{username}” ({steamId64}) 吗？\n删除后需重新手动填写录入。",
+  "@dialogDeleteSteamAccountPrompt": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      },
+      "steamId64": {
+        "type": "String"
+      }
+    }
+  },
+  "errSteamIdRequired": "SteamID64 不能为空",
+  "errSteamIdInvalid": "SteamID64 必须为 17 位纯数字且不能为 0",
+  "errSteamUsernameRequired": "用户名不能为空",
+  "dialogManualSteamSavedAccounts": "已保存的手动账号",
+  "dialogManualSteamIdInputHint": "17 位纯数字 SteamID64",
+  "dialogManualSteamNameInputHint": "输入 Steam 用户名",
+  "dialogLaunchCancelFailed": "暂时无法取消启动，请稍后重试",
+  "dialogLaunchFailedGeneric": "游戏未能启动",
+  "dialogLaunchGoToLogs": "前往日志",
+  "dialogLaunchStepStarting": "准备启动参数",
+  "dialogLaunchStepWaitingForGame": "等待游戏进程",
+  "dialogLaunchStepInjecting": "注入 TractorBeam Hook",
+  "dialogLaunchStepWaitingForHook": "连接 Hook 通信端点",
+  "dialogLaunchStepReady": "游戏与 Hook 就绪",
+  "dialogLaunchCancelling": "正在取消启动",
+  "dialogLaunchCancelled": "启动已取消",
+  "dialogLaunchSuccess": "启动成功",
+  "dialogLaunchPreparing": "正在准备启动游戏",
+  "dialogLaunchCancellingButton": "正在取消…",
+  "dialogLaunchCancelButton": "取消启动",
+  "dialogLaunchStepCompleted": "已完成",
+  "dialogLaunchStepInProgress": "进行中",
+  "dialogLaunchStepPending": "等待中",
+  "dialogLaunchNotStarted": "未开始启动",
+  "dialogLaunchConfigured": "启动参数已就绪",
+  "dialogLaunchWaitingForGame": "正在等待以撒游戏启动…",
+  "dialogLaunchInjectingHook": "已发现游戏，正在注入 Hook 模块…",
+  "dialogLaunchConnectingHook": "注入已完成，正在建立 Hook 本地通信…",
+  "dialogLaunchHookReady": "游戏与 Hook 已就绪",
+  "dialogLaunchStoppingProcess": "正在停止 TractorBeam 启动流程…",
+  "dialogLaunchErrIsaacAlreadyRunning": "以撒游戏已在运行中。请先完全退出以撒，然后重新点击启动游戏。",
+  "dialogLaunchErrPreviousHookPresent": "检测到上一次的 Hook 仍留在游戏中。请完全退出游戏后再试。",
+  "dialogLaunchErrCannotChangeMode": "以撒运行期间无法更改工作模式，请完全退出游戏后重试。",
+  "dialogLaunchErrLaunchInProgress": "游戏启动流程正在进行中，请稍候。",
+  "dialogLaunchErrInsufficientPermissions": "注入权限不足。请关闭可能阻止注入的程序，或尝试以管理员身份运行。",
+  "dialogLaunchErrProcessNotFound": "未发现以撒游戏进程，请确认游戏是否已正常启动。",
+  "dialogLaunchErrMissingComponents": "缺少启动所需的注入组件，请检查程序文件是否完整。",
+  "dialogLaunchErrCannotPrepareParams": "无法准备 Hook 启动参数，请检查程序目录的写入权限。",
+  "dialogLaunchErrCannotBindEndpoint": "无法建立本地 Hook 通信端点，请关闭旧的游戏进程后重试。",
+  "dialogLaunchErrSteamApiTakeoverFailed": "Hook 无法接管 Steam API。请完全退出游戏后重试。",
+  "dialogLaunchErrNetworkHookInstallFailed": "Hook 无法安装网络功能。请完全退出游戏后重试。",
+  "dialogLaunchErrTimeout": "等待游戏或 Hook 就绪超时，请确认游戏已正常启动后重试。",
+  "dialogLaunchErrElevationCancelled": "已取消管理员提权授权，无法完成 Hook 注入。",
+  "dialogLaunchErrSteamLaunchFailed": "无法通过 Steam 启动游戏，请确认 Steam 正在运行。",
+  "dialogLaunchErrUnsupportedPlatform": "当前操作系统平台暂不支持原生 Hook 注入。",
+  "dialogLaunchErrCannotReattach": "当前游戏运行时无法重新附加或分离，请完全退出游戏后重试。",
+  "dialogLaunchErrHookRuntimeTerminated": "Hook 运行时已终止，请重新启动游戏。",
+  "dialogLaunchErrFileNotFound": "系统找不到指定的文件，请检查游戏或注入组件完整性。",
+  "dialogLaunchErrWaitTimeout120": "启动等待超过 120 秒，本次启动已停止。请确认游戏和 Steam 状态后重试。",
+  "dialogLaunchErrUnknown": "游戏未能正常启动，未获取到具体错误信息。",
+  "dialogLaunchErrOpenProcessFailed": "Hook 注入失败：无法打开以撒进程（请尝试以管理员身份运行或检查杀毒软件拦截）。",
+  "dialogLaunchErrCreateRemoteThreadFailed": "Hook 注入失败：无法在游戏中创建注入线程（可能被安全软件拦截）。",
+  "dialogLaunchErrAllocMemoryFailed": "Hook 注入失败：无法为以撒进程分配内存。",
+  "dialogLaunchErrWriteDllPathFailed": "Hook 注入失败：无法向游戏写入注入路径。",
+  "dialogLaunchErrInjectionGenericFailed": "Hook 注入以撒进程失败，请尝试以管理员身份运行或检查杀毒软件拦截。",
+  "windowMinimize": "最小化",
+  "windowMaximize": "最大化",
+  "windowRestore": "还原",
+  "windowClose": "关闭",
+  "latencyGradeExcellent": "优秀",
+  "latencyGradeFair": "一般",
+  "latencyGradePoor": "差",
+  "latencyGradeSevere": "严重",
+  "latencyTestComplete": "延迟测试完成: {latency}ms ({grade})",
+  "@latencyTestComplete": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      },
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "relayAddedAndSwitched": "已添加并切换至节点：{name}",
+  "@relayAddedAndSwitched": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "relayUpdatedNotice": "节点已更新：{name}",
+  "@relayUpdatedNotice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutIdentityHelp": "Tractor Beam 版本、原项目架构与核心协议标准",
+  "aboutIdentitySlogan": "为《以撒的结合：忏悔+》打造的轻量联机桥接工具",
+  "aboutAuthor": "项目作者",
+  "aboutUiDesigner": "UI 重构设计",
+  "aboutVersionLabel": "版本标识",
+  "aboutVersionHelp": "点击复制客户端版本与诊断标识",
+  "aboutCopiedVersionNotice": "已复制客户端版本与构建诊断信息",
+  "aboutCoreProtocol": "核心协议",
+  "aboutLinksTitle": "开源与链接",
+  "aboutLinksHelp": "本 Flutter 客户端仓库与官方原版代码仓库",
+  "aboutSourceRepo": "Flutter 客户端源码 (GitHub)",
+  "aboutRefactorRepo": "官方原版项目 (GitHub)",
+  "aboutRefactorRepoPending": "UI 重构项目即将上线，开源地址将在上传后更新",
+  "aboutRefactorRepoBadge": "预留",
+  "aboutReleases": "版本发布 (Releases)",
+  "aboutIssues": "问题与建议反馈 (Issues)",
+  "@aboutLicense": {
+    "placeholders": {
+      "license": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutLinkCopiedNotice": "已将 {title} 链接复制到剪贴板",
+  "@aboutLinkCopiedNotice": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutLinkCopiedDirect": "已复制 {title} 链接",
+  "@aboutLinkCopiedDirect": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutThanksTitle": "感谢",
+  "aboutThanksHelp": "致谢为 Tractor Beam 提供开发、测试与优化支持的伙伴",
+  "aboutThanksIntro": "感谢每一位帮助 Tractor Beam 变得更好的朋友",
+  "aboutContributors": "●  核心贡献者",
+  "aboutEarlyTesters": "●  早期测试者",
+  "aboutTagTester": "测试",
+  "aboutTagContributor": "贡献者",
+  "aboutOtherAnonymous": "其他匿名玩家",
+  "statsSessionQualityTitle": "会话质量",
+  "statsSessionQualityHelp": "当前联机会话的网络平滑度评估与诊断状态",
+  "statsCountersTitle": "计数器",
+  "statsCountersHelp": "Hook 注入与 Relay 服务器之间的数据包及字节吞吐统计",
+  "statsConnectionTestTitle": "连接测试",
+  "statsConnectionTestHelp": "向当前选中的 Relay 节点发送轻量探测包测试延迟与连通性",
+  "statsHookIpcTitle": "Hook 通信状态",
+  "statsHookIpcHelp": "以撒游戏进程内 Hook 模块与本程序的 IPC 实时通信状态",
+  "statsStartSpeedtest": "开始测速",
+  "statsSpeedtesting": "测速中",
+  "statsRefreshingHook": "刷新中",
+  "statsQualityGood": "会话质量：良好",
+  "statsQualityWatch": "会话质量：需关注",
+  "statsQualityPoor": "会话质量：较差",
+  "statsQualityEvaluating": "会话质量：评估中",
+  "statsQualityInactive": "未开始会话",
+  "statsModeOfficial": "官方匹配",
+  "statsModePure": "纯净联机",
+  "statsModeFallback": "后备兼容",
+  "statsRoomNumber": "房间 {code}",
+  "@statsRoomNumber": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "statsRoomJoined": "已加入房间",
+  "statsRoomNotJoined": "未加入房间",
+  "statsRouteLan": "局域网直连",
+  "statsRouteUnknown": "未知路由",
+  "statsRouteRelay": "中继转发",
+  "statsRouteRelayNode": "中继 ({node})",
+  "@statsRouteRelayNode": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "statsTransportAuto": "自动",
+  "statsLabelMode": "联机模式",
+  "statsLabelRoomStatus": "房间状态",
+  "statsLabelRouteNode": "路由节点",
+  "statsLabelTransport": "传输协议",
+  "statsHealthDiagnostic": "健康诊断: {health}",
+  "@statsHealthDiagnostic": {
+    "placeholders": {
+      "health": {
+        "type": "String"
+      }
+    }
+  },
+  "statsLastStopReason": "上次停止: {reason}",
+  "@statsLastStopReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "statsCounterHookToRelay": "Hook 到 Relay",
+  "statsCounterBytesReceived": "接收流量",
+  "statsCounterRelayToHook": "Relay 到 Hook",
+  "statsCounterErrors": "错误",
+  "statsCounterBytesSent": "发送流量",
+  "statsCounterReconnectDrops": "重连丢弃",
+  "statsNoTestRecords": "暂无测速记录",
+  "statsNoTestRecordsPrompt": "点击右上角“开始测速”探测当前 Relay 节点的延迟与连通性",
+  "statsTableHeaderNode": "节点",
+  "statsTableHeaderTransport": "传输",
+  "statsTableHeaderPackets": "收发",
+  "statsTableHeaderLoss": "丢包率",
+  "statsTableHeaderLatency": "延迟",
+  "statsTestTimeout": "超时",
+  "statsTableHeaderStatus": "状态",
+  "statsTableHeaderVersion": "版本",
+  "statsTableHeaderReconnects": "重连",
+  "statsTableHeaderDrops": "丢弃(Hook/程序)",
+  "statsTableHeaderBadFrames": "异常帧",
+  "statsHookRefreshFailed": "Hook 状态刷新失败",
+  "statsHookRefreshSuccess": "Hook 状态已刷新",
+  "statsSelectRelayPrompt": "请先在首页选择 Relay 节点",
+  "statsSpeedtestRejected": "测速请求未被接受",
+  "logsLevelAll": "全部",
+  "logsLevelTrace": "跟踪",
+  "logsLevelDebug": "调试",
+  "logsLevelInfo": "信息",
+  "logsLevelWarn": "警告",
+  "logsLevelError": "错误",
+  "logsExportBundle": "导出诊断包",
+  "logsExportBundleTooltip": "导出完整诊断数据包（ZIP）",
+  "logsExportingNotice": "正在导出诊断包",
+  "logsOpenFolder": "定位文件夹",
+  "logsOpenFolderTooltip": "打开本地日志与诊断目录",
+  "logsOpeningFolderNotice": "正在打开日志文件夹",
+  "logsClearTooltip": "清空当前诊断日志",
+  "logsClearedNotice": "日志已清空",
+  "logsShowingCount": "显示 {visible} / 共 {total} 条",
+  "@logsShowingCount": {
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "logsSearchButton": "搜索",
+  "logsCopyAll": "复制全部",
+  "logsAutoScrollOn": "已锁定最新",
+  "logsAutoScrollPaused": "已暂停滚动",
+  "logsEmptyNoMatch": "未找到与“{query}”匹配的日志",
+  "@logsEmptyNoMatch": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "logsEmptyNoRecords": "暂无日志记录",
+  "logsCopyLine": "复制此行",
+  "logsNoCopyableLogs": "当前没有可复制的日志",
+  "logsCopiedCount": "已复制当前 {count} 条日志",
+  "@logsCopiedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logsCopiedSingle": "已复制此行日志",
+  "logsCopyFailed": "复制到剪贴板失败，请稍后重试",
+  "logsAlreadyEmpty": "当前没有可清空的日志",
+  "dialogUdpFallbackTitle": "无法通过 UDP 连接",
+  "dialogUdpFallbackBody": "当前网络可能限制了 UDP 通信。可以临时改用 TCP 重新连接；TCP 通常兼容性更好，但延迟可能略高。此次重试不会修改默认协议。",
+  "dialogUdpFallbackRetry": "改用 TCP 并重试",
+  "dialogUdpFallbackSettings": "打开设置",
+  "udpTcpRetryStarted": "正在改用 TCP 重新连接…",
+  "udpTcpRetryFailed": "无法开始 TCP 重试",
+  "latencyBatchComplete": "Relay 测速完成：{successful}/{total} 个节点可用",
+  "@latencyBatchComplete": {
+    "placeholders": {
+      "successful": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "latencyBatchAllFailed": "Relay 测速完成：{total} 个节点均无法连接",
+  "@latencyBatchAllFailed": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  }
+}

@@ -115,6 +115,7 @@ impl BridgeApp {
         if let Some(operation) = self.application_snapshot.operation {
             return match operation {
                 ApplicationOperation::Starting => t!("status.starting"),
+                ApplicationOperation::StoppingSession => t!("status.working"),
                 ApplicationOperation::LeavingRoom => t!("status.leaving_room"),
                 ApplicationOperation::ShuttingDown => t!("status.shutting_down"),
                 ApplicationOperation::RefreshingAccounts

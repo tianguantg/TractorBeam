@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "inkColor": "#3B3032",
+  "alphaThreshold": 6,
+  "icons": {
+    "source": "assets/icons/ui",
+    "output": "build/normalized_assets/icons/ui",
+    "defaults": {
+      "kind": "icon",
+      "canvas": 256,
+      "visibleRatio": 0.78,
+      "opticalCenter": true,
+      "normalizeInk": true
+    },
+    "overrides": {
+      "about_title.png": { "kind": "title", "canvas": [512, 256], "visibleRatio": 0.88 },
+      "home_title.png": { "kind": "title", "canvas": [512, 256], "visibleRatio": 0.88 },
+      "log_title.png": { "kind": "title", "canvas": [512, 256], "visibleRatio": 0.88 },
+      "room_title.png": { "kind": "title", "canvas": [512, 256], "visibleRatio": 0.88 },
+      "settings_title.png": { "kind": "title", "canvas": [512, 256], "visibleRatio": 0.88 },
+      "statistics_title.png": { "kind": "title", "canvas": [512, 256], "visibleRatio": 0.88 },
+      "launch_game.png": { "kind": "wide", "canvas": [512, 256], "visibleRatio": 0.82 },
+      "dashed_line.png": { "kind": "stretch", "canvas": [1024, 32], "opticalCenter": false, "normalizeInk": false },
+      "room_dashed_line.png": { "kind": "stretch", "canvas": [1024, 32], "opticalCenter": false, "normalizeInk": false },
+      "party_page_previous.png": { "kind": "vertical", "canvas": [256, 512], "visibleRatio": 0.88 },
+      "party_page_next.png": { "kind": "vertical", "canvas": [256, 512], "visibleRatio": 0.88 },
+      "settings_latency_level.png": { "kind": "wide", "canvas": [512, 256], "visibleRatio": 0.88, "normalizeInk": false }
+    }
+  },
+  "papers": {
+    "source": "assets/images/paper",
+    "output": "build/normalized_assets/images/paper",
+    "mode": "audit-only",
+    "targetStroke": 2.15,
+    "reference": "sidebar_card.webp",
+    "items": {
+      "about_identity_card.webp": { "renderSize": [386, 246], "strokeClass": "card" },
+      "about_links_card.webp": { "renderSize": [386, 246], "strokeClass": "card" },
+      "about_thanks_card.webp": { "renderSize": [790, 356], "strokeClass": "card" },
+      "connection_paper.webp": { "renderSize": [792, 340], "strokeClass": "card" },
+      "connection_lan_torn.webp": { "renderSize": [792, 237], "strokeClass": "card" },
+      "notice_paper.webp": { "renderSize": [792, 279], "strokeClass": "card" },
+      "room_code_card.webp": { "renderSize": [386, 252], "strokeClass": "card" },
+      "steam_account_card.webp": { "renderSize": [386, 252], "strokeClass": "card" },
+      "empty_room_card.webp": { "renderSize": [790, 417], "strokeClass": "card" },
+      "party_card.webp": { "renderSize": [790, 417], "strokeClass": "card" },
+      "party_card_collapsed.webp": { "renderSize": [790, 85], "strokeClass": "card" },
+      "settings_mode_card.webp": { "renderSize": [386, 177], "strokeClass": "card" },
+      "settings_protocol_card.webp": { "renderSize": [386, 190], "strokeClass": "card" },
+      "settings_latency_card.webp": { "renderSize": [386, 293], "strokeClass": "card" },
+      "settings_language_card.webp": { "renderSize": [386, 177], "strokeClass": "card" },
+      "statistics_session_card.webp": { "renderSize": [386, 245], "strokeClass": "card" },
+      "statistics_counter_card.webp": { "renderSize": [386, 305], "strokeClass": "card" },
+      "statistics_test_card.webp": { "renderSize": [386, 360], "strokeClass": "card" },
+      "statistics_hook_card.webp": { "renderSize": [386, 190], "strokeClass": "card" },
+      "log_toolbar_card.webp": { "renderSize": [790, 86], "strokeClass": "card" },
+      "log_console_card.webp": { "renderSize": [790, 587], "strokeClass": "card" },
+      "log_console_card_dark.webp": { "renderSize": [790, 587], "strokeClass": "card", "normalize": false },
+      "sidebar_card.webp": { "renderSize": [84, 760], "strokeClass": "reference", "normalize": false },
+      "sidebar_pin.webp": { "renderSize": [32, 32], "strokeClass": "decoration", "normalize": false }
+    }
+  }
+}

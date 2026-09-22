@@ -3,10 +3,7 @@
 rust_i18n::i18n!("locales", fallback = "en_US");
 
 mod app;
-mod application;
 mod i18n;
-mod logging;
-mod update;
 
 use eframe::egui;
 

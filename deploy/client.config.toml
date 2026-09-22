@@ -1,4 +1,4 @@
-# Copy this file to config.toml next to tractor-beam.exe.
+# Copy this file to config.toml next to the selected TractorBeam client executable.
 #
 # Formal Client Bundles do not include Relay presets. Distribute test Relay
 # presets out-of-band with separately packaged test builds.

@@ -6,6 +6,11 @@
 /release-assets/
 /staging/
 /verify/
+/dist/
+/audit/
+/crates/flutter-bridge/logs/
+**/dart_devtools_*.json
+**/build/normalized_assets/
 
 *.pdb
 *.ilk
@@ -16,10 +21,6 @@
 
 __pycache__/
 *.py[cod]
-/scripts/compat/.venv/
-/scripts/compat/.uv-cache/
-/scripts/compat/downloads/
-/scripts/compat/out/
 
 .DS_Store
 Thumbs.db

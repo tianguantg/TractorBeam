@@ -2,12 +2,12 @@ name: Check Code
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, codex/flutter-client]
   push:
-    branches: [main]
+    branches: [main, codex/flutter-client]
+  workflow_dispatch:
 
 permissions:
-  actions: write
   contents: read
 
 concurrency:
@@ -27,6 +27,13 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Scan repository history for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check public IP literals
         run: python scripts/check_no_public_ip_literals.py
@@ -95,10 +102,36 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7.0.0
+        with:
+          lfs: true
       - uses: dtolnay/rust-toolchain@1.97.0
         with:
           targets: x86_64-pc-windows-msvc,i686-pc-windows-msvc
       - uses: Swatinem/rust-cache@v2.9.1
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.41.6"
+          channel: stable
+
+      - name: Verify Flutter asset checkout
+        shell: pwsh
+        run: |
+          $font = "apps/tractor-beam-flutter/assets/fonts/Xiaolai-Regular.ttf"
+          if ((Get-Item -LiteralPath $font).Length -lt 1000000) {
+            throw "Flutter font is missing or is still a Git LFS pointer"
+          }
+
+      - name: Verify generated Flutter bridge
+        shell: pwsh
+        run: |
+          dart pub global activate flutter_rust_bridge_codegen 2.13.0
+          $env:PATH += ";$env:LOCALAPPDATA\Pub\Cache\bin"
+          ./scripts/generate_flutter_bridge.ps1
+          git diff --exit-code -- `
+            crates/flutter-bridge/src/frb_generated.rs `
+            apps/tractor-beam-flutter/lib/bridge/generated `
+            apps/tractor-beam-flutter/windows/runner/frb_generated.h
 
       - name: Build Bridge GUI
         run: cargo build --locked --release -p tractor-beam-gui --target x86_64-pc-windows-msvc
@@ -108,3 +141,14 @@ jobs:
 
       - name: Build Native Hook
         run: cargo build --locked --release -p tractor-beam-native-hook --target i686-pc-windows-msvc
+
+      - name: Check Flutter client
+        working-directory: apps/tractor-beam-flutter
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+
+      - name: Build Flutter client
+        working-directory: apps/tractor-beam-flutter
+        run: flutter build windows --release --build-name 0.5.2 --build-number 1

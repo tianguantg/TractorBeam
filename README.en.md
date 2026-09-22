@@ -1,77 +1,107 @@
+<div align="center">
+
+<img src="apps/tractor-beam-flutter/assets/icons/app_mark.png" alt="Tractor Beam" width="96" />
+
 # Tractor Beam
 
-[中文](README.md)
+A desktop Client and Relay Server for improving online play in *The Binding of Isaac: Repentance+*
 
-A desktop Client and Relay Server for improving online play in
-*The Binding of Isaac: Repentance+*.
+[English](README.en.md) · [简体中文](README.md) · [Download Releases](https://github.com/tianguantg/TractorBeam/releases)
 
-When official online play or a virtual LAN is not smooth enough, Tractor Beam
-can move game data through a Relay while preserving normal Steam features.
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows_x64-0078D6.svg?logo=windows)]()
+[![Frontend](https://img.shields.io/badge/Frontend-Flutter_3.41-02569B.svg?logo=flutter)](https://flutter.dev)
+[![Backend](https://img.shields.io/badge/Backend-Rust_1.97-DEA584.svg?logo=rust)](https://www.rust-lang.org)
+[![Upstream](https://img.shields.io/badge/Fork_of-mcthesw%2FTractorBeam-orange.svg)](https://github.com/mcthesw/TractorBeam)
 
-## Project status
+</div>
 
-Maintainer time is limited, but we will do our best to fix well-defined bugs
-and compatibility issues and review focused pull requests as time allows.
-Community contributions remain welcome; see the
-[contribution guide](CONTRIBUTING.md).
+---
 
-The Client supports Windows and Linux (Proton). The supported game version is
-*Repentance+*. The Relay supports Windows, Linux, and macOS; formal Releases
-provide Windows and Linux executables.
+> This repository is a community fork of [mcthesw/TractorBeam](https://github.com/mcthesw/TractorBeam) that adds a Windows x64 Flutter client. Core protocols and upstream implementation remain owned by the original authors. Fork source code is hosted at [tianguantg/TractorBeam](https://github.com/tianguantg/TractorBeam).
 
-## Use the Client
+When official online play or virtual LAN connections are unstable, Tractor Beam routes game traffic through a Relay while preserving standard Steam features.
 
-1. Download the Client Bundle for your platform from the
-   [latest release](https://github.com/mcthesw/TractorBeam/releases/latest) and
-   extract the complete archive.
-2. Keep the extracted files in the same directory. On Windows run
-   `tractor-beam.exe`; on Linux run `tractor-beam`.
-3. Select the Steam account and connection route. The host copies the Join
-   Code, and the other players import it.
-4. Select **Launch Game**. If something goes wrong, export a Diagnostics Bundle
-   from the Client.
+## Features
 
-On Linux, the Client runs the Windows *Repentance+* build through Proton. It
-writes a temporary `winmm.dll` proxy next to the game executable and temporarily
-enables a Wine DLL override scoped to `isaac-ng.exe`. It restores the prior
-override and removes the proxy when the session ends or the Client next starts.
+- **Isaac Game Style Interface**: Visual elements and animations aligned with the game style.
+- **Compact Monitor Window**: Switch to an always-on-top window during active sessions to inspect latency and packet loss without obstructing gameplay, with instant return to the full window at any time.
+- **Dual-Engine Architecture**: Flutter manages presentation and layout, while the Rust native layer handles process injection, encrypted transport, and relay routing.
+- **Bilingual and Accessible**: Full switching between English and Simplified Chinese, with keyboard focus navigation and hotkey activation.
+- **Diagnostics and Statistics**: Real-time latency evaluation, relay speed tests, packet drop tracking, and diagnostic log export.
 
-The formal Client Bundle requires a self-configured Relay. A separate
-public-test bundle is also available; its maintainer-funded public Relays are
-intended for testing.
+## Screenshots
 
-- [LAN Direct guide](docs/lan.en.md)
-- [Relay self-deployment guide](docs/relay.en.md)
+<table>
+  <tr>
+    <td align="center" colspan="2"><strong>Home</strong></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="docs/screenshots/home_en.png" alt="Home" width="720" /></td>
+  </tr>
+  <tr>
+    <td align="center" width="50%"><strong>Room</strong></td>
+    <td align="center" width="50%"><strong>Settings</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/room_en.png" alt="Room" /></td>
+    <td><img src="docs/screenshots/settings_en.png" alt="Settings" /></td>
+  </tr>
+  <tr>
+    <td align="center" width="50%"><strong>Statistics</strong></td>
+    <td align="center" width="50%"><strong>About</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/statistics_en.png" alt="Statistics" /></td>
+    <td><img src="docs/screenshots/about_en.png" alt="About" /></td>
+  </tr>
+</table>
 
-## Build
+## Usage
 
-Install the Rust toolchain first.
+1. Download `TractorBeam-Client-Flutter-Windows-x86_64.zip` from the [Releases page](https://github.com/tianguantg/TractorBeam/releases/latest).
+2. Extract all files to a local directory and run `tractor-beam.exe`.
+3. Select your Steam account and connection mode (Steam Direct, External Relay, or LAN Direct).
+4. The host creates a room and shares the Join Code; other players join using the code.
+5. Click **Launch Game**; during play, click the status bar button to switch to the compact monitor window.
 
-```sh
-# Build the Client
-cargo build -p tractor-beam-gui
+## Building
 
-# Build the Relay Server
-cargo build -p tractor-beam-relay
+Prerequisites: Rust 1.97.0, Flutter 3.41.6 / Dart 3.11.4, and Visual Studio 2022 C++ desktop development components.
 
-# Check and test
+```powershell
+# 1. Check Rust crates
 cargo check --workspace
 cargo test --workspace
+
+# 2. Test Flutter client
+cd apps/tractor-beam-flutter
+flutter pub get
+flutter analyze
+flutter test
+
+# 3. Package Windows release bundle
+cd ../..
+./scripts/package_flutter_windows.ps1
 ```
+
+The output bundle is placed at `dist/TractorBeam-Client-Flutter-Windows-x86_64.zip`.
+
+## Privacy and Diagnostics
+
+Do not share join codes, session credentials, resume keys, or paths containing personal usernames in public issues or screenshots. If you encounter network issues, export a diagnostic bundle from the client log screen.
 
 ## Documentation
 
-- [docs/architecture.en.md](docs/architecture.en.md): component boundaries and data flow.
-- [docs/relay.en.md](docs/relay.en.md): Relay Server deployment.
-- [docs/relay-configuration.en.md](docs/relay-configuration.en.md): Relay Server configuration.
-- [docs/relay-observability.en.md](docs/relay-observability.en.md): Relay Server logs, metrics, traces, and capacity guidance.
-- [docs/lan.en.md](docs/lan.en.md): LAN and virtual-LAN direct sessions.
-- [docs/security.en.md](docs/security.en.md): security boundaries.
-- [roadmap.en.md](roadmap.en.md): staged roadmap.
-- [CONTRIBUTING.md](CONTRIBUTING.md): contribution guidance.
+- [Architecture Overview](docs/architecture.md)
+- [Relay Deployment Guide](docs/relay.md)
+- [Relay Configuration](docs/relay-configuration.md)
+- [Relay Observability](docs/relay-observability.md)
+- [LAN Direct Guide](docs/lan.md)
+- [Security Model](docs/security.md)
+- [Roadmap](roadmap.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## License
 
-Licensed by default under [GNU AGPL v3.0 or later](LICENSE). For alternative
-licensing, commercial use, or exceptions, use the public contact information on
-the author's GitHub profile.
+Source code is licensed under [GNU AGPL v3.0 or later](LICENSE). Third-party fonts and assets are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Upstream copyright remains with original contributors.

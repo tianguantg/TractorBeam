@@ -21,10 +21,11 @@ pub struct LoadedClientConfig {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ClientConfig {
-    pub default_transport: TransportChoice,
+    pub default_transport: Option<TransportChoice>,
     pub default_mode: SessionMode,
     pub selected_relay: Option<String>,
     pub selected_steam_id64: Option<String>,
+    pub manual_steam_accounts: Vec<ManualSteamAccount>,
     pub relays: Vec<RelayPreset>,
     pub session_health: SessionHealthConfig,
 }
@@ -32,10 +33,11 @@ pub struct ClientConfig {
 impl Default for ClientConfig {
     fn default() -> Self {
         Self {
-            default_transport: TransportChoice::default(),
+            default_transport: None,
             default_mode: SessionMode::Pure,
             selected_relay: None,
             selected_steam_id64: None,
+            manual_steam_accounts: Vec::new(),
             relays: Vec::new(),
             session_health: SessionHealthConfig::default(),
         }
@@ -61,9 +63,52 @@ impl ClientConfig {
         {
             return Err(ClientConfigError::UnknownSelectedRelay(selected.to_owned()));
         }
+        let mut steam_ids = HashSet::new();
+        for account in &self.manual_steam_accounts {
+            account.validate()?;
+            if !steam_ids.insert(account.steam_id64.as_str()) {
+                return Err(ClientConfigError::DuplicateSteamAccount(
+                    account.steam_id64.clone(),
+                ));
+            }
+        }
         self.session_health
             .validate()
             .map_err(|message| ClientConfigError::InvalidSessionHealth(message.to_owned()))?;
+        Ok(())
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ManualSteamAccount {
+    pub steam_id64: String,
+    pub display_name: String,
+}
+
+impl ManualSteamAccount {
+    fn normalized(self) -> Result<Self, ClientConfigError> {
+        let account = Self {
+            steam_id64: self.steam_id64.trim().to_owned(),
+            display_name: self.display_name.trim().to_owned(),
+        };
+        account.validate()?;
+        Ok(account)
+    }
+
+    fn validate(&self) -> Result<(), ClientConfigError> {
+        if self.steam_id64.len() != 17
+            || !self.steam_id64.bytes().all(|byte| byte.is_ascii_digit())
+            || self.steam_id64.parse::<u64>().unwrap_or(0) == 0
+        {
+            return Err(ClientConfigError::InvalidSteamAccount(
+                "Steam ID64 must be a 17-digit positive integer".to_owned(),
+            ));
+        }
+        if self.display_name.is_empty() {
+            return Err(ClientConfigError::InvalidSteamAccount(
+                "display name is required".to_owned(),
+            ));
+        }
         Ok(())
     }
 }
@@ -196,6 +241,10 @@ pub enum ClientConfigError {
     RelayNotFound(String),
     #[error("relay record number is exhausted")]
     RelayIdExhausted,
+    #[error("invalid Steam account: {0}")]
+    InvalidSteamAccount(String),
+    #[error("duplicate manual Steam account: {0}")]
+    DuplicateSteamAccount(String),
     #[error("invalid session health config: {0}")]
     InvalidSessionHealth(String),
     #[error("Bundle config path is unavailable")]
@@ -217,9 +266,17 @@ struct RawClientConfig {
     default_mode: Option<String>,
     selected_relay: Option<String>,
     selected_steam_id64: Option<String>,
+    #[serde(default)]
+    manual_steam_accounts: Vec<RawManualSteamAccount>,
     session_health: Option<RawSessionHealthConfig>,
     #[serde(default)]
     relays: Vec<RawRelayPreset>,
+}
+
+#[derive(Debug, Deserialize)]
+struct RawManualSteamAccount {
+    steam_id64: String,
+    display_name: String,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -248,17 +305,47 @@ impl TryFrom<RawClientConfig> for ClientConfig {
     type Error = ClientConfigError;
 
     fn try_from(value: RawClientConfig) -> Result<Self, Self::Error> {
+        let relays: Vec<RelayPreset> = value
+            .relays
+            .into_iter()
+            .map(TryInto::try_into)
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let selected_relay = trimmed_non_empty(value.selected_relay)
+            .filter(|selected| relays.iter().any(|relay| relay.id == *selected));
+
+        let selected_steam_id64 = trimmed_non_empty(value.selected_steam_id64).filter(|id| {
+            id.len() == 17
+                && id.bytes().all(|b| b.is_ascii_digit())
+                && id.parse::<u64>().unwrap_or(0) > 0
+        });
+
+        let mut steam_ids = HashSet::new();
+        let manual_steam_accounts = value
+            .manual_steam_accounts
+            .into_iter()
+            .filter_map(|account| {
+                let normalized = ManualSteamAccount {
+                    steam_id64: account.steam_id64,
+                    display_name: account.display_name,
+                }
+                .normalized()
+                .ok()?;
+                if steam_ids.insert(normalized.steam_id64.clone()) {
+                    Some(normalized)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
         let config = Self {
-            default_transport: parse_transport(value.default_transport.as_deref())?
-                .unwrap_or_default(),
+            default_transport: parse_transport(value.default_transport.as_deref())?,
             default_mode: parse_mode(value.default_mode.as_deref())?.unwrap_or(SessionMode::Pure),
-            selected_relay: trimmed_non_empty(value.selected_relay),
-            selected_steam_id64: trimmed_non_empty(value.selected_steam_id64),
-            relays: value
-                .relays
-                .into_iter()
-                .map(TryInto::try_into)
-                .collect::<Result<Vec<_>, _>>()?,
+            selected_relay,
+            selected_steam_id64,
+            manual_steam_accounts,
+            relays,
             session_health: value.session_health.unwrap_or_default().into(),
         };
         config.validate()?;
@@ -341,12 +428,56 @@ pub struct ClientConfigSelection {
     pub selected_steam_id64: Option<String>,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ClientConfigPreferences {
+    pub default_transport: Option<TransportChoice>,
+    pub default_mode: SessionMode,
+    pub session_health_enabled: bool,
+}
+
 pub fn save_client_config_selection(
     selection: &ClientConfigSelection,
 ) -> Result<PathBuf, ClientConfigError> {
     let path = bundle_config_path().ok_or(ClientConfigError::ConfigPathUnavailable)?;
     save_selection_to(&path, selection)?;
     Ok(path)
+}
+
+pub fn save_client_config_preferences_to(
+    path: &Path,
+    preferences: ClientConfigPreferences,
+) -> Result<LoadedClientConfig, ClientConfigError> {
+    let existing = read_editable_config(path)?;
+    let mut doc = parse_editable_config(&existing)?;
+    if let Some(transport) = preferences.default_transport {
+        doc["default_transport"] = toml_edit::value(transport_name(transport));
+    } else {
+        doc.remove("default_transport");
+    }
+    doc["default_mode"] = toml_edit::value(match preferences.default_mode {
+        SessionMode::Official => "official",
+        SessionMode::Fallback => "fallback",
+        SessionMode::Pure => "pure",
+    });
+    if doc
+        .get("session_health")
+        .is_some_and(|item| !item.is_table())
+    {
+        return Err(ClientConfigError::InvalidDocument(
+            "session_health must be a table".to_owned(),
+        ));
+    }
+    if !doc.contains_key("session_health") {
+        doc["session_health"] = toml_edit::Item::Table(toml_edit::Table::new());
+    }
+    doc["session_health"]["enabled"] = toml_edit::value(preferences.session_health_enabled);
+    let config = parse_client_config(&doc)?;
+    write_document(path, &doc)?;
+    Ok(LoadedClientConfig {
+        config,
+        source: Some(path.to_path_buf()),
+        warnings: Vec::new(),
+    })
 }
 
 pub fn save_client_relay_catalog_to(
@@ -396,6 +527,75 @@ pub fn save_client_relay_catalog_to(
                     .map_err(|_| ClientConfigError::RelayIdExhausted)?,
             );
         }
+    }
+
+    let config = parse_client_config(&doc)?;
+    write_document(path, &doc)?;
+    Ok(LoadedClientConfig {
+        config,
+        source: Some(path.to_path_buf()),
+        warnings: Vec::new(),
+    })
+}
+
+pub fn save_client_manual_steam_account_to(
+    path: &Path,
+    account: ManualSteamAccount,
+) -> Result<LoadedClientConfig, ClientConfigError> {
+    let account = account.normalized()?;
+    let existing = read_editable_config(path)?;
+    let mut doc = parse_editable_config(&existing)?;
+    // Validate the existing document before mutating it, just like relay edits.
+    parse_client_config(&doc)?;
+
+    let tables = manual_steam_account_tables_mut(&mut doc)?;
+    if let Some(table) = tables.iter_mut().find(|table| {
+        table
+            .get("steam_id64")
+            .and_then(toml_edit::Item::as_str)
+            .is_some_and(|stored| stored.trim() == account.steam_id64)
+    }) {
+        table["display_name"] = toml_edit::value(account.display_name.clone());
+    } else {
+        let mut table = toml_edit::Table::new();
+        table["steam_id64"] = toml_edit::value(account.steam_id64.clone());
+        table["display_name"] = toml_edit::value(account.display_name.clone());
+        tables.push(table);
+    }
+    set_optional_key(&mut doc, "selected_steam_id64", Some(&account.steam_id64));
+
+    let config = parse_client_config(&doc)?;
+    write_document(path, &doc)?;
+    Ok(LoadedClientConfig {
+        config,
+        source: Some(path.to_path_buf()),
+        warnings: Vec::new(),
+    })
+}
+
+pub fn delete_client_manual_steam_account_to(
+    path: &Path,
+    steam_id64: &str,
+) -> Result<LoadedClientConfig, ClientConfigError> {
+    let steam_id64 = steam_id64.trim();
+    let existing = read_editable_config(path)?;
+    let mut doc = parse_editable_config(&existing)?;
+    let current = parse_client_config(&doc)?;
+
+    let tables = manual_steam_account_tables_mut(&mut doc)?;
+    let Some(index) = tables.iter().position(|table| {
+        table
+            .get("steam_id64")
+            .and_then(toml_edit::Item::as_str)
+            .is_some_and(|stored| stored.trim() == steam_id64)
+    }) else {
+        return Err(ClientConfigError::InvalidSteamAccount(
+            "manual steam account not found".to_owned(),
+        ));
+    };
+    tables.remove(index);
+    if current.selected_steam_id64.as_deref() == Some(steam_id64) {
+        set_optional_key(&mut doc, "selected_steam_id64", None);
     }
 
     let config = parse_client_config(&doc)?;
@@ -497,6 +697,22 @@ fn relay_tables_mut(doc: &mut toml_edit::DocumentMut) -> &mut toml_edit::ArrayOf
     doc["relays"]
         .as_array_of_tables_mut()
         .expect("validated config relays must be an array of tables")
+}
+
+fn manual_steam_account_tables_mut(
+    doc: &mut toml_edit::DocumentMut,
+) -> Result<&mut toml_edit::ArrayOfTables, ClientConfigError> {
+    if !doc.contains_key("manual_steam_accounts") {
+        doc["manual_steam_accounts"] =
+            toml_edit::Item::ArrayOfTables(toml_edit::ArrayOfTables::new());
+    }
+    doc["manual_steam_accounts"]
+        .as_array_of_tables_mut()
+        .ok_or_else(|| {
+            ClientConfigError::InvalidDocument(
+                "manual_steam_accounts must be an array of tables".to_owned(),
+            )
+        })
 }
 
 fn find_relay_table_mut<'a>(

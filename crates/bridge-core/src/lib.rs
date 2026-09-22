@@ -9,9 +9,9 @@ pub use tractor_beam_direct_protocol as direct_protocol;
 pub use tractor_beam_relay_protocol as protocol;
 
 pub use client::{
-    BridgeClient, CLIENT_CONFIG_FILE, ClientConfig, ClientConfigSelection, ClientError,
-    ClientIncidentKind, ClientIncidentSnapshot, ClientLogSink, ClientSessionLogContext,
-    ClientSessionLogRoute, ConfigError, ConnectionProfile, Counters,
+    BridgeClient, CLIENT_CONFIG_FILE, ClientConfig, ClientConfigError, ClientConfigPreferences,
+    ClientConfigSelection, ClientError, ClientIncidentKind, ClientIncidentSnapshot, ClientLogSink,
+    ClientSessionLogContext, ClientSessionLogRoute, ConfigError, ConnectionProfile, Counters,
     DEFAULT_RELAY_PROBE_PAYLOAD_BYTES, DirectDirectionHealthSnapshot, DirectDropReason,
     DirectEpochHealthSnapshot, DirectFlowDirection, DirectFlowHealthSnapshot, DirectFlowStage,
     DirectFlowWindow, DirectOutcomeWindow, DirectPeerHealthSnapshot, DirectRejectionHealthSnapshot,
@@ -22,7 +22,7 @@ pub use client::{
     LanAdapterSelectionError, LanControlPlane, LanDirectConfig, LanJoinCode,
     LanPeerConnectionState, LanPeerPathState, LanPeerPathStatus, LanPeerState, LanProbeResult,
     LanRoomHandle, LightPingReport, LightPingTarget, LoadedClientConfig, LogEntry, LogLevel,
-    MAX_SELECTED_LAN_ADAPTERS, PRODUCT_NAME, QualityConfidence,
+    MAX_SELECTED_LAN_ADAPTERS, ManualSteamAccount, PRODUCT_NAME, QualityConfidence,
     READINESS_PROBE_CONNECTION_PROFILES, READINESS_PROBE_PAYLOAD_BYTES,
     READINESS_PROBE_SAMPLES_PER_CASE, ReadinessProbeCaseReport, ReadinessProbeReport,
     RelayCatalogChange, RelayEndpoint, RelayJoinCode, RelayLinkState, RelayPreset,
@@ -30,8 +30,9 @@ pub use client::{
     RuntimeState, SessionConfig, SessionCredential, SessionHealthConfig, SessionHealthSnapshot,
     SessionHealthSummary, SessionHealthWindow, SessionMode, SessionQuality, SessionQualityReason,
     SessionRouteConfig, SessionStatus, SessionStopReason, SmoothnessReason, SmoothnessSnapshot,
-    SteamIdentity, TransportChoice, bundle_config_path, default_lan_adapters,
-    emit_client_log_event, enumerate_lan_adapter_addresses, enumerate_lan_adapters,
-    lan_candidate_addresses, load_client_config, runtime_name, save_client_config_selection,
-    save_client_relay_catalog_to,
+    SteamIdentity, TransportChoice, bundle_config_path, bundle_directory, default_lan_adapters,
+    delete_client_manual_steam_account_to, emit_client_log_event, enumerate_lan_adapter_addresses,
+    enumerate_lan_adapters, lan_candidate_addresses, load_client_config, runtime_name,
+    save_client_config_preferences_to, save_client_config_selection,
+    save_client_manual_steam_account_to, save_client_relay_catalog_to,
 };

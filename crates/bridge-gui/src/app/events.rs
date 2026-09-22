@@ -21,6 +21,7 @@ impl BridgeApp {
                     self.start_error_dialog_open = true;
                 }
             },
+            ApplicationEvent::SessionStopped => {}
             ApplicationEvent::RoomLeft => {
                 self.relay_settings_original = None;
                 self.status_message = None;
@@ -213,12 +214,13 @@ impl BridgeApp {
                     self.relay_dialog = None;
                     self.status_message = None;
                 }
-                Err(()) => {
+                Err(_) => {
                     if let Some(dialog) = &mut self.relay_dialog {
                         dialog.error = Some(t!("relay.save_failed").into_owned());
                     }
                 }
             },
+            ApplicationEvent::PreferencesSaved(_) => {}
             ApplicationEvent::UpdateAvailable(update) => {
                 self.available_update = Some(update);
             }

@@ -1,0 +1,28 @@
+[package]
+name = "tractor-beam-application"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+arboard = "3"
+chrono = { version = "0.4.42", default-features = false, features = ["clock", "std"] }
+tractor-beam-core = { path = "../bridge-core" }
+open = { version = "5.3.5", features = ["shellexecute-on-windows"] }
+semver = "1.0.28"
+serde = { version = "1.0.228", features = ["derive"] }
+tracing = "0.1.44"
+tracing-appender = "0.2.4"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+ureq = { version = "3.4.0", default-features = false, features = ["json", "rustls", "win-system-proxy"] }
+
+[target.'cfg(windows)'.dependencies]
+rfd = { version = "0.17.2", default-features = false }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+rfd = { version = "0.17.2", default-features = false, features = ["gtk3"] }
+
+[dev-dependencies]
+tempfile = "3.23.0"

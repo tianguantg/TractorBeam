@@ -1,0 +1,841 @@
+{
+  "@@locale": "en",
+  "navHome": "Home",
+  "navRoom": "Room",
+  "navSettings": "Settings",
+  "navStatistics": "Stats",
+  "navLogs": "Logs",
+  "navAbout": "About",
+  "switchToEnglish": "Switch to Chinese",
+  "trayShowMonitor": "Show monitor",
+  "trayOpenFull": "Open full interface",
+  "trayHide": "Hide window",
+  "trayExit": "Exit application",
+  "genericError": "Operation failed",
+  "busy": "The application is busy. Try again shortly.",
+  "roomRestoreRelayFailed": "Could not restore the previous Relay room. Check the Relay server and network, then try again.",
+  "roomRestoreLanFailed": "Could not restore the previous LAN room because its saved endpoint is no longer reachable. Ask the host for a new Join Code.",
+  "roomRestoreRelayTimeout": "Restoring the previous Relay room timed out. Check your network and retry it from room history.",
+  "roomRestoreLanManualRequired": "The previous LAN room cannot be restored automatically. Select it from room history and choose an endpoint manually.",
+  "latencyComplete": "Latency test completed: {latency}ms",
+  "@latencyComplete": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      }
+    }
+  },
+  "latencyUnavailable": "Could not connect to the selected Relay server",
+  "latencyTimeout": "Latency test timed out; the selected Relay server could not be reached",
+  "startupFailed": "Application initialization failed",
+  "retry": "Retry",
+  "exit": "Exit",
+  "openFullInterface": "Open full interface",
+  "hideToTray": "Hide to tray",
+  "localPlayer": "Local",
+  "connected": "Connected",
+  "noData": "—",
+  "homeNoticeTitle": "Online Play Guide",
+  "homeNoticeHelp": "Basic online play instructions and important notes",
+  "connectionMode": "Connection Mode",
+  "connectionModeHelp": "Choose an external Relay for internet play or a direct LAN connection",
+  "hostInstruction": "If you are the host, choose a connection mode and create a room.",
+  "memberInstructionBefore": "If you are joining, copy the host's Join Code and select ",
+  "memberInstructionAfter": ".",
+  "joinRoom": "Join Room",
+  "launchInstructionBefore": "After joining the room, select ",
+  "launchInstructionAfter": " in the lower-right corner.",
+  "launchGame": "Launch Game",
+  "startMultiplayer": "Start Multiplayer",
+  "gameReady": "Game Ready",
+  "gameReadyStandby": "Game Ready",
+  "gameReadyJoinRoomPrompt": "Game is ready. Please join or create a room to start multiplayer.",
+  "dialogLeaveRoomInGameTitle": "Leave Multiplayer Room",
+  "dialogLeaveRoomInGameWarning": "Gameplay is currently active! Leaving the room will immediately disconnect you from other players. Are you sure you want to leave?",
+  "confirmLeave": "Leave Room",
+  "launchWarning": "Do not launch the game directly through Steam or another shortcut.",
+  "externalRelay": "External Relay",
+  "lanDirect": "LAN Direct",
+  "lanSelectedHint": "LAN Direct is selected. Continue to the Room page to create a room.",
+  "relayConfiguration": "Relay Configuration",
+  "noRelayConfigured": "No Relay server is configured",
+  "addRelayHint": "Use the button below to add a custom Relay server.",
+  "addRelay": "Add Relay",
+  "editRelay": "Edit Relay",
+  "switchRelay": "Switch",
+  "noOtherRelayToSwitch": "No other Relay server available",
+  "testLatency": "Test Latency",
+  "selectRelayFirst": "Select a Relay server first",
+  "latencyTestUnavailable": "Latency cannot be tested right now",
+  "relayAddFailed": "Could not add the Relay server",
+  "relayUpdateFailed": "Could not update the Relay server",
+  "relayDeleteFailed": "Could not delete the Relay server",
+  "relayDeleted": "Relay server deleted",
+  "blockSessionAndRoom": "Exit the game and leave the room before you {action}",
+  "blockSession": "Exit the game before you {action}",
+  "blockRoom": "Leave the room before you {action}",
+  "blockCurrentState": "You cannot {action} in the current state",
+  "@blockSessionAndRoom": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@blockSession": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@blockRoom": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@blockCurrentState": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "actionSwitchConnection": "switch connection modes",
+  "actionSwitchRelay": "switch Relay servers",
+  "actionAddRelay": "add Relay node",
+  "actionEditRelay": "edit Relay node",
+  "monitorWindow": "Monitor",
+  "monitorWindowTooltip": "Switch to floating window mode",
+  "running": "Running",
+  "idle": "Idle",
+  "reconnectCount": "Reconnects {count}",
+  "errorCount": "Errors {count}",
+  "@reconnectCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@errorCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "hookReady": "Hook ready",
+  "hookConnecting": "Hook connecting",
+  "noMembers": "No member information",
+  "relayRoute": "Relay",
+  "relayConnectionRoute": "Relay",
+  "lanRoute": "LAN Direct",
+  "unknownRoute": "Unknown route",
+  "relayDefault": "Relay default",
+  "defaultTransport": "Default protocol",
+  "fullInterface": "Full interface",
+  "launching": "Launching…",
+  "cancelling": "Cancelling…",
+  "gameRunning": "Game running",
+  "hookDisconnected": "Not connected",
+  "hookConnected": "Connected",
+  "hookReconnecting": "Reconnecting",
+  "hookFailed": "Connection failed",
+  "hookClosed": "Disconnected",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "save": "Save",
+  "delete": "Delete",
+  "close": "Close",
+  "copy": "Copy",
+  "copied": "Copied to clipboard",
+  "leaveAndJoin": "Leave & Join",
+  "confirmSwitch": "Confirm Switch",
+  "completeExit": "Exit App",
+  "hideToTrayAction": "Hide to Tray",
+  "retryAction": "Retry",
+  "exitAction": "Exit",
+  "errRoomAlreadyActive": "Please leave the current room first",
+  "errAccountRequired": "Please select a Steam account",
+  "errSessionRunning": "Game is currently running; please exit the game first",
+  "errLanAdapterRequired": "Please select at least one network adapter",
+  "errTooManyLanAdapters": "Select up to 8 network adapters",
+  "errLaunchNotActive": "No active launch flow to cancel",
+  "errLaunchCancelPending": "Cancelling game launch, please wait",
+  "errLaunchGeneric": "Unable to launch game",
+  "gameLaunching": "Game is launching",
+  "errQueueBusy": "Command queue is busy, please try again shortly",
+  "errPublisherUnavailable": "Failed to start status publisher thread",
+  "errAlreadyInitialized": "TractorBeam is already initialized",
+  "errNotInitialized": "Application is not initialized yet",
+  "errInputDelayUnsupported": "Input delay is not supported in the current mode; please use Fallback or Pure mode",
+  "errInputDelayHookNotReady": "Hook is not ready yet; please try again later",
+  "errInputDelayHookBusy": "Hook is busy; please retry input delay operation shortly",
+  "errInputDelayTimedOut": "Input delay read/write timed out; please try again later",
+  "errInputDelayGeneric": "Failed to process input delay; please try again later",
+  "errConfigSaveFailed": "Failed to save configuration",
+  "errRelaySaveFailed": "Could not save Relay; check logs for details",
+  "errLanProbeFailed": "LAN probe failed",
+  "errLanUnreachable": "LAN target is unreachable",
+  "roomTitle": "Room",
+  "roomJoinCodeTitle": "Room Join Code",
+  "roomJoinCodeHelp": "Room code is used to invite players to join the match; click to copy",
+  "roomSteamAccountHelp": "Steam account identity for multiplayer; supports quick switching and manual management",
+  "roomPartyHelp": "All members in the current room, connection states, and network metrics",
+  "roomLeaving": "Leaving room…",
+  "roomAlreadyInTarget": "Already in this room",
+  "roomEmptySubtitle": "Create a room or enter a Join Code to play with friends",
+  "roomCreating": "Creating room…",
+  "roomJoining": "Joining room…",
+  "roomFailed": "Room operation failed; please try again",
+  "roomNotJoined": "You have not joined any room yet",
+  "createStandaloneRoom": "Create Room",
+  "createLanRoom": "Create LAN Room",
+  "leaveCurrentRoom": "Leave Room",
+  "roomProcessingWait": "Processing room request, please wait…",
+  "roomHistoryEmpty": "No room history records",
+  "roomSwitchFailed": "Failed to switch room",
+  "roomJoinFailed": "Failed to join room",
+  "roomCreateFailed": "Failed to create room",
+  "roomLeaveFailed": "Failed to leave room",
+  "roomCreatedSuccess": "Room created successfully",
+  "roomLeftSuccess": "Left current room",
+  "roomJoinedSuccess": "Joined room: {code}",
+  "@roomJoinedSuccess": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "roomSwitchedSuccess": "Left previous room and joined new room: {code}",
+  "@roomSwitchedSuccess": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "roomLanCreatedSuccess": "Created LAN room with {count} network adapters",
+  "@roomLanCreatedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "roomSteamAccountTitle": "Steam Account",
+  "roomSteamAccountUnconfigured": "Unconfigured",
+  "roomSteamMismatchTitle": "Steam Account Mismatch",
+  "roomSteamMismatchMessage": "Isaac game uses {gameSteamId}, but room is configured with {roomSteamId}",
+  "@roomSteamMismatchMessage": {
+    "placeholders": {
+      "gameSteamId": {
+        "type": "String"
+      },
+      "roomSteamId": {
+        "type": "String"
+      }
+    }
+  },
+  "roomSteamSyncNow": "Sync to Game Account & Reconnect",
+  "roomPartyTitle": "Party Members",
+  "memberStatusConnected": "Status: Connected",
+  "memberStatusPlaying": "Status: In Game",
+  "memberStatusReconnecting": "Status: Reconnecting",
+  "memberStatusDisconnected": "Status: Disconnected",
+  "memberStatusInactive": "Status: Disconnected",
+  "memberStatusConnecting": "Status: Connecting",
+  "memberTagLocal": "Local",
+  "memberTagHost": "Host",
+  "memberLocalFooter": "Route: {route}    Transport: {transport}",
+  "@memberLocalFooter": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "transport": {
+        "type": "String"
+      }
+    }
+  },
+  "memberPeerFooter": "Jitter: {jitter}ms  Loss: {loss}%",
+  "@memberPeerFooter": {
+    "placeholders": {
+      "jitter": {
+        "type": "String"
+      },
+      "loss": {
+        "type": "String"
+      }
+    }
+  },
+  "routeRelay": "Relay",
+  "routeLan": "LAN",
+  "transportUdp": "UDP",
+  "transportTcp": "TCP",
+  "transportAuto": "Auto",
+  "roomCurrentCode": "Current Code",
+  "roomCodeCopied": "Room code copied",
+  "inputCodeToJoin": "Enter Code to Join",
+  "history": "History",
+  "switchAction": "Switch",
+  "roomAdapterReadFailed": "Failed to read network adapters",
+  "roomOnlineCount": "Online {count}",
+  "@roomOnlineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "roomOnlineCountWithPage": "Online {count}  {page}/{total}",
+  "@roomOnlineCountWithPage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "page": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "steamManualAccountDeleted": "Manual Steam account deleted",
+  "steamAccountUpdated": "Steam account updated: {name}",
+  "@steamAccountUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "steamSwitched": "Switched Steam account",
+  "steamSwitchedAndReconnected": "Switched Steam account and reconnected",
+  "steamSwitchFailed": "Failed to switch account",
+  "steamSwitchedTo": "Switched Steam account: {name}",
+  "@steamSwitchedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "steamRefreshAccounts": "Refresh Accounts",
+  "steamRefreshStarted": "Account refresh started",
+  "steamManualInput": "Manual Entry",
+  "steamActiveQuickSwitch": "Steam active account: {name} (Click to switch)",
+  "@steamActiveQuickSwitch": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "steamAccountActiveTag": "Active",
+  "steamAccountManualTag": "Manual",
+  "steamAccountCurrentLogin": "Current Steam Login",
+  "roomSteamMismatchDesc": "Identity mismatch causes connection failures or routing errors. Syncing with Isaac is recommended.",
+  "roomSteamSyncSuccess": "Synced with Isaac account and reconnected",
+  "roomSteamSyncFailed": "Sync failed",
+  "settingsLanguageFollowSystem": "System Default",
+  "dialogJoinRoomTitle": "Join Room",
+  "dialogJoinRoomHint": "Enter 16 or 32-character Join Code",
+  "dialogJoinRoomConfirm": "Join",
+  "dialogReplaceRoomTitle": "Switch & Join Room",
+  "dialogReplaceRoomPrompt": "Leaving the current room will end your active game session. Continue?",
+  "dialogSwitchHistoryTitle": "Switch Room",
+  "dialogSwitchHistoryPrompt": "Switching rooms will leave the current room and end any active game session. Continue?",
+  "dialogSwitchSteamInRoomTitle": "Switch Steam Account in Room",
+  "dialogSwitchSteamInRoomPrompt": "Switching Steam account will leave the current room{extra}. Continue?",
+  "@dialogSwitchSteamInRoomPrompt": {
+    "placeholders": {
+      "extra": {
+        "type": "String"
+      }
+    }
+  },
+  "dialogSwitchSteamEndSession": " and end the game session",
+  "dialogCreateLanTitle": "Create LAN Game",
+  "dialogCreateLanSubtitle": "Select network adapters for direct LAN play (up to 8)",
+  "dialogCreateLanConfirm": "Create LAN Room",
+  "dialogAddRelayTitle": "Add Relay Node",
+  "dialogEditRelayTitle": "Edit Relay Node",
+  "dialogRelayNameLabel": "Node Name",
+  "dialogRelayNameHint": "e.g. East China Fast Node",
+  "dialogRelayHostLabel": "Relay Address",
+  "dialogRelayHostHint": "e.g. relay.example.com",
+  "dialogRelayPortLabel": "Port",
+  "dialogRelayTransportLabel": "Supported Transports",
+  "dialogRelayDefaultTransportLabel": "Default Transport",
+  "dialogRelayDeleteConfirmTitle": "Delete Relay Node",
+  "dialogRelayDeleteConfirmPrompt": "Are you sure you want to delete this Relay node? This action cannot be undone.",
+  "dialogManualSteamTitle": "Manual Steam Account",
+  "dialogManualSteamSubtitle": "Specify your Steam identity and name manually when Steam client is not running",
+  "dialogManualSteamNameLabel": "Username",
+  "dialogManualSteamIdLabel": "SteamID64",
+  "dialogManualSteamDelete": "Delete Account",
+  "dialogManualSteamSave": "Save & Apply",
+  "dialogCloseAppTitle": "Close Tractor Beam",
+  "dialogCloseAppPrompt": "Do you want to exit completely or hide to system tray to stay connected?",
+  "dialogCloseAppRoomWarning": "You are in an active room! Hide to tray to stay in the room; choosing Exit will leave and disconnect.",
+  "dialogCloseAppSessionWarning": "Game is currently running! Hide to tray to stay connected; choosing Exit will immediately disconnect gameplay.",
+  "dialogLaunchProgressTitle": "Launching Game",
+  "dialogLaunchProgressCancel": "Cancel Launch",
+  "dialogLaunchCancelConfirmTitle": "Cancel Game Launch",
+  "dialogLaunchCancelConfirmPrompt": "Game is starting and preparing injection. Are you sure you want to cancel?",
+  "dialogLaunchFailureTitle": "Launch Failed",
+  "dialogClearLogsTitle": "Clear Diagnostic Logs",
+  "dialogClearLogsPrompt": "Are you sure you want to clear all recorded console logs? This cannot be undone.",
+  "settingsLanguageLabel": "Language",
+  "settingsLanguageTitle": "Language",
+  "settingsLanguageHelpTooltip": "Switch Tractor Beam interface display language (supports Simplified Chinese and English).",
+  "settingsLanguageZh": "简体中文",
+  "settingsLanguageZhSub": "Chinese (Default)",
+  "settingsLanguageEn": "English",
+  "settingsLanguageEnSub": "English (US)",
+  "settingsInputDelayTitle": "Input Delay",
+  "settingsInputDelayHelp": "Fine-tune frame buffer delay in non-official modes to balance responsiveness",
+  "settingsInputDelayLabel": "Input Delay",
+  "settingsInputDelayFrames": "{frames} frames ({ms}ms)",
+  "@settingsInputDelayFrames": {
+    "placeholders": {
+      "frames": {
+        "type": "int"
+      },
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsInputDelayRead": "Read from Game",
+  "settingsInputDelayWrite": "Write to Game",
+  "settingsInputDelayOfficialNotice": "Official mode netcode does not require input delay",
+  "settingsInputDelayNotRunningNotice": "Game not running; launch Isaac to adjust delay",
+  "settingsInputDelayReadSuccess": "Input delay read successfully",
+  "settingsInputDelayWriteSuccess": "Input delay written successfully",
+  "settingsWorkModeTitle": "Work Mode",
+  "settingsWorkModeHelp": "Determines how Hook intercepts and routes gameplay traffic",
+  "settingsModeOfficial": "Official",
+  "settingsModeFallback": "Fallback",
+  "settingsModePure": "Pure",
+  "settingsModeOfficialTitle": "Official",
+  "settingsModeFallbackTitle": "Fallback",
+  "settingsModePureTitle": "Pure",
+  "settingsInputDelayReading": "Reading input delay from Isaac...",
+  "settingsInputDelayWriting": "Writing input delay to Isaac...",
+  "settingsModeOfficialDesc": "Pure Steam P2P mode, bridge only monitors session",
+  "settingsModeFallbackDesc": "Relay first, automatic fallback to Steam P2P on errors",
+  "settingsModePureDesc": "Full traffic takeover for lowest latency and stability (Recommended)",
+  "settingsWorkModeSavedRestartHint": "Settings saved; restart Isaac to apply new mode",
+  "settingsTransportProtocolTitle": "Transport Protocol",
+  "settingsTransportProtocolHelp": "Default packet transport protocol for Relay sessions",
+  "settingsProtocolAuto": "Default (UDP)",
+  "settingsProtocolUdp": "UDP Protocol",
+  "settingsProtocolTcp": "TCP Protocol",
+  "settingsRestoreDefaults": "Restore Defaults",
+  "settingsRestoreDefaultsSuccess": "Default settings restored",
+  "settingsProtocolAutoSub": "Server Default",
+  "settingsProtocolUdpSub": "Low Latency",
+  "settingsProtocolTcpSub": "High Compatibility",
+  "settingsModeOfficialSub": "Official Route",
+  "settingsModeFallbackSub": "Prefer TB",
+  "settingsModePureSub": "Pure TB",
+  "settingsInputDelayApplied": "Active: {frames}",
+  "@settingsInputDelayApplied": {
+    "placeholders": {
+      "frames": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsInputDelayAdjustHint": "Increase when network is unstable",
+  "settingsProtocolHelpTooltip": "Transport Protocol:\nDefault: Automatically determined by relay capabilities\nUDP: Low latency, sensitive to jitter\nTCP: High penetration, stable and easy to connect",
+  "settingsModeHelpTooltip": "Work Mode:\nOfficial: Pure official routing without TB relay\nFallback: Prefer TB relay, fall back to official P2P if blocked\nPure: Force all traffic through TB relay",
+  "settingsInputDelayHelpTooltip": "Input Delay (0-5 frames):\nLower delay feels more responsive; increase during jitter/packet loss for smoothness.\nOfficial mode is managed by game's own netcode and cannot be tuned.",
+  "statsTitle": "Statistics & Diagnostics",
+  "statsConnectionQuality": "Connection Quality",
+  "statsPacketStats": "Packet Statistics",
+  "statsHookStatus": "Hook Status",
+  "statsRefreshHook": "Refresh IPC",
+  "statsTestLatency": "Test Ping",
+  "logsTitle": "Console Logs",
+  "logsFilterAll": "All",
+  "logsFilterInfo": "Info",
+  "logsFilterWarn": "Warn",
+  "logsFilterError": "Error",
+  "logsAutoScroll": "Auto-scroll",
+  "logsClear": "Clear Logs",
+  "logsExport": "Export Diagnostics",
+  "logsSearchHint": "Search logs / keywords...",
+  "aboutTitle": "About",
+  "aboutProjectDesc": "High-performance, low-latency co-op tool for The Binding of Isaac: Repentance+",
+  "aboutVersion": "Version",
+  "aboutOpenSource": "Repository",
+  "aboutLicense": "Open Source License ({license})",
+  "aboutDiagnosticTitle": "Export Diagnostics Bundle",
+  "aboutDiagnosticDesc": "Export logs and diagnostic info for troubleshooting",
+  "aboutExportButton": "Export Diagnostics",
+  "pleaseJoinRoomFirst": "Please join a room first",
+  "errRelayNameRequired": "Please enter a node name",
+  "errRelayHostRequired": "Please enter a relay address",
+  "errRelayPortRange": "Port must be an integer between 1 and 65535",
+  "errRelayProtocolRequired": "Must select at least one transport protocol (TCP/UDP)",
+  "dialogRelayDeletePrompt": "Are you sure you want to delete node \"{relayName}\"?\nThis cannot be undone.",
+  "@dialogRelayDeletePrompt": {
+    "placeholders": {
+      "relayName": {
+        "type": "String"
+      }
+    }
+  },
+  "dialogConfirmDelete": "Delete",
+  "dialogCancel": "Cancel",
+  "dialogSave": "Save",
+  "dialogDelete": "Delete",
+  "dialogClose": "Close",
+  "dialogClearLogsPromptDetailed": "Are you sure you want to clear current logs?\nHistorical logs in memory will be permanently removed.",
+  "dialogClearLogsConfirm": "Clear",
+  "dialogExitAppTitle": "Exit Tractor Beam",
+  "dialogExitSessionRunningWarning": "The game is currently running. Exiting will immediately terminate the session and disconnect. Are you sure?",
+  "dialogExitRoomWarning": "You are currently in a room. Exiting will leave the room (and close it if you are host). Are you sure?",
+  "dialogExitPrompt": "Are you sure you want to exit Tractor Beam?",
+  "dialogExitButton": "Exit",
+  "dialogCloseAppHideToTray": "Hide to Tray",
+  "dialogCloseAppFullExit": "Exit Completely",
+  "dialogReplaceRoomExitAndJoin": "Leave & Join",
+  "dialogSwitchRoomConfirm": "Confirm Switch",
+  "dialogSwitchSteamLanPrompt": "Currently in a LAN direct room. Switching Steam accounts requires leaving the current room. Recreate or rejoin with your new identity afterward. Leave and switch?",
+  "dialogSwitchSteamRelayPrompt": "Currently in a Relay room. Switching Steam accounts will reconnect to this relay room with the new identity. If Isaac is running, you will need to reconnect in-game. Continue?",
+  "dialogSwitchSteamConfirm": "Confirm Switch",
+  "dialogJoinRoomByCodePrompt": "Enter the TB-NET room code provided by the host:",
+  "dialogJoinRoomCodeLabel": "Room Code",
+  "dialogLanEndpointTitle": "Select LAN Endpoint",
+  "dialogLanEndpointPrompt": "Multiple reachable addresses detected. Please select an endpoint to connect:",
+  "dialogLanEndpointConnect": "Connect",
+  "dialogLanAdaptersPrompt": "Available Network Adapters for LAN",
+  "dialogLanNoAdapters": "No available network adapters found",
+  "dialogLanSelectedCount": "Selected: {count}/8",
+  "@dialogLanSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dialogCreateButton": "Create",
+  "dialogDeleteSteamAccountTitle": "Delete Steam Account",
+  "dialogDeleteSteamAccountPrompt": "Are you sure you want to delete manual account \"{username}\" ({steamId64})?\nYou will need to re-enter it manually later.",
+  "@dialogDeleteSteamAccountPrompt": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      },
+      "steamId64": {
+        "type": "String"
+      }
+    }
+  },
+  "errSteamIdRequired": "SteamID64 cannot be empty",
+  "errSteamIdInvalid": "SteamID64 must be 17 digits and non-zero",
+  "errSteamUsernameRequired": "Username cannot be empty",
+  "dialogManualSteamSavedAccounts": "Saved Manual Accounts",
+  "dialogManualSteamIdInputHint": "17-digit SteamID64",
+  "dialogManualSteamNameInputHint": "Enter Steam username",
+  "dialogLaunchCancelFailed": "Unable to cancel launch right now, please try again",
+  "dialogLaunchFailedGeneric": "Game failed to launch",
+  "dialogLaunchGoToLogs": "Go to Logs",
+  "dialogLaunchStepStarting": "Preparing launch arguments",
+  "dialogLaunchStepWaitingForGame": "Waiting for game process",
+  "dialogLaunchStepInjecting": "Injecting TractorBeam Hook",
+  "dialogLaunchStepWaitingForHook": "Connecting to Hook endpoint",
+  "dialogLaunchStepReady": "Game and Hook ready",
+  "dialogLaunchCancelling": "Cancelling launch...",
+  "dialogLaunchCancelled": "Launch cancelled",
+  "dialogLaunchSuccess": "Launch successful",
+  "dialogLaunchPreparing": "Preparing to launch game...",
+  "dialogLaunchCancellingButton": "Cancelling…",
+  "dialogLaunchCancelButton": "Cancel Launch",
+  "dialogLaunchStepCompleted": "Completed",
+  "dialogLaunchStepInProgress": "In progress",
+  "dialogLaunchStepPending": "Pending",
+  "dialogLaunchNotStarted": "Game not yet launched",
+  "dialogLaunchConfigured": "Launch parameters configured",
+  "dialogLaunchWaitingForGame": "Waiting for game process...",
+  "dialogLaunchInjectingHook": "Game detected, injecting Hook...",
+  "dialogLaunchConnectingHook": "Injection complete, connecting to Hook...",
+  "dialogLaunchHookReady": "Game and Hook ready",
+  "dialogLaunchStoppingProcess": "Stopping TractorBeam launch process...",
+  "dialogLaunchErrIsaacAlreadyRunning": "The Binding of Isaac is already running. Please exit Isaac completely before launching.",
+  "dialogLaunchErrPreviousHookPresent": "Previous Hook instance detected in game. Please exit the game completely and try again.",
+  "dialogLaunchErrCannotChangeMode": "Cannot change mode while Isaac is running. Please exit the game completely and try again.",
+  "dialogLaunchErrLaunchInProgress": "Game launch is currently in progress, please wait.",
+  "dialogLaunchErrInsufficientPermissions": "Insufficient injection permissions. Please close blocking programs or run as administrator.",
+  "dialogLaunchErrProcessNotFound": "Isaac game process was not found. Please confirm the game launched properly.",
+  "dialogLaunchErrMissingComponents": "Required injection components are missing. Please verify your program files.",
+  "dialogLaunchErrCannotPrepareParams": "Unable to prepare Hook parameters. Please check directory write permissions.",
+  "dialogLaunchErrCannotBindEndpoint": "Unable to bind local Hook endpoint. Please close old game processes and try again.",
+  "dialogLaunchErrSteamApiTakeoverFailed": "Hook could not take over Steam API. Please exit the game completely and try again.",
+  "dialogLaunchErrNetworkHookInstallFailed": "Hook could not install networking features. Please exit the game completely and try again.",
+  "dialogLaunchErrTimeout": "Timed out waiting for game or Hook to be ready. Please make sure the game launched properly.",
+  "dialogLaunchErrElevationCancelled": "Administrator elevation was cancelled. Hook injection cannot proceed.",
+  "dialogLaunchErrSteamLaunchFailed": "Unable to launch game via Steam. Please make sure Steam is running.",
+  "dialogLaunchErrUnsupportedPlatform": "Current operating system does not support native Hook injection.",
+  "dialogLaunchErrCannotReattach": "Cannot reattach or detach from current game runtime. Please exit the game completely and try again.",
+  "dialogLaunchErrHookRuntimeTerminated": "Hook runtime has terminated. Please restart the game.",
+  "dialogLaunchErrFileNotFound": "The system cannot find the file specified. Please check game or component integrity.",
+  "dialogLaunchErrWaitTimeout120": "Launch wait exceeded 120 seconds and was stopped. Please check game and Steam status and try again.",
+  "dialogLaunchErrUnknown": "Game failed to launch normally. No detailed error message was returned.",
+  "dialogLaunchErrOpenProcessFailed": "Hook injection failed: Unable to open Isaac process (try running as administrator or check antivirus).",
+  "dialogLaunchErrCreateRemoteThreadFailed": "Hook injection failed: Unable to create remote thread (may be blocked by security software).",
+  "dialogLaunchErrAllocMemoryFailed": "Hook injection failed: Unable to allocate remote memory in Isaac process.",
+  "dialogLaunchErrWriteDllPathFailed": "Hook injection failed: Unable to write DLL path to game process.",
+  "dialogLaunchErrInjectionGenericFailed": "Hook injection failed. Try running as administrator or check antivirus.",
+  "windowMinimize": "Minimize",
+  "windowMaximize": "Maximize",
+  "windowRestore": "Restore",
+  "windowClose": "Close",
+  "latencyGradeExcellent": "Excellent",
+  "latencyGradeFair": "Fair",
+  "latencyGradePoor": "Poor",
+  "latencyGradeSevere": "Severe",
+  "latencyTestComplete": "Latency test completed: {latency}ms ({grade})",
+  "@latencyTestComplete": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      },
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "relayAddedAndSwitched": "Added and switched to node: {name}",
+  "@relayAddedAndSwitched": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "relayUpdatedNotice": "Node updated: {name}",
+  "@relayUpdatedNotice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutIdentityHelp": "Tractor Beam version, original architecture, and core protocol specifications",
+  "aboutIdentitySlogan": "Lightweight online play bridge built for The Binding of Isaac: Repentance+",
+  "aboutAuthor": "Project Author",
+  "aboutUiDesigner": "UI Redesign",
+  "aboutVersionLabel": "Version ID",
+  "aboutVersionHelp": "Click to copy client version and diagnostic info",
+  "aboutCopiedVersionNotice": "Client version and diagnostic info copied to clipboard",
+  "aboutCoreProtocol": "Core Protocol",
+  "aboutLinksTitle": "Open Source & Links",
+  "aboutLinksHelp": "Flutter client repository and official upstream repository",
+  "aboutSourceRepo": "Flutter Client Source (GitHub)",
+  "aboutRefactorRepo": "Official Upstream (GitHub)",
+  "aboutRefactorRepoPending": "UI refactoring project coming soon. Repository will be linked once published.",
+  "aboutRefactorRepoBadge": "Reserved",
+  "aboutReleases": "Releases (GitHub)",
+  "aboutIssues": "Issues & Feedback",
+  "@aboutLicense": {
+    "placeholders": {
+      "license": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutLinkCopiedNotice": "Copied {title} link to clipboard",
+  "@aboutLinkCopiedNotice": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutLinkCopiedDirect": "Copied {title} link",
+  "@aboutLinkCopiedDirect": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutThanksTitle": "Acknowledgements",
+  "aboutThanksHelp": "Thanks to everyone who helped develop, test, and improve Tractor Beam",
+  "aboutThanksIntro": "Thank you to every friend who helped make Tractor Beam better",
+  "aboutContributors": "●  Core Contributors",
+  "aboutEarlyTesters": "●  Early Testers",
+  "aboutTagTester": "Tester",
+  "aboutTagContributor": "Contributor",
+  "aboutOtherAnonymous": "Other Anonymous Players",
+  "statsSessionQualityTitle": "Session Quality",
+  "statsSessionQualityHelp": "Network smoothness assessment and diagnostic status for the current session",
+  "statsCountersTitle": "Counters",
+  "statsCountersHelp": "Packet and byte throughput statistics between Hook injection and Relay server",
+  "statsConnectionTestTitle": "Connection Test",
+  "statsConnectionTestHelp": "Send lightweight probe packets to test latency and reachability to the selected Relay",
+  "statsHookIpcTitle": "Hook IPC Status",
+  "statsHookIpcHelp": "Real-time IPC communication status between in-game Hook module and this app",
+  "statsStartSpeedtest": "Start Test",
+  "statsSpeedtesting": "Testing...",
+  "statsRefreshingHook": "Refreshing...",
+  "statsQualityGood": "Session Quality: Good",
+  "statsQualityWatch": "Session Quality: Watch",
+  "statsQualityPoor": "Session Quality: Poor",
+  "statsQualityEvaluating": "Session Quality: Evaluating",
+  "statsQualityInactive": "Session Inactive",
+  "statsModeOfficial": "Official Matchmaking",
+  "statsModePure": "Pure Mode",
+  "statsModeFallback": "Fallback Mode",
+  "statsRoomNumber": "Room {code}",
+  "@statsRoomNumber": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "statsRoomJoined": "In Room",
+  "statsRoomNotJoined": "Not in Room",
+  "statsRouteLan": "LAN Direct",
+  "statsRouteUnknown": "Unknown Route",
+  "statsRouteRelay": "Relay",
+  "statsRouteRelayNode": "Relay ({node})",
+  "@statsRouteRelayNode": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "statsTransportAuto": "Auto",
+  "statsLabelMode": "Mode",
+  "statsLabelRoomStatus": "Room Status",
+  "statsLabelRouteNode": "Route / Node",
+  "statsLabelTransport": "Transport",
+  "statsHealthDiagnostic": "Health: {health}",
+  "@statsHealthDiagnostic": {
+    "placeholders": {
+      "health": {
+        "type": "String"
+      }
+    }
+  },
+  "statsLastStopReason": "Last Stop: {reason}",
+  "@statsLastStopReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "statsCounterHookToRelay": "Hook -> Relay",
+  "statsCounterBytesReceived": "Bytes Received",
+  "statsCounterRelayToHook": "Relay -> Hook",
+  "statsCounterErrors": "Errors",
+  "statsCounterBytesSent": "Bytes Sent",
+  "statsCounterReconnectDrops": "Drops on Reconnect",
+  "statsNoTestRecords": "No speedtest records yet",
+  "statsNoTestRecordsPrompt": "Click 'Start Test' above to probe latency and reachability to the selected Relay",
+  "statsTableHeaderNode": "Node",
+  "statsTableHeaderTransport": "Transport",
+  "statsTableHeaderPackets": "Tx/Rx",
+  "statsTableHeaderLoss": "Loss",
+  "statsTableHeaderLatency": "Latency",
+  "statsTestTimeout": "Timeout",
+  "statsTableHeaderStatus": "Status",
+  "statsTableHeaderVersion": "Version",
+  "statsTableHeaderReconnects": "Reconnects",
+  "statsTableHeaderDrops": "Dropped (Hook/App)",
+  "statsTableHeaderBadFrames": "Bad Frames",
+  "statsHookRefreshFailed": "Failed to refresh Hook status",
+  "statsHookRefreshSuccess": "Hook status refreshed",
+  "statsSelectRelayPrompt": "Please select a Relay node on the Home page first",
+  "statsSpeedtestRejected": "Speedtest request was not accepted",
+  "logsLevelAll": "ALL",
+  "logsLevelTrace": "TRACE",
+  "logsLevelDebug": "DEBUG",
+  "logsLevelInfo": "INFO",
+  "logsLevelWarn": "WARN",
+  "logsLevelError": "ERROR",
+  "logsExportBundle": "Export Bundle",
+  "logsExportBundleTooltip": "Export full diagnostic archive (ZIP)",
+  "logsExportingNotice": "Exporting diagnostic bundle...",
+  "logsOpenFolder": "Open Folder",
+  "logsOpenFolderTooltip": "Open local log and diagnostics directory",
+  "logsOpeningFolderNotice": "Opening log folder...",
+  "logsClearTooltip": "Clear current session logs",
+  "logsClearedNotice": "Logs cleared",
+  "logsShowingCount": "Showing {visible} / {total} entries",
+  "@logsShowingCount": {
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "logsSearchButton": "Search",
+  "logsCopyAll": "Copy All",
+  "logsAutoScrollOn": "Auto-scroll: On",
+  "logsAutoScrollPaused": "Auto-scroll: Paused",
+  "logsEmptyNoMatch": "No logs matching '{query}'",
+  "@logsEmptyNoMatch": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "logsEmptyNoRecords": "No logs recorded yet",
+  "logsCopyLine": "Copy line",
+  "logsNoCopyableLogs": "No logs to copy",
+  "logsCopiedCount": "Copied {count} log entries",
+  "@logsCopiedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logsCopiedSingle": "Log entry copied",
+  "logsCopyFailed": "Failed to copy to clipboard",
+  "logsAlreadyEmpty": "No logs to clear",
+  "dialogUdpFallbackTitle": "Could not connect over UDP",
+  "dialogUdpFallbackBody": "This network may restrict UDP traffic. You can retry this connection over TCP, which is usually more compatible but may add some latency. This retry will not change your default protocol.",
+  "dialogUdpFallbackRetry": "Retry with TCP",
+  "dialogUdpFallbackSettings": "Open Settings",
+  "udpTcpRetryStarted": "Retrying the connection over TCP…",
+  "udpTcpRetryFailed": "Could not start the TCP retry",
+  "latencyBatchComplete": "Relay test complete: {successful}/{total} servers available",
+  "@latencyBatchComplete": {
+    "placeholders": {
+      "successful": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "latencyBatchAllFailed": "Relay test complete: none of {total} servers could be reached",
+  "@latencyBatchAllFailed": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  }
+}

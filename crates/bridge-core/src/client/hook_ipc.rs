@@ -37,7 +37,7 @@ const WRITE_TIMEOUT: Duration = Duration::from_millis(250);
 const LIVENESS_PING_INTERVAL: Duration = Duration::from_millis(250);
 const LIVENESS_PONG_TIMEOUT: Duration = Duration::from_secs(1);
 const MAX_DATA_BURST: usize = 64;
-const INPUT_DELAY_TIMEOUT: Duration = Duration::from_millis(750);
+const INPUT_DELAY_TIMEOUT: Duration = Duration::from_secs(2);
 
 #[derive(Clone, Copy)]
 struct ListenerSettings {

@@ -11,12 +11,12 @@ use std::{
 };
 
 use tractor_beam_core::{
-    BridgeClient, ClientConfigSelection, ClientError, ExternalRelayConfig, InputDelayError,
-    InputDelayReport, LanAdapter, LanJoinCode, LanPeerPathState, LanPeerState, LanProbeResult,
-    LanRoomHandle, LightPingTarget, LoadedClientConfig, RelayCatalogChange, RelayEndpoint,
-    RuntimeState, SessionConfig, SessionStatus, bundle_config_path, default_lan_adapters,
-    enumerate_lan_adapters, lan_candidate_addresses, load_client_config,
-    save_client_config_selection, save_client_relay_catalog_to,
+    BridgeClient, ClientConfigPreferences, ClientConfigSelection, ClientError, ExternalRelayConfig,
+    InputDelayError, InputDelayReport, LanAdapter, LanJoinCode, LanPeerPathState, LanPeerState,
+    LanProbeResult, LanRoomHandle, LightPingTarget, LoadedClientConfig, RelayCatalogChange,
+    RelayEndpoint, RuntimeState, SessionConfig, SessionStatus, bundle_config_path,
+    default_lan_adapters, enumerate_lan_adapters, lan_candidate_addresses, load_client_config,
+    save_client_config_preferences_to, save_client_config_selection, save_client_relay_catalog_to,
 };
 
 use crate::{
@@ -49,7 +49,7 @@ struct SnapshotStore {
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub(crate) enum BootstrapState {
+pub enum BootstrapState {
     #[default]
     Initializing,
     Ready,
@@ -57,13 +57,14 @@ pub(crate) enum BootstrapState {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum BootstrapFailure {
+pub enum BootstrapFailure {
     LoggingUnavailable,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum ApplicationOperation {
+pub enum ApplicationOperation {
     Starting,
+    StoppingSession,
     LeavingRoom,
     RefreshingAccounts,
     Probing,
@@ -78,41 +79,41 @@ pub(crate) enum ApplicationOperation {
 }
 
 #[derive(Clone, Debug, Default)]
-pub(crate) struct ApplicationSnapshot {
-    pub(crate) bootstrap: BootstrapState,
-    pub(crate) bootstrap_failure: Option<BootstrapFailure>,
-    pub(crate) bootstrap_error: Option<String>,
-    pub(crate) operation: Option<ApplicationOperation>,
-    pub(crate) runtime: RuntimeState,
-    pub(crate) loaded_config: Option<LoadedClientConfig>,
-    pub(crate) shutdown_complete: bool,
-    pub(crate) lan_room: Option<LanRoomSnapshot>,
-    pub(crate) relay_room_active: bool,
+pub struct ApplicationSnapshot {
+    pub bootstrap: BootstrapState,
+    pub bootstrap_failure: Option<BootstrapFailure>,
+    pub bootstrap_error: Option<String>,
+    pub operation: Option<ApplicationOperation>,
+    pub runtime: RuntimeState,
+    pub loaded_config: Option<LoadedClientConfig>,
+    pub shutdown_complete: bool,
+    pub lan_room: Option<LanRoomSnapshot>,
+    pub relay_room_active: bool,
     command_generation: u64,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct LanRoomSnapshot {
-    pub(crate) invitation_code: String,
-    pub(crate) peers: Vec<LanPeerState>,
-    pub(crate) paths: Vec<LanPeerPathState>,
+pub struct LanRoomSnapshot {
+    pub invitation_code: String,
+    pub peers: Vec<LanPeerState>,
+    pub paths: Vec<LanPeerPathState>,
 }
 
 impl ApplicationSnapshot {
     #[must_use]
-    pub(crate) fn room_active(&self) -> bool {
+    pub fn room_active(&self) -> bool {
         self.relay_room_active || self.lan_room.is_some()
     }
 
     #[must_use]
-    pub(crate) fn accepts_mutation(&self) -> bool {
+    pub fn accepts_mutation(&self) -> bool {
         self.bootstrap == BootstrapState::Ready
             && self.operation.is_none()
             && !self.shutdown_complete
     }
 
     #[must_use]
-    pub(crate) fn needs_polling(&self) -> bool {
+    pub fn needs_polling(&self) -> bool {
         self.bootstrap == BootstrapState::Initializing
             || self.operation.is_some()
             || self.runtime.status == SessionStatus::Running
@@ -120,8 +121,9 @@ impl ApplicationSnapshot {
 }
 
 #[derive(Debug)]
-pub(crate) enum ApplicationEvent {
+pub enum ApplicationEvent {
     StartFinished(Result<(), ClientError>),
+    SessionStopped,
     RoomLeft,
     RelayRoomJoined(Result<(), ClientError>),
     AccountsRefreshed,
@@ -138,7 +140,8 @@ pub(crate) enum ApplicationEvent {
     LanRoomCreated(Result<String, String>),
     LanRoomJoined(Result<(), String>),
     SelectionSaveFailed(String),
-    RelayCatalogSaved(Result<LoadedClientConfig, ()>),
+    RelayCatalogSaved(Result<LoadedClientConfig, String>),
+    PreferencesSaved(Result<LoadedClientConfig, String>),
     UpdateAvailable(AvailableUpdate),
     CommandRejected,
     ShutdownComplete,
@@ -148,6 +151,7 @@ pub(crate) enum ApplicationEvent {
 enum ApplicationCommand {
     RetryBootstrap,
     Start(Box<StartRequest>),
+    StopSession,
     JoinRelayRoom {
         route: ExternalRelayConfig,
         steam_id64: String,
@@ -165,6 +169,7 @@ enum ApplicationCommand {
     ClearLogs,
     ReadClipboard,
     SaveRelayCatalog(RelayCatalogChange),
+    SavePreferences(ClientConfigPreferences),
     EnumerateLanAdapters,
     CreateLanRoom {
         steam_id64: u64,
@@ -192,7 +197,7 @@ struct QueuedCommand {
     command: ApplicationCommand,
 }
 
-pub(crate) struct ApplicationHandle {
+pub struct ApplicationHandle {
     command_tx: SyncSender<QueuedCommand>,
     event_rx: Receiver<ApplicationEvent>,
     snapshot: Arc<SnapshotStore>,
@@ -202,7 +207,7 @@ pub(crate) struct ApplicationHandle {
 
 impl ApplicationHandle {
     #[must_use]
-    pub(crate) fn spawn(wake: impl Fn() + Send + Sync + 'static) -> Self {
+    pub fn spawn(wake: impl Fn() + Send + Sync + 'static) -> Self {
         let current_version = tractor_beam_core::build_info::current().version.to_owned();
         let update_check = Box::new(move || update::check_for_update(&current_version));
         Self::spawn_with(
@@ -210,6 +215,20 @@ impl ApplicationHandle {
             Box::new(production_bootstrap),
             bundle_config_path(),
             Some(update_check),
+        )
+    }
+
+    /// Starts the shared client application without contacting the release API.
+    ///
+    /// The Flutter client uses this entry point until it has its own compatible
+    /// release channel. The egui client continues to use [`Self::spawn`].
+    #[must_use]
+    pub fn spawn_without_update(wake: impl Fn() + Send + Sync + 'static) -> Self {
+        Self::spawn_with(
+            wake,
+            Box::new(production_bootstrap),
+            bundle_config_path(),
+            None,
         )
     }
 
@@ -265,31 +284,35 @@ impl ApplicationHandle {
     }
 
     #[must_use]
-    pub(crate) fn snapshot(&self) -> ApplicationSnapshot {
+    pub fn snapshot(&self) -> ApplicationSnapshot {
         lock(&self.snapshot.value).clone()
     }
 
-    pub(crate) fn drain_events(&self) -> Vec<ApplicationEvent> {
+    pub fn drain_events(&self) -> Vec<ApplicationEvent> {
         self.event_rx.try_iter().collect()
     }
 
-    pub(crate) fn retry_bootstrap(&self) -> bool {
+    pub fn retry_bootstrap(&self) -> bool {
         self.submit(ApplicationCommand::RetryBootstrap)
     }
 
-    pub(crate) fn start(&self, config: SessionConfig, selection: ClientConfigSelection) -> bool {
+    pub fn start(&self, config: SessionConfig, selection: ClientConfigSelection) -> bool {
         self.submit(ApplicationCommand::Start(Box::new(StartRequest {
             config,
             selection,
         })))
     }
 
-    pub(crate) fn leave_room(&self) {
+    pub fn stop_session(&self) -> bool {
+        self.submit(ApplicationCommand::StopSession)
+    }
+
+    pub fn leave_room(&self) {
         self.control
             .fetch_max(CONTROL_LEAVE_ROOM, Ordering::Release);
     }
 
-    pub(crate) fn join_relay_room(
+    pub fn join_relay_room(
         &self,
         route: ExternalRelayConfig,
         steam_id64: String,
@@ -302,7 +325,7 @@ impl ApplicationHandle {
         })
     }
 
-    pub(crate) fn rejoin_relay_room(
+    pub fn rejoin_relay_room(
         &self,
         config: SessionConfig,
         selection: ClientConfigSelection,
@@ -312,55 +335,55 @@ impl ApplicationHandle {
         )))
     }
 
-    pub(crate) fn request_shutdown(&self) {
+    pub fn request_shutdown(&self) {
         self.control.store(CONTROL_SHUTDOWN, Ordering::Release);
     }
 
-    pub(crate) fn refresh_accounts(&self) -> bool {
+    pub fn refresh_accounts(&self) -> bool {
         self.submit(ApplicationCommand::RefreshAccounts)
     }
 
-    pub(crate) fn start_readiness_probe(&self, relay: RelayEndpoint) -> bool {
+    pub fn start_readiness_probe(&self, relay: RelayEndpoint) -> bool {
         self.submit(ApplicationCommand::StartReadinessProbe(relay))
     }
 
-    pub(crate) fn start_hook_receive_probe(&self) -> bool {
+    pub fn start_hook_receive_probe(&self) -> bool {
         self.submit(ApplicationCommand::StartHookReceiveProbe)
     }
 
-    pub(crate) fn start_light_ping(&self, targets: Vec<LightPingTarget>) -> bool {
+    pub fn start_light_ping(&self, targets: Vec<LightPingTarget>) -> bool {
         self.submit(ApplicationCommand::StartLightPing(targets))
     }
 
-    pub(crate) fn read_input_delay(&self) -> bool {
+    pub fn read_input_delay(&self) -> bool {
         self.submit(ApplicationCommand::ReadInputDelay)
     }
 
-    pub(crate) fn write_input_delay(&self, value: i32) -> bool {
+    pub fn write_input_delay(&self, value: i32) -> bool {
         self.submit(ApplicationCommand::WriteInputDelay(value))
     }
 
-    pub(crate) fn open_log_directory(&self) -> bool {
+    pub fn open_log_directory(&self) -> bool {
         self.submit(ApplicationCommand::OpenLogDirectory)
     }
 
-    pub(crate) fn export_diagnostics_bundle(&self) -> bool {
+    pub fn export_diagnostics_bundle(&self) -> bool {
         self.submit(ApplicationCommand::ExportDiagnosticsBundle)
     }
 
-    pub(crate) fn clear_logs(&self) -> bool {
+    pub fn clear_logs(&self) -> bool {
         self.submit(ApplicationCommand::ClearLogs)
     }
 
-    pub(crate) fn read_clipboard(&self) -> bool {
+    pub fn read_clipboard(&self) -> bool {
         self.submit(ApplicationCommand::ReadClipboard)
     }
 
-    pub(crate) fn enumerate_lan_adapters(&self) -> bool {
+    pub fn enumerate_lan_adapters(&self) -> bool {
         self.submit(ApplicationCommand::EnumerateLanAdapters)
     }
 
-    pub(crate) fn create_lan_room(
+    pub fn create_lan_room(
         &self,
         steam_id64: u64,
         display_name: String,
@@ -373,11 +396,11 @@ impl ApplicationHandle {
         })
     }
 
-    pub(crate) fn probe_lan_join(&self, invitation: LanJoinCode) -> bool {
+    pub fn probe_lan_join(&self, invitation: LanJoinCode) -> bool {
         self.submit(ApplicationCommand::ProbeLanJoin(invitation))
     }
 
-    pub(crate) fn join_lan_room(
+    pub fn join_lan_room(
         &self,
         steam_id64: u64,
         display_name: String,
@@ -392,12 +415,16 @@ impl ApplicationHandle {
         })
     }
 
-    pub(crate) fn persist_selection(&self, selection: ClientConfigSelection) {
+    pub fn persist_selection(&self, selection: ClientConfigSelection) {
         *lock(&self.pending_selection) = Some(selection);
     }
 
-    pub(crate) fn save_relay_catalog(&self, change: RelayCatalogChange) -> bool {
+    pub fn save_relay_catalog(&self, change: RelayCatalogChange) -> bool {
         self.submit(ApplicationCommand::SaveRelayCatalog(change))
+    }
+
+    pub fn save_preferences(&self, preferences: ClientConfigPreferences) -> bool {
+        self.submit(ApplicationCommand::SavePreferences(preferences))
     }
 
     fn submit(&self, command: ApplicationCommand) -> bool {

@@ -11,6 +11,33 @@ use super::*;
 use crate::client::test_relay::TestRelay;
 
 #[test]
+fn light_ping_reports_distinguish_transport_for_the_same_endpoint() {
+    let mut client = BridgeClient::new();
+    let endpoint = RelayEndpoint::new("relay.example.test", 25910);
+    for (relay_id, transport, latency) in [
+        ("udp", TransportChoice::Udp, 21_u128),
+        ("tcp", TransportChoice::Tcp, 34_u128),
+    ] {
+        client.upsert_light_ping_report(probe::LightPingReport {
+            target: probe::LightPingTarget {
+                relay_id: Some(relay_id.to_owned()),
+                relay_name: Some(relay_id.to_owned()),
+                endpoint: endpoint.clone(),
+                transport,
+            },
+            sent: 5,
+            received: 5,
+            median_rtt_ms: Some(latency),
+            failure_reason: None,
+        });
+    }
+
+    assert_eq!(client.state.light_ping_reports.len(), 2);
+    assert_eq!(client.state.light_ping_reports[0].median_rtt_ms, Some(21));
+    assert_eq!(client.state.light_ping_reports[1].median_rtt_ms, Some(34));
+}
+
+#[test]
 fn relay_room_can_be_joined_without_starting_gameplay() {
     let relay = TestRelay::spawn();
     let mut client = BridgeClient::new();

@@ -712,13 +712,10 @@ impl BridgeClient {
     }
 
     fn upsert_light_ping_report(&mut self, report: probe::LightPingReport) {
-        let key = report.target.endpoint.clone();
-        if let Some(existing) = self
-            .state
-            .light_ping_reports
-            .iter_mut()
-            .find(|r| r.target.endpoint == key)
-        {
+        if let Some(existing) = self.state.light_ping_reports.iter_mut().find(|existing| {
+            existing.target.endpoint == report.target.endpoint
+                && existing.target.transport == report.target.transport
+        }) {
             *existing = report;
         } else {
             self.state.light_ping_reports.push(report);

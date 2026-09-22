@@ -23,7 +23,7 @@ default_transport = "tcp"
         .unwrap()
         .try_into()
         .unwrap();
-    assert_eq!(config.default_transport, TransportChoice::Tcp);
+    assert_eq!(config.default_transport, Some(TransportChoice::Tcp));
     assert_eq!(config.default_mode, SessionMode::Pure);
     assert!(config.session_health.enabled);
     assert!(!config.session_health.runtime_rtt_enabled);
@@ -34,7 +34,6 @@ default_transport = "tcp"
         TransportChoice::Tcp
     );
 }
-
 #[test]
 fn parses_ipv6_relay_preset() {
     let raw = r#"
@@ -61,12 +60,12 @@ fn rejects_invalid_session_health_interval() {
 }
 
 #[test]
-fn defaults_transport_to_tcp_when_omitted() {
+fn defaults_transport_to_none_when_omitted() {
     let config: ClientConfig = toml::from_str::<RawClientConfig>("")
         .unwrap()
         .try_into()
         .unwrap();
-    assert_eq!(config.default_transport, TransportChoice::Tcp);
+    assert_eq!(config.default_transport, None);
 }
 
 #[test]
@@ -228,6 +227,213 @@ fn relay_catalog_rejects_an_unsupported_default_transport_without_writing() {
     );
 }
 
+#[test]
+fn preferences_are_saved_without_discarding_other_config() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join(CLIENT_CONFIG_FILE);
+    std::fs::write(
+        &config_path,
+        "# retained\nselected_steam_id64 = \"76561198000000000\"\n",
+    )
+    .unwrap();
+
+    let saved = save_client_config_preferences_to(
+        &config_path,
+        ClientConfigPreferences {
+            default_transport: Some(TransportChoice::Udp),
+            default_mode: SessionMode::Fallback,
+            session_health_enabled: true,
+        },
+    )
+    .unwrap();
+
+    assert_eq!(saved.config.default_transport, Some(TransportChoice::Udp));
+    assert_eq!(saved.config.default_mode, SessionMode::Fallback);
+    assert!(saved.config.session_health.enabled);
+    assert_eq!(
+        saved.config.selected_steam_id64.as_deref(),
+        Some("76561198000000000")
+    );
+    assert!(
+        std::fs::read_to_string(&config_path)
+            .unwrap()
+            .contains("# retained")
+    );
+
+    let saved_none = save_client_config_preferences_to(
+        &config_path,
+        ClientConfigPreferences {
+            default_transport: None,
+            default_mode: SessionMode::Pure,
+            session_health_enabled: true,
+        },
+    )
+    .unwrap();
+
+    assert_eq!(saved_none.config.default_transport, None);
+    assert!(
+        !std::fs::read_to_string(&config_path)
+            .unwrap()
+            .contains("default_transport")
+    );
+}
+
+#[test]
+fn preferences_reject_a_non_table_health_section_without_writing() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join(CLIENT_CONFIG_FILE);
+    let original = "session_health = \"invalid\"\n";
+    std::fs::write(&config_path, original).unwrap();
+
+    let error = save_client_config_preferences_to(
+        &config_path,
+        ClientConfigPreferences {
+            default_transport: Some(TransportChoice::Tcp),
+            default_mode: SessionMode::Pure,
+            session_health_enabled: true,
+        },
+    )
+    .unwrap_err();
+
+    assert!(matches!(error, ClientConfigError::InvalidDocument(_)));
+    assert_eq!(std::fs::read_to_string(config_path).unwrap(), original);
+}
+
+#[test]
+fn manual_steam_account_is_persisted_selected_and_updated_in_place() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join(CLIENT_CONFIG_FILE);
+    std::fs::write(&config_path, "# retained\ncustom_key = \"keep\"\n").unwrap();
+
+    let first = save_client_manual_steam_account_to(
+        &config_path,
+        ManualSteamAccount {
+            steam_id64: " 76561198000000000 ".to_owned(),
+            display_name: " First Name ".to_owned(),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        first.config.selected_steam_id64.as_deref(),
+        Some("76561198000000000")
+    );
+    assert_eq!(first.config.manual_steam_accounts.len(), 1);
+    assert_eq!(
+        first.config.manual_steam_accounts[0].display_name,
+        "First Name"
+    );
+
+    let updated = save_client_manual_steam_account_to(
+        &config_path,
+        ManualSteamAccount {
+            steam_id64: "76561198000000000".to_owned(),
+            display_name: "Updated Name".to_owned(),
+        },
+    )
+    .unwrap();
+    assert_eq!(updated.config.manual_steam_accounts.len(), 1);
+    assert_eq!(
+        updated.config.manual_steam_accounts[0].display_name,
+        "Updated Name"
+    );
+    assert!(
+        std::fs::read_to_string(config_path)
+            .unwrap()
+            .contains("# retained")
+    );
+}
+
+#[test]
+fn invalid_manual_steam_account_does_not_modify_config() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join(CLIENT_CONFIG_FILE);
+    let original = "# unchanged\n";
+    std::fs::write(&config_path, original).unwrap();
+
+    let error = save_client_manual_steam_account_to(
+        &config_path,
+        ManualSteamAccount {
+            steam_id64: "not-an-id".to_owned(),
+            display_name: "Player".to_owned(),
+        },
+    )
+    .unwrap_err();
+    assert!(matches!(error, ClientConfigError::InvalidSteamAccount(_)));
+    assert_eq!(std::fs::read_to_string(&config_path).unwrap(), original);
+
+    // Test zero SteamID is rejected
+    let error_zero = save_client_manual_steam_account_to(
+        &config_path,
+        ManualSteamAccount {
+            steam_id64: "0".to_owned(),
+            display_name: "Player".to_owned(),
+        },
+    )
+    .unwrap_err();
+    assert!(matches!(
+        error_zero,
+        ClientConfigError::InvalidSteamAccount(_)
+    ));
+
+    // Test short SteamID (< 17 digits) is rejected
+    let error_short = save_client_manual_steam_account_to(
+        &config_path,
+        ManualSteamAccount {
+            steam_id64: "1234567890".to_owned(),
+            display_name: "Player".to_owned(),
+        },
+    )
+    .unwrap_err();
+    assert!(matches!(
+        error_short,
+        ClientConfigError::InvalidSteamAccount(_)
+    ));
+
+    // Test empty display name is rejected
+    let error_empty_name = save_client_manual_steam_account_to(
+        &config_path,
+        ManualSteamAccount {
+            steam_id64: "76561198000000000".to_owned(),
+            display_name: "   ".to_owned(),
+        },
+    )
+    .unwrap_err();
+    assert!(matches!(
+        error_empty_name,
+        ClientConfigError::InvalidSteamAccount(_)
+    ));
+}
+
+#[test]
+fn delete_manual_steam_account_removes_entry_and_resets_selected() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join(CLIENT_CONFIG_FILE);
+    std::fs::write(&config_path, "# initial\n").unwrap();
+
+    let loaded = save_client_manual_steam_account_to(
+        &config_path,
+        ManualSteamAccount {
+            steam_id64: "76561198000000001".to_owned(),
+            display_name: "Player One".to_owned(),
+        },
+    )
+    .unwrap();
+    assert_eq!(loaded.config.manual_steam_accounts.len(), 1);
+    assert_eq!(
+        loaded.config.selected_steam_id64.as_deref(),
+        Some("76561198000000001")
+    );
+
+    let after_delete =
+        delete_client_manual_steam_account_to(&config_path, "76561198000000001").unwrap();
+    assert_eq!(after_delete.config.manual_steam_accounts.len(), 0);
+    assert_eq!(after_delete.config.selected_steam_id64, None);
+
+    // Deleting non-existent account returns error
+    let err = delete_client_manual_steam_account_to(&config_path, "76561198000000001").unwrap_err();
+    assert!(matches!(err, ClientConfigError::InvalidSteamAccount(_)));
+}
+
 fn relay_input(name: &str, host: &str) -> RelayProfileInput {
     RelayProfileInput {
         name: name.to_owned(),
@@ -236,4 +442,62 @@ fn relay_input(name: &str, host: &str) -> RelayProfileInput {
         supports_tcp: true,
         default_transport: TransportChoice::Tcp,
     }
+}
+
+#[test]
+fn legacy_invalid_steam_accounts_and_dangling_selected_relay_are_resiliently_handled() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join(CLIENT_CONFIG_FILE);
+    let contents = r#"
+default_transport = "udp"
+default_mode = "fallback"
+selected_relay = "unknown-relay-id"
+selected_steam_id64 = "invalid-short-id"
+
+[session_health]
+enabled = false
+
+[[manual_steam_accounts]]
+steam_id64 = "76561198000000001"
+display_name = "Valid Account"
+
+[[manual_steam_accounts]]
+steam_id64 = "765611980"
+display_name = "Short ID"
+
+[[manual_steam_accounts]]
+steam_id64 = "76561198000000002"
+display_name = "   "
+
+[[manual_steam_accounts]]
+steam_id64 = "76561198000000001"
+display_name = "Duplicate Account"
+"#;
+    std::fs::write(&config_path, contents).unwrap();
+
+    let loaded = load_config_file(&config_path).expect("resilient parsing should succeed");
+    assert_eq!(loaded.selected_relay, None);
+    assert_eq!(loaded.selected_steam_id64, None);
+    assert_eq!(loaded.manual_steam_accounts.len(), 1);
+    assert_eq!(
+        loaded.manual_steam_accounts[0].steam_id64,
+        "76561198000000001"
+    );
+    assert_eq!(
+        loaded.manual_steam_accounts[0].display_name,
+        "Valid Account"
+    );
+
+    // Saving preferences on such a document must succeed without error
+    let preferences = ClientConfigPreferences {
+        default_transport: Some(TransportChoice::Tcp),
+        default_mode: SessionMode::Pure,
+        session_health_enabled: true,
+    };
+    let saved = save_client_config_preferences_to(&config_path, preferences)
+        .expect("saving preferences should succeed");
+    assert_eq!(saved.config.default_transport, Some(TransportChoice::Tcp));
+    assert_eq!(saved.config.default_mode, SessionMode::Pure);
+    assert!(saved.config.session_health.enabled);
+    assert_eq!(saved.config.manual_steam_accounts.len(), 1);
 }

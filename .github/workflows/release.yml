@@ -194,6 +194,85 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  client-flutter-windows:
+    name: Flutter Client Bundle Windows
+    needs: setup
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      TRACTOR_BEAM_GIT_HASH: ${{ needs.setup.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v7.0.0
+        with:
+          ref: ${{ needs.setup.outputs.ref }}
+          lfs: true
+
+      - uses: dtolnay/rust-toolchain@1.97.0
+        with:
+          targets: x86_64-pc-windows-msvc,i686-pc-windows-msvc
+
+      - uses: Swatinem/rust-cache@v2.9.1
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.41.6"
+          channel: stable
+
+      - name: Verify Flutter client
+        working-directory: apps/tractor-beam-flutter
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+
+      - name: Build Flutter client
+        working-directory: apps/tractor-beam-flutter
+        run: flutter build windows --release --build-name ${{ needs.setup.outputs.version }} --build-number 1
+
+      - name: Build Injector
+        run: cargo build --locked --release -p tractor-beam-isaac-injector --target i686-pc-windows-msvc
+
+      - name: Build Native Hook
+        run: cargo build --locked --release -p tractor-beam-native-hook --target i686-pc-windows-msvc
+
+      - name: Package Flutter Client Bundle
+        shell: pwsh
+        run: |
+          $releaseDir = "apps/tractor-beam-flutter/build/windows/x64/runner/Release"
+          $bundleDir = "dist/TractorBeamFlutter"
+          New-Item -ItemType Directory -Force $bundleDir | Out-Null
+          Copy-Item "$releaseDir/*" $bundleDir -Recurse
+          Copy-Item "target/i686-pc-windows-msvc/release/tractor-beam-isaac-injector.exe" $bundleDir
+          Copy-Item "target/i686-pc-windows-msvc/release/tractor_beam_native_hook.dll" $bundleDir
+          Copy-Item "deploy/client.config.toml" (Join-Path $bundleDir "config.toml")
+          Copy-Item "LICENSE" $bundleDir
+          Copy-Item "THIRD_PARTY_NOTICES.md" $bundleDir
+          $required = @(
+            "config.toml",
+            "data/flutter_assets/AssetManifest.bin",
+            "data/flutter_assets/NativeAssetsManifest.json",
+            "flutter_windows.dll",
+            "LICENSE",
+            "THIRD_PARTY_NOTICES.md",
+            "tractor-beam-isaac-injector.exe",
+            "tractor_beam_flutter.exe",
+            "tractor_beam_flutter_bridge.dll",
+            "tractor_beam_native_hook.dll"
+          )
+          foreach ($relative in $required) {
+            if (-not (Test-Path -LiteralPath (Join-Path $bundleDir $relative))) {
+              throw "Flutter Client Bundle is missing $relative"
+            }
+          }
+          Compress-Archive -Path "$bundleDir/*" -DestinationPath "dist/TractorBeam-Client-Flutter-Windows-x86_64.zip"
+
+      - uses: actions/upload-artifact@v7.0.1
+        with:
+          name: release-client-flutter-windows-x86_64
+          path: dist/TractorBeam-Client-Flutter-Windows-x86_64.zip
+          if-no-files-found: error
+          retention-days: 7
+
   relay-linux:
     name: Relay Server Linux x86_64
     needs: setup
@@ -308,7 +387,7 @@ jobs:
 
   assemble:
     name: Assemble release
-    needs: [setup, client-windows, client-linux, relay-linux, relay-windows, relay-image]
+    needs: [setup, client-windows, client-flutter-windows, client-linux, relay-linux, relay-windows, relay-image]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -326,6 +405,7 @@ jobs:
           set -euo pipefail
           mkdir -p release-assets
           cp staging/TractorBeam-Client-Windows-x86_64.zip release-assets/
+          cp staging/TractorBeam-Client-Flutter-Windows-x86_64.zip release-assets/
           cp staging/TractorBeam-Client-Linux-x86_64.tar.gz release-assets/
           cp staging/TractorBeam-Relay-Linux-x86_64 release-assets/
           cp staging/TractorBeam-Relay-Windows-x86_64.exe release-assets/
@@ -371,6 +451,7 @@ jobs:
           set -euo pipefail
           for name in \
             TractorBeam-Client-Windows-x86_64.zip \
+            TractorBeam-Client-Flutter-Windows-x86_64.zip \
             TractorBeam-Client-Linux-x86_64.tar.gz \
             TractorBeam-Relay-Linux-x86_64 \
             TractorBeam-Relay-Windows-x86_64.exe; do
@@ -392,6 +473,25 @@ jobs:
             <(tar -tzf TractorBeam-Client-Linux-x86_64.tar.gz | sort)
           python3 - <<'PY'
           import tarfile
+          import zipfile
+
+          flutter_required = {
+              "config.toml",
+              "data/flutter_assets/AssetManifest.bin",
+              "data/flutter_assets/NativeAssetsManifest.json",
+              "flutter_windows.dll",
+              "LICENSE",
+              "THIRD_PARTY_NOTICES.md",
+              "tractor-beam-isaac-injector.exe",
+              "tractor_beam_flutter.exe",
+              "tractor_beam_flutter_bridge.dll",
+              "tractor_beam_native_hook.dll",
+          }
+          with zipfile.ZipFile("TractorBeam-Client-Flutter-Windows-x86_64.zip") as archive:
+              names = {name.replace("\\", "/") for name in archive.namelist()}
+              missing = sorted(flutter_required - names)
+              if missing:
+                  raise SystemExit(f"Flutter archive is missing: {', '.join(missing)}")
 
           with tarfile.open("TractorBeam-Client-Linux-x86_64.tar.gz", "r:gz") as archive:
               for name in ("tractor-beam", "tractor-beam-isaac-injector"):

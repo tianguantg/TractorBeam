@@ -18,9 +18,11 @@ def main() -> int:
     findings: list[tuple[str, int]] = []
     for name in tracked_files():
         path = pathlib.Path(name)
+        if not path.is_file():
+            continue
         try:
             text = path.read_text(encoding="utf-8")
-        except UnicodeDecodeError:
+        except (UnicodeDecodeError, OSError):
             continue
 
         for line_number, line in enumerate(text.splitlines(), start=1):

@@ -26,6 +26,10 @@
         {
           "type": "generic",
           "path": "Cargo.toml"
+        },
+        {
+          "type": "generic",
+          "path": "apps/tractor-beam-flutter/pubspec.yaml"
         }
       ]
     }

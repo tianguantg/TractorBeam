@@ -17,13 +17,10 @@ use tractor_beam_core::{
     TransportChoice, default_lan_adapters,
 };
 
-use crate::{
-    application::{
-        ApplicationEvent, ApplicationHandle, ApplicationOperation, ApplicationSnapshot,
-        BootstrapFailure, BootstrapState,
-    },
-    i18n::{Language, set_language},
-    update::AvailableUpdate,
+use crate::i18n::{Language, set_language};
+use tractor_beam_application::{
+    ApplicationEvent, ApplicationHandle, ApplicationOperation, ApplicationSnapshot,
+    AvailableUpdate, BootstrapFailure, BootstrapState,
 };
 
 use status::StatusMessage;
@@ -290,7 +287,7 @@ impl BridgeApp {
         };
         self.relay_presets = loaded_config.config.relays.clone();
         self.selected_relay = loaded_config.config.selected_relay.clone();
-        self.transport = loaded_config.config.default_transport;
+        self.transport = loaded_config.config.default_transport.unwrap_or_default();
         self.mode = loaded_config.config.default_mode;
         self.session_health = loaded_config.config.session_health;
         self.selected_account = initial_selected_account(

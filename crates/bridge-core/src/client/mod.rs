@@ -24,9 +24,11 @@ mod state;
 mod test_relay;
 
 pub use config::{
-    CLIENT_CONFIG_FILE, ClientConfig, ClientConfigSelection, LoadedClientConfig,
-    RelayCatalogChange, RelayPreset, RelayProfileInput, bundle_config_path, load_client_config,
-    save_client_config_selection, save_client_relay_catalog_to,
+    CLIENT_CONFIG_FILE, ClientConfig, ClientConfigError, ClientConfigPreferences,
+    ClientConfigSelection, LoadedClientConfig, ManualSteamAccount, RelayCatalogChange, RelayPreset,
+    RelayProfileInput, bundle_config_path, bundle_directory, delete_client_manual_steam_account_to,
+    load_client_config, save_client_config_preferences_to, save_client_config_selection,
+    save_client_manual_steam_account_to, save_client_relay_catalog_to,
 };
 pub use input_delay::{
     InputDelayError, InputDelayEvidence, InputDelayEvidenceBlocker, InputDelayOperation,
