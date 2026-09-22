@@ -125,8 +125,7 @@ jobs:
       - name: Verify generated Flutter bridge
         shell: pwsh
         run: |
-          dart pub global activate flutter_rust_bridge_codegen 2.13.0
-          $env:PATH += ";$env:LOCALAPPDATA\Pub\Cache\bin"
+          cargo install flutter_rust_bridge_codegen --version 2.13.0
           ./scripts/generate_flutter_bridge.ps1
           git diff --exit-code -- `
             crates/flutter-bridge/src/frb_generated.rs `
