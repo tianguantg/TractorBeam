@@ -1,5 +1,6 @@
 param(
-  [string]$Version = '0.5.2'
+  [string]$Version = '0.5.2',
+  [int]$BuildNumber = 1
 )
 
 $ErrorActionPreference = 'Stop'
@@ -30,7 +31,7 @@ try {
   if (Test-Path -LiteralPath $debugSymbols) {
     Remove-Item -LiteralPath $debugSymbols -Recurse -Force
   }
-  flutter build windows --release --build-name $Version --build-number 1 --split-debug-info=$debugSymbols --tree-shake-icons
+  flutter build windows --release --build-name $Version --build-number $BuildNumber --split-debug-info=$debugSymbols --tree-shake-icons
 } finally {
   Pop-Location
 }

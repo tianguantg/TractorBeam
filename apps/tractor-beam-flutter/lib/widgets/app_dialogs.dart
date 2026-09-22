@@ -1568,7 +1568,8 @@ class _JoinRoomDialogWidgetState extends State<_JoinRoomDialogWidget> {
       });
       return;
     }
-    Navigator.pop(context, code.toUpperCase());
+    // Join codes contain a case-sensitive Base58 payload.
+    Navigator.pop(context, code);
   }
 
   @override
@@ -1588,7 +1589,7 @@ class _JoinRoomDialogWidgetState extends State<_JoinRoomDialogWidget> {
             label: l10n.dialogJoinRoomCodeLabel,
             controller: _codeController,
             isMono: true,
-            textCapitalization: TextCapitalization.characters,
+            textCapitalization: TextCapitalization.none,
             onChanged: (_) {
               if (_errorMessage != null) {
                 setState(() => _errorMessage = null);

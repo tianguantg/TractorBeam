@@ -205,3 +205,12 @@ fn every_truncated_lan_payload_fails_without_panicking() {
         assert!(JoinCode::decode(&truncated).is_err());
     }
 }
+
+#[test]
+fn decodes_relay_v5_fixture() {
+    let code = include_str!("fixtures/join-code/relay-v5.txt").trim();
+    assert!(matches!(
+        JoinCode::decode(code),
+        Ok(JoinCode::ExternalRelay(_))
+    ));
+}

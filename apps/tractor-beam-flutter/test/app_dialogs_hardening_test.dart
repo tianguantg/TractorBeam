@@ -82,7 +82,7 @@ void main() {
     );
 
     testWidgets(
-      'showJoinRoomDialog validates empty input and normalizes lowercase to uppercase',
+      'showJoinRoomDialog trims whitespace and preserves case-sensitive join code',
       (tester) async {
         String? result;
         await tester.pumpWidget(
@@ -101,13 +101,13 @@ void main() {
         await tester.tap(find.text('Open'));
         await tester.pumpAndSettle();
 
-        // 1. Try to submit empty input
+        // Empty input is rejected.
         await tester.tap(find.text('加入'));
         await tester.pumpAndSettle();
         expect(result, isNull);
         expect(find.byType(PaperDialogShell), findsOneWidget);
 
-        // 2. Try submitting only whitespace
+        // Whitespace-only input is rejected.
         await tester.enterText(find.byType(TextField), '   ');
         await tester.pumpAndSettle();
         await tester.tap(find.text('加入'));
@@ -115,13 +115,21 @@ void main() {
         expect(result, isNull);
         expect(find.byType(PaperDialogShell), findsOneWidget);
 
-        // 3. Enter lowercase room code with spaces
-        await tester.enterText(find.byType(TextField), '  tb-room-888  ');
+        // Relay v5 codes use case-sensitive Base58.
+        const joinCode =
+            'TWz6wgiSBfGK388SWBQ4heSJ9AvhbMVKm8io3EMJNU7epa89CqajJXWVLUuWpongLBCZujjvjAmYT';
+        final field = tester.widget<TextField>(find.byType(TextField));
+        expect(field.textCapitalization, TextCapitalization.none);
+
+        await tester.enterText(
+          find.byType(TextField),
+          '  $joinCode  ',
+        );
         await tester.pumpAndSettle();
         await tester.tap(find.text('加入'));
         await tester.pumpAndSettle();
 
-        expect(result, 'TB-ROOM-888');
+        expect(result, joinCode);
         expect(find.byType(PaperDialogShell), findsNothing);
       },
     );
