@@ -148,6 +148,14 @@ jobs:
           flutter analyze
           flutter test
 
+      - name: Upload golden failures
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: golden-failures
+          path: apps/tractor-beam-flutter/test/failures/
+          if-no-files-found: ignore
+
       - name: Build Flutter client
         working-directory: apps/tractor-beam-flutter
         run: flutter build windows --release --build-name 0.5.2 --build-number 1
