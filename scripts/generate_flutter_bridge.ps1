@@ -1,4 +1,5 @@
 $ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $crateRoot = Join-Path $repoRoot 'crates/flutter-bridge'
@@ -10,6 +11,9 @@ $rustOutput = "\\?\$crateRoot\src\frb_generated.rs"
 
 Push-Location $crateRoot
 try {
+  # FRB and the normalization pass below shell out to rustfmt resolved through
+  # this crate's pinned toolchain; minimal CI images lack its rustfmt component.
+  rustup component add rustfmt
   flutter_rust_bridge_codegen generate `
     --rust-input crate::api `
     --rust-root . `
