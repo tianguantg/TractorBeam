@@ -8,6 +8,15 @@ import 'request_cache.dart';
 
 enum ConnectionMode { relay, lan }
 
+enum PrimarySessionAction {
+  resolveSteamMismatch,
+  running,
+  launching,
+  resumeGameplay,
+  unavailable,
+  launchGame,
+}
+
 /// The single Flutter-side projection of the Rust application state.
 ///
 /// Rust owns all business state. This controller only keeps the latest monotonic
@@ -114,8 +123,8 @@ class TractorBeamController extends ChangeNotifier {
     );
   }
   bool get isHookReady =>
-      _snapshot?.launch.status == bridge.LaunchStatusDto.ready;
-  bool get isLaunching => switch (_snapshot?.launch.status) {
+      launchProgress?.status == bridge.LaunchStatusDto.ready;
+  bool get isLaunching => switch (launchProgress?.status) {
     bridge.LaunchStatusDto.starting ||
     bridge.LaunchStatusDto.waitingForGame ||
     bridge.LaunchStatusDto.injecting ||
@@ -123,16 +132,36 @@ class TractorBeamController extends ChangeNotifier {
     bridge.LaunchStatusDto.cancelling => true,
     _ => false,
   };
-  String get launchButtonLabel =>
+  PrimarySessionAction get primarySessionAction {
+    if (steamIdentityMismatch != null) {
+      return PrimarySessionAction.resolveSteamMismatch;
+    }
+    if (isSessionRunning) {
+      return PrimarySessionAction.running;
+    }
+    if (isLaunching) {
+      return PrimarySessionAction.launching;
+    }
+    if (isHookReady) {
+      if (isInRoom) {
+        return PrimarySessionAction.resumeGameplay;
+      }
+      return PrimarySessionAction.unavailable;
+    }
+    return PrimarySessionAction.launchGame;
+  }
+
+  String get launchButtonLabel => switch (primarySessionAction) {
+    PrimarySessionAction.resolveSteamMismatch => '同步 Steam 账号',
+    PrimarySessionAction.running => '游戏运行中',
+    PrimarySessionAction.launching =>
       _snapshot?.launch.status == bridge.LaunchStatusDto.cancelling
-      ? '取消中…'
-      : isLaunching
-      ? '启动中…'
-      : isSessionRunning
-      ? '游戏运行中'
-      : isHookReady
-      ? (isInRoom ? '开始联机' : '游戏已就绪')
-      : '启动游戏';
+          ? '取消中…'
+          : '启动中…',
+    PrimarySessionAction.resumeGameplay => '开始联机',
+    PrimarySessionAction.unavailable => '游戏已就绪',
+    PrimarySessionAction.launchGame => '启动游戏',
+  };
   bool get canStartGame =>
       _snapshot == null || (isInRoom && canMutate && !isSessionRunning);
 

@@ -141,6 +141,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startMultiplayer => 'Start Multiplayer';
 
   @override
+  String get syncSteamAccount => 'Sync Steam Account';
+
+  @override
   String get gameReady => 'Game Ready';
 
   @override

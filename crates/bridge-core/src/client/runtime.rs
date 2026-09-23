@@ -127,6 +127,7 @@ impl BridgeClient {
         let mut readiness_finished = false;
         let mut hook_probe_finished = false;
         let mut relay_recovery_exhausted = None;
+        let mut game_exited = false;
         let mut events = Vec::new();
         if let Some(handle) = &self.session {
             while let Ok(event) = handle.events.try_recv() {
@@ -204,7 +205,10 @@ impl BridgeClient {
                     self.refresh_smoothness();
                 }
                 state::RuntimeEvent::SessionEnded(reason) => {
-                    if self.state.last_stop_reason.is_none() {
+                    if matches!(reason, state::SessionStopReason::GameExited { .. }) {
+                        game_exited = true;
+                        self.state.last_stop_reason = Some(reason.clone());
+                    } else if self.state.last_stop_reason.is_none() {
                         self.state.last_stop_reason = Some(reason.clone());
                     }
                 }
@@ -264,7 +268,9 @@ impl BridgeClient {
                 }
             }
         }
-        self.finish_game_exit();
+        if game_exited {
+            self.finish_game_exit();
+        }
         if self.state.status == state::SessionStatus::Running
             && !self.resume_gameplay_after_rejoin
             && let Some(mismatch) = self.state.steam_identity_mismatch

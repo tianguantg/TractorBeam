@@ -18,6 +18,7 @@ impl BridgeClient {
     }
 
     pub(super) fn apply_stopped_session_events(&mut self, events: Vec<state::RuntimeEvent>) {
+        let mut game_exited = false;
         for event in events {
             match event {
                 state::RuntimeEvent::Log(level, message) => self.push_log(level, message),
@@ -45,13 +46,15 @@ impl BridgeClient {
                 state::RuntimeEvent::HookTargetObserved(target) => {
                     self.observe_game_target(target);
                 }
-                state::RuntimeEvent::SessionEnded(reason)
-                    if self.state.last_stop_reason.is_none() =>
-                {
-                    self.state.last_stop_reason = Some(reason)
+                state::RuntimeEvent::SessionEnded(reason) => {
+                    if matches!(reason, state::SessionStopReason::GameExited { .. }) {
+                        game_exited = true;
+                        self.state.last_stop_reason = Some(reason);
+                    } else if self.state.last_stop_reason.is_none() {
+                        self.state.last_stop_reason = Some(reason);
+                    }
                 }
-                state::RuntimeEvent::SessionEnded(_)
-                | state::RuntimeEvent::GameplayStopped
+                state::RuntimeEvent::GameplayStopped
                 | state::RuntimeEvent::Stopped
                 | state::RuntimeEvent::ReadinessProbeFinished(_)
                 | state::RuntimeEvent::HookReceiveProbeFinished(_)
@@ -61,7 +64,9 @@ impl BridgeClient {
                 | state::RuntimeEvent::RelayLinkChanged(_) => {}
             }
         }
-        self.finish_game_exit();
+        if game_exited {
+            self.finish_game_exit();
+        }
     }
 
     pub(super) fn apply_hook_startup_state(&mut self, mut startup: state::HookStartupState) {

@@ -10,6 +10,7 @@ import 'custom_icons.dart';
 class BottomStatusBar extends StatefulWidget {
   final VoidCallback? onLaunchGame;
   final VoidCallback? onEnterLightweight;
+  final VoidCallback? onNavigateToRoom;
   final double contentScale;
   final int? latencyMs;
 
@@ -17,6 +18,7 @@ class BottomStatusBar extends StatefulWidget {
     super.key,
     this.onLaunchGame,
     this.onEnterLightweight,
+    this.onNavigateToRoom,
     this.contentScale = 1,
     this.latencyMs,
   });
@@ -309,80 +311,98 @@ class _BottomStatusBarState extends State<BottomStatusBar> {
                             const SizedBox(width: 10),
                           ],
 
-                          // Launch Game Button [ 🎮 启动游戏 ]
-                          Semantics(
-                            key: const ValueKey('status-bar-launch-button'),
-                            button: true,
-                            enabled: widget.onLaunchGame != null,
-                            child: FocusableActionDetector(
-                              enabled: widget.onLaunchGame != null,
-                              onShowFocusHighlight: (v) =>
-                                  setState(() => _launchFocused = v),
-                              onShowHoverHighlight: (v) =>
-                                  setState(() => _launchHovered = v),
-                              actions: {
-                                ActivateIntent: CallbackAction<ActivateIntent>(
-                                  onInvoke: (_) => widget.onLaunchGame?.call(),
-                                ),
-                              },
-                              shortcuts: const {
-                                SingleActivator(LogicalKeyboardKey.enter):
-                                    ActivateIntent(),
-                                SingleActivator(LogicalKeyboardKey.space):
-                                    ActivateIntent(),
-                              },
-                              child: MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                  onTap: widget.onLaunchGame,
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 120),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 7,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _launchHovered
-                                          ? AppColors.accentRedHover
-                                          : AppColors.accentRed,
-                                      borderRadius: BorderRadius.circular(
-                                        AppRadii.control,
+                          // Launch Game Button [ 🎮 启动游戏 / ⚠ 同步 Steam 账号 ]
+                          () {
+                            final primaryAction =
+                                app?.primarySessionAction ??
+                                PrimarySessionAction.launchGame;
+                            final isMismatch =
+                                primaryAction ==
+                                PrimarySessionAction.resolveSteamMismatch;
+                            final onTrigger = isMismatch
+                                ? (widget.onNavigateToRoom ??
+                                      widget.onLaunchGame)
+                                : widget.onLaunchGame;
+
+                            return Semantics(
+                              key: const ValueKey('status-bar-launch-button'),
+                              button: true,
+                              enabled: onTrigger != null,
+                              child: FocusableActionDetector(
+                                enabled: onTrigger != null,
+                                onShowFocusHighlight: (v) =>
+                                    setState(() => _launchFocused = v),
+                                onShowHoverHighlight: (v) =>
+                                    setState(() => _launchHovered = v),
+                                actions: {
+                                  ActivateIntent: CallbackAction<ActivateIntent>(
+                                    onInvoke: (_) => onTrigger?.call(),
+                                  ),
+                                },
+                                shortcuts: const {
+                                  SingleActivator(LogicalKeyboardKey.enter):
+                                      ActivateIntent(),
+                                  SingleActivator(LogicalKeyboardKey.space):
+                                      ActivateIntent(),
+                                },
+                                child: MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  child: GestureDetector(
+                                    onTap: onTrigger,
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 120),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 7,
                                       ),
-                                      border: _launchFocused
-                                          ? Border.all(
-                                              color: Colors.white,
-                                              width: 1.6,
-                                            )
-                                          : null,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(
-                                            alpha: 0.3,
+                                      decoration: BoxDecoration(
+                                        color: _launchHovered
+                                            ? AppColors.accentRedHover
+                                            : AppColors.accentRed,
+                                        borderRadius: BorderRadius.circular(
+                                          AppRadii.control,
+                                        ),
+                                        border: _launchFocused
+                                            ? Border.all(
+                                                color: Colors.white,
+                                                width: 1.6,
+                                              )
+                                            : null,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.3,
+                                            ),
+                                            offset: const Offset(0, 2),
+                                            blurRadius: 3,
                                           ),
-                                          offset: const Offset(0, 2),
-                                          blurRadius: 3,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        TbIcons.gamepad(
-                                          size: 20,
-                                          color: Colors.white,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          _launchButtonLabel(context, app),
-                                          style: AppTextStyles.statusAction,
-                                        ),
-                                      ],
+                                        ],
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          isMismatch
+                                              ? TbIcons.noticeAlert(
+                                                  size: 20,
+                                                  color: Colors.white,
+                                                )
+                                              : TbIcons.gamepad(
+                                                  size: 20,
+                                                  color: Colors.white,
+                                                ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            _launchButtonLabel(context, app),
+                                            style: AppTextStyles.statusAction,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
+                            );
+                          }(),
                         ],
                       ),
                     ),
@@ -428,17 +448,15 @@ class _BottomStatusBarState extends State<BottomStatusBar> {
   static String _launchButtonLabel(
     BuildContext context,
     TractorBeamController? app,
-  ) => switch (app?.launchProgress?.status) {
-    bridge.LaunchStatusDto.cancelling => context.l10n.cancelling,
-    bridge.LaunchStatusDto.starting ||
-    bridge.LaunchStatusDto.waitingForGame ||
-    bridge.LaunchStatusDto.injecting ||
-    bridge.LaunchStatusDto.waitingForHook => context.l10n.launching,
-    _ when app?.isSessionRunning == true => context.l10n.gameRunning,
-    _ when app?.isHookReady == true =>
-      app?.isInRoom == true
-          ? context.l10n.startMultiplayer
-          : context.l10n.gameReady,
-    _ => context.l10n.launchGame,
+  ) => switch (app?.primarySessionAction ?? PrimarySessionAction.launchGame) {
+    PrimarySessionAction.resolveSteamMismatch => context.l10n.syncSteamAccount,
+    PrimarySessionAction.running => context.l10n.gameRunning,
+    PrimarySessionAction.launching =>
+      app?.launchProgress?.status == bridge.LaunchStatusDto.cancelling
+          ? context.l10n.cancelling
+          : context.l10n.launching,
+    PrimarySessionAction.resumeGameplay => context.l10n.startMultiplayer,
+    PrimarySessionAction.unavailable => context.l10n.gameReady,
+    PrimarySessionAction.launchGame => context.l10n.launchGame,
   };
 }

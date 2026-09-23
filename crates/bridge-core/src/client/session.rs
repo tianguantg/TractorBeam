@@ -659,8 +659,14 @@ impl SessionHandle {
 
     #[cfg(test)]
     pub(super) fn with_test_persistent_runtime(mode: SessionMode) -> Self {
-        let (commands, command_rx) = tokio_mpsc::unbounded_channel();
-        drop(command_rx);
+        let (commands, mut command_rx) = tokio_mpsc::unbounded_channel();
+        std::thread::spawn(move || {
+            while let Some(command) = command_rx.blocking_recv() {
+                if let SessionCommand::StopGameplay { reply } = command {
+                    let _ = reply.send(Ok(()));
+                }
+            }
+        });
         let (_event_tx, events) = mpsc::channel();
         Self {
             cancellation: CancellationToken::new(),

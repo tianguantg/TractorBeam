@@ -47,6 +47,7 @@
   "launchInstructionAfter": " 按钮。",
   "launchGame": "启动游戏",
   "startMultiplayer": "开始联机",
+  "syncSteamAccount": "同步 Steam 账号",
   "gameReady": "游戏已就绪",
   "gameReadyStandby": "游戏就绪",
   "gameReadyJoinRoomPrompt": "游戏已就绪，请加入或创建房间开始联机",

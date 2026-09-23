@@ -338,6 +338,12 @@ abstract class AppLocalizations {
   /// **'开始联机'**
   String get startMultiplayer;
 
+  /// No description provided for @syncSteamAccount.
+  ///
+  /// In zh, this message translates to:
+  /// **'同步 Steam 账号'**
+  String get syncSteamAccount;
+
   /// No description provided for @gameReady.
   ///
   /// In zh, this message translates to:
