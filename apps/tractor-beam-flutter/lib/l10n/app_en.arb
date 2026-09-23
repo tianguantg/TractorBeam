@@ -47,6 +47,7 @@
   "launchInstructionAfter": " in the lower-right corner.",
   "launchGame": "Launch Game",
   "startMultiplayer": "Start Multiplayer",
+  "syncSteamAccount": "Sync Steam Account",
   "gameReady": "Game Ready",
   "gameReadyStandby": "Game Ready",
   "gameReadyJoinRoomPrompt": "Game is ready. Please join or create a room to start multiplayer.",

@@ -240,6 +240,8 @@ class _TbNetAppState extends State<TbNetApp> with WindowListener, TrayListener {
   BigInt _handledReadyGeneration = BigInt.from(-1);
   bool _wasSessionRunning = false;
   bool _closePromptOpen = false;
+  bool _pendingFullForeground = false;
+  bridge.SteamIdentityMismatchDto? _lastSteamMismatch;
   late Locale _locale;
 
   @override
@@ -474,11 +476,24 @@ class _TbNetAppState extends State<TbNetApp> with WindowListener, TrayListener {
   void _handleControllerUpdate() {
     final launch = _controller.launchProgress;
     final running = _controller.isSessionRunning;
-    if (launch?.status == bridge.LaunchStatusDto.ready &&
-        launch!.generation != _handledReadyGeneration) {
-      _handledReadyGeneration = launch.generation;
-      if (_presentationMode == _PresentationMode.full) {
-        unawaited(_enterLightweight());
+    final mismatch = _controller.steamIdentityMismatch;
+
+    final mismatchAppeared = mismatch != null && _lastSteamMismatch == null;
+    _lastSteamMismatch = mismatch;
+
+    if (mismatchAppeared) {
+      unawaited(_showFullInterface(bringToFront: true));
+    }
+
+    if (launch?.status == bridge.LaunchStatusDto.ready) {
+      final generationChanged = launch!.generation != _handledReadyGeneration;
+      final sessionStartedRunning =
+          !_wasSessionRunning && running && mismatch == null;
+      if (generationChanged || sessionStartedRunning) {
+        _handledReadyGeneration = launch.generation;
+        if (_presentationMode == _PresentationMode.full && mismatch == null) {
+          unawaited(_enterLightweight());
+        }
       }
     }
     if (_wasSessionRunning &&
@@ -488,6 +503,14 @@ class _TbNetAppState extends State<TbNetApp> with WindowListener, TrayListener {
       unawaited(_showFullInterface(bringToFront: true));
     }
     _wasSessionRunning = running;
+  }
+
+  void _finishTransition() {
+    _presentationTransitioning = false;
+    if (_pendingFullForeground) {
+      _pendingFullForeground = false;
+      unawaited(_showFullInterface(bringToFront: true));
+    }
   }
 
   Future<void> _enterLightweight() async {
@@ -541,7 +564,7 @@ class _TbNetAppState extends State<TbNetApp> with WindowListener, TrayListener {
         await _updateTrayMenu();
       }
     } finally {
-      _presentationTransitioning = false;
+      _finishTransition();
     }
     if (restoreFull || !_controller.isSessionRunning) {
       await _showFullInterface(bringToFront: true);
@@ -649,7 +672,7 @@ class _TbNetAppState extends State<TbNetApp> with WindowListener, TrayListener {
       await windowManager.hide();
       await _updateTrayMenu();
     } finally {
-      _presentationTransitioning = false;
+      _finishTransition();
     }
     if (sessionWasRunning && !_controller.isSessionRunning) {
       await _showFullInterface(bringToFront: true);
@@ -679,7 +702,7 @@ class _TbNetAppState extends State<TbNetApp> with WindowListener, TrayListener {
       if (widget.desktopIntegration) await _configureLightweightWindow();
       await _updateTrayMenu();
     } finally {
-      _presentationTransitioning = false;
+      _finishTransition();
     }
     if (!_controller.isSessionRunning) {
       await _showFullInterface(bringToFront: true);
@@ -687,8 +710,22 @@ class _TbNetAppState extends State<TbNetApp> with WindowListener, TrayListener {
   }
 
   Future<void> _showFullInterface({bool bringToFront = true}) async {
-    if (_presentationTransitioning ||
-        _presentationMode == _PresentationMode.full) {
+    if (_presentationMode == _PresentationMode.full) {
+      if (bringToFront && widget.desktopIntegration) {
+        try {
+          if (await windowManager.isMinimized()) {
+            await windowManager.restore();
+          }
+          await windowManager.show();
+          await windowManager.focus();
+        } catch (_) {}
+      }
+      return;
+    }
+    if (_presentationTransitioning) {
+      if (bringToFront) {
+        _pendingFullForeground = true;
+      }
       return;
     }
     _presentationTransitioning = true;
@@ -751,7 +788,7 @@ class _TbNetAppState extends State<TbNetApp> with WindowListener, TrayListener {
       if (mounted) setState(() => _presentationMode = _PresentationMode.full);
       await _updateTrayMenu();
     } finally {
-      _presentationTransitioning = false;
+      _finishTransition();
     }
   }
 

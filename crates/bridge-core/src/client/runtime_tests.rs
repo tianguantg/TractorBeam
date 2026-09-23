@@ -742,3 +742,67 @@ fn stop_does_not_overwrite_a_terminal_reason_that_already_arrived() {
         })
     );
 }
+
+#[test]
+fn game_exit_after_mismatch_detach_resets_hook_and_mismatch() {
+    let mut client = BridgeClient::new();
+    client.state.status = state::SessionStatus::Running;
+    client.state.active_session_mode = Some(SessionMode::Pure);
+    client.state.hook_runtime_active = true;
+    client.state.hook_startup = state::HookStartupState {
+        phase: state::HookStartupPhase::Ready,
+        injected: true,
+        endpoint: Some("127.0.0.1:25900".to_owned()),
+        ..state::HookStartupState::default()
+    };
+    client.state.hook_ipc = state::HookIpcState {
+        connection: state::HookIpcConnectionState::Connected,
+        game_steam_id64: Some(76561198000000001),
+        ..state::HookIpcState::default()
+    };
+    client.state.relay_room_steam_id64 = Some(76561198000000002);
+    client.refresh_steam_identity_mismatch();
+    assert!(client.state.steam_identity_mismatch.is_some());
+
+    client.session = Some(session::SessionHandle::with_test_persistent_runtime(
+        SessionMode::Pure,
+    ));
+
+    // Mismatch detaches gameplay via stop_session():
+    client.stop_session();
+
+    // Hook remains ready, but session is idle and last_stop_reason is UserStopped:
+    assert_eq!(client.state.status, state::SessionStatus::Idle);
+    assert_eq!(
+        client.state.last_stop_reason,
+        Some(state::SessionStopReason::UserStopped)
+    );
+    assert_eq!(
+        client.state.hook_startup.phase,
+        state::HookStartupPhase::Ready
+    );
+    assert!(client.state.steam_identity_mismatch.is_some());
+
+    // Game process exits while session was already stopped:
+    client.apply_stopped_session_events(vec![state::RuntimeEvent::SessionEnded(
+        state::SessionStopReason::GameExited {
+            process_name: "isaac-ng.exe".to_owned(),
+            pid: 1234,
+        },
+    )]);
+
+    // finish_game_exit must have run, resetting hook state and mismatch:
+    assert_eq!(
+        client.state.last_stop_reason,
+        Some(state::SessionStopReason::GameExited {
+            process_name: "isaac-ng.exe".to_owned(),
+            pid: 1234,
+        })
+    );
+    assert_eq!(client.state.hook_startup, state::HookStartupState::default());
+    assert_eq!(client.state.hook_ipc, state::HookIpcState::default());
+    assert_eq!(client.state.steam_identity_mismatch, None);
+    assert!(!client.resume_gameplay_after_rejoin);
+    assert_eq!(client.state.status, state::SessionStatus::Idle);
+}
+

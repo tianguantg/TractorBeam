@@ -131,6 +131,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get startMultiplayer => '开始联机';
 
   @override
+  String get syncSteamAccount => '同步 Steam 账号';
+
+  @override
   String get gameReady => '游戏已就绪';
 
   @override

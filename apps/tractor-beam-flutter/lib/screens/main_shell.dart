@@ -74,6 +74,7 @@ class _MainShellState extends State<MainShell> {
   BigInt? _foregroundedLaunchFailureGeneration;
   bool _udpFallbackDialogOpen = false;
   bool _updateNotificationShown = false;
+  bridge.SteamIdentityMismatchDto? _lastSteamMismatch;
 
   static final Map<int, Offset> _pageOrigins = {
     0: Offset.zero,
@@ -135,6 +136,12 @@ class _MainShellState extends State<MainShell> {
     _surfaceLaunchFailureIfNeeded();
     _trackRoomVisualVersion();
     _notifyUpdateAvailableIfNeeded();
+    final mismatch = _controller.steamIdentityMismatch;
+    final mismatchAppeared = mismatch != null && _lastSteamMismatch == null;
+    _lastSteamMismatch = mismatch;
+    if (mismatchAppeared) {
+      _onPageSelected(1);
+    }
     final event = _controller.latestEvent;
     if (!mounted ||
         event == null ||
@@ -273,6 +280,11 @@ class _MainShellState extends State<MainShell> {
 
   void _onLaunchGame() {
     final l10n = context.l10n;
+    if (_controller.primarySessionAction ==
+        PrimarySessionAction.resolveSteamMismatch) {
+      _onPageSelected(1);
+      return;
+    }
     if (!_controller.isInRoom) {
       if (_controller.isHookReady) {
         AppNotification.info(context, l10n.gameReadyJoinRoomPrompt);
@@ -457,6 +469,7 @@ class _MainShellState extends State<MainShell> {
                               child: BottomStatusBar(
                                 contentScale: canvasScale,
                                 onLaunchGame: _onLaunchGame,
+                                onNavigateToRoom: () => _onPageSelected(1),
                                 onEnterLightweight: widget.onEnterLightweight,
                               ),
                             ),
