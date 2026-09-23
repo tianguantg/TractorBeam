@@ -224,7 +224,15 @@ jobs:
         run: |
           flutter pub get
           flutter analyze
-          flutter test
+          flutter test --concurrency=1
+
+      - name: Upload Flutter golden failures
+        if: failure()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: flutter-golden-failures
+          path: apps/tractor-beam-flutter/test/failures/
+          if-no-files-found: ignore
 
       - name: Build Flutter client
         working-directory: apps/tractor-beam-flutter
