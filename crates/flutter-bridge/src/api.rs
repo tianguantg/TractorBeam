@@ -25,7 +25,7 @@ use tractor_beam_core::{
 };
 
 static APPLICATION: OnceLock<Arc<BridgeRuntime>> = OnceLock::new();
-const DEFAULT_FLUTTER_RELEASE_VERSION: &str = "0.5.2-tb.1";
+const DEFAULT_FLUTTER_RELEASE_VERSION: &str = "0.5.2-tb.2";
 
 fn flutter_release_version() -> &'static str {
     option_env!("TB_RELEASE_VERSION").unwrap_or(DEFAULT_FLUTTER_RELEASE_VERSION)

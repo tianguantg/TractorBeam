@@ -201,6 +201,7 @@ jobs:
     timeout-minutes: 60
     env:
       TRACTOR_BEAM_GIT_HASH: ${{ needs.setup.outputs.commit }}
+      TB_RELEASE_VERSION: ${{ needs.setup.outputs.version }}
     steps:
       - uses: actions/checkout@v7.0.0
         with:
