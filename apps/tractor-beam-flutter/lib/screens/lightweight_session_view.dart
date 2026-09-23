@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../bridge/generated/api.dart' as bridge;
+import '../l10n/bridge_message_localizer.dart';
 import '../l10n/l10n.dart';
 import '../models/tractor_beam_controller.dart';
 import '../theme/app_theme.dart';
@@ -26,12 +27,26 @@ class LightweightSessionView extends StatefulWidget {
 
 class _LightweightSessionViewState extends State<LightweightSessionView> {
   late LightweightViewState _viewState;
+  int _draftDelay = 2;
+  bool _hasUserEditedDelay = false;
+  bool _isApplying = false;
+  bool _isReadingDelay = false;
+  BigInt _lastHandledEventRevision = BigInt.zero;
 
   @override
   void initState() {
     super.initState();
     _viewState = widget.controller.lightweightViewState;
+    _lastHandledEventRevision = widget.controller.revision;
+    _syncDelayFromState();
     widget.controller.addListener(_handleUpdate);
+  }
+
+  void _syncDelayFromState() {
+    final current = _viewState.inputDelay;
+    if (current != null && !_hasUserEditedDelay) {
+      _draftDelay = current.clamp(0, 5);
+    }
   }
 
   @override
@@ -40,13 +55,57 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_handleUpdate);
       _viewState = widget.controller.lightweightViewState;
+      _lastHandledEventRevision = widget.controller.revision;
+      _syncDelayFromState();
       widget.controller.addListener(_handleUpdate);
     }
   }
 
   void _handleUpdate() {
     final next = widget.controller.lightweightViewState;
-    if (next != _viewState && mounted) setState(() => _viewState = next);
+
+    if (widget.controller.revision > _lastHandledEventRevision) {
+      _lastHandledEventRevision = widget.controller.revision;
+      final event = widget.controller.latestEvent;
+      if (event != null && event.code == 'input_delay_read') {
+        _isReadingDelay = false;
+        if (event.success) {
+          final readVal = int.tryParse(event.value ?? '');
+          if (readVal != null) {
+            _draftDelay = readVal.clamp(0, 5);
+            _hasUserEditedDelay = false;
+          }
+          if (mounted) {
+            AppNotification.show(
+              context,
+              localizeBridgeEvent(
+                context,
+                event,
+                fallback: context.l10n.settingsInputDelayReadSuccess,
+              ),
+              duration: const Duration(milliseconds: 1400),
+            );
+          }
+        } else if (mounted) {
+          AppNotification.show(
+            context,
+            localizeBridgeEvent(
+              context,
+              event,
+              fallback: context.l10n.errInputDelayGeneric,
+            ),
+            duration: const Duration(milliseconds: 2000),
+          );
+        }
+      }
+    }
+
+    if (next != _viewState && mounted) {
+      setState(() {
+        _viewState = next;
+        _syncDelayFromState();
+      });
+    }
   }
 
   @override
@@ -81,6 +140,7 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
               children: [
                 _buildHeader(context),
                 _buildStatus(context),
+                _buildDelayControl(context),
                 Expanded(child: _buildMembers()),
               ],
             ),
@@ -193,16 +253,31 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
             ),
           ],
           const SizedBox(width: 4),
-          IconButton(
+          InkWell(
             key: const ValueKey('lightweight-open-full'),
-            tooltip: context.l10n.fullInterface,
-            onPressed: widget.onOpenFull,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            icon: const Icon(
-              Icons.open_in_full,
-              color: AppColors.statusText,
-              size: 15,
+            borderRadius: BorderRadius.circular(4),
+            onTap: widget.onOpenFull,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B3430),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: AppColors.statusBarBorder.withValues(alpha: 0.8),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                context.l10n.lightweightBackToMain,
+                style: const TextStyle(
+                  color: AppColors.statusText,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
           IconButton(
@@ -286,6 +361,329 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _applyDelay() async {
+    if (!_viewState.canEditInputDelay || _isApplying || _isReadingDelay) return;
+    setState(() => _isApplying = true);
+    try {
+      final receipt = widget.controller.writeInputDelay(_draftDelay);
+      if (!receipt.accepted) {
+        if (mounted) {
+          AppNotification.show(
+            context,
+            localizeBridgeRejection(
+              context,
+              receipt.rejection,
+              fallback: context.l10n.errInputDelayGeneric,
+            ),
+            duration: const Duration(milliseconds: 2000),
+          );
+        }
+        return;
+      }
+      _hasUserEditedDelay = false;
+      if (mounted) {
+        AppNotification.show(
+          context,
+          context.l10n.settingsInputDelayWriteSuccess,
+          duration: const Duration(milliseconds: 1400),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isApplying = false);
+      }
+    }
+  }
+
+  Future<void> _readDelay() async {
+    if (!_viewState.canEditInputDelay || _isReadingDelay || _isApplying) return;
+    final l10n = context.l10n;
+    setState(() => _isReadingDelay = true);
+    try {
+      final receipt = widget.controller.readInputDelay();
+      if (!receipt.accepted) {
+        if (mounted) {
+          AppNotification.show(
+            context,
+            localizeBridgeRejection(
+              context,
+              receipt.rejection,
+              fallback: l10n.errInputDelayGeneric,
+            ),
+            duration: const Duration(milliseconds: 2000),
+          );
+        }
+        return;
+      }
+      if (!widget.controller.isNative) {
+        final currentDelay = widget.controller.lightweightViewState.inputDelay ??
+            widget.controller.snapshot?.hook.inputDelay;
+        if (currentDelay != null) {
+          setState(() {
+            _draftDelay = currentDelay.clamp(0, 5);
+            _hasUserEditedDelay = false;
+          });
+        }
+        if (mounted) {
+          AppNotification.show(
+            context,
+            l10n.settingsInputDelayReadSuccess,
+            duration: const Duration(milliseconds: 1400),
+          );
+        }
+        return;
+      }
+      Future<void>.delayed(const Duration(seconds: 3), () {
+        if (mounted && _isReadingDelay) {
+          setState(() => _isReadingDelay = false);
+        }
+      });
+    } finally {
+      if (!widget.controller.isNative && mounted) {
+        setState(() => _isReadingDelay = false);
+      }
+    }
+  }
+
+  Widget _buildDelayControl(BuildContext context) {
+    final l10n = context.l10n;
+    final canEdit = _viewState.canEditInputDelay;
+    final isOfficial = _viewState.isOfficial;
+    final hasError = _viewState.inputDelayError != null &&
+        _viewState.inputDelayError!.isNotEmpty;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2C2725),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.statusBarBorder),
+      ),
+      child: Row(
+        children: [
+          Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    l10n.settingsInputDelayTitle,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      color: Color(0xFFD6CEC7),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                if (hasError) ...[
+                  const SizedBox(width: 4),
+                  Tooltip(
+                    message: _viewState.inputDelayError!,
+                    child: const Icon(
+                      Icons.error_outline_rounded,
+                      size: 14,
+                      color: AppColors.accentRed,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (isOfficial) ...[
+            Expanded(
+              child: Text(
+                l10n.settingsInputDelayOfficialNotice,
+                textAlign: TextAlign.end,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: const TextStyle(
+                  color: AppColors.inkMuted,
+                  fontSize: 11.5,
+                ),
+              ),
+            ),
+          ] else ...[
+            const Spacer(),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildStepperButton(
+                    key: const ValueKey('lightweight-delay-minus'),
+                    icon: Icons.remove,
+                    enabled: canEdit && _draftDelay > 0 && !_isApplying && !_isReadingDelay,
+                    onTap: () => setState(() {
+                      _draftDelay--;
+                      _hasUserEditedDelay = true;
+                    }),
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    key: const ValueKey('lightweight-delay-value'),
+                    constraints: const BoxConstraints(minWidth: 36),
+                    alignment: Alignment.center,
+                    child: Text(
+                      l10n.framesCount(_draftDelay),
+                      style: TextStyle(
+                        color: canEdit ? Colors.white : AppColors.inkMuted,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  _buildStepperButton(
+                    key: const ValueKey('lightweight-delay-plus'),
+                    icon: Icons.add,
+                    enabled: canEdit && _draftDelay < 5 && !_isApplying && !_isReadingDelay,
+                    onTap: () => setState(() {
+                      _draftDelay++;
+                      _hasUserEditedDelay = true;
+                    }),
+                  ),
+                  const SizedBox(width: 6),
+                  _buildActionButton(
+                    key: const ValueKey('lightweight-delay-read'),
+                    icon: Icons.refresh,
+                    tooltip: l10n.settingsInputDelayRead,
+                    enabled: canEdit && !_isApplying && !_isReadingDelay,
+                    loading: _isReadingDelay,
+                    onTap: _readDelay,
+                  ),
+                  const SizedBox(width: 6),
+                  InkWell(
+                    key: const ValueKey('lightweight-delay-apply'),
+                    borderRadius: BorderRadius.circular(4),
+                    onTap: canEdit && !_isApplying && !_isReadingDelay ? _applyDelay : null,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: canEdit && !_isApplying && !_isReadingDelay
+                            ? const Color(0xFF3B3430)
+                            : const Color(0xFF24201E),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: canEdit && !_isApplying && !_isReadingDelay
+                              ? AppColors.statusBarBorder.withValues(alpha: 0.8)
+                              : AppColors.statusBarBorder.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: _isApplying
+                          ? const SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.5,
+                                color: AppColors.statusText,
+                              ),
+                            )
+                          : Text(
+                              l10n.lightweightApplyDelay,
+                              style: TextStyle(
+                                color: canEdit && !_isApplying && !_isReadingDelay
+                                    ? AppColors.statusText
+                                    : AppColors.inkMuted,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required Key key,
+    required IconData icon,
+    required String tooltip,
+    required bool enabled,
+    required bool loading,
+    required VoidCallback onTap,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        key: key,
+        borderRadius: BorderRadius.circular(4),
+        onTap: enabled && !loading ? onTap : null,
+        child: Container(
+          width: 22,
+          height: 22,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: enabled ? const Color(0xFF3B3430) : const Color(0xFF24201E),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: enabled
+                  ? AppColors.statusBarBorder.withValues(alpha: 0.8)
+                  : AppColors.statusBarBorder.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: loading
+              ? const SizedBox(
+                  width: 11,
+                  height: 11,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: AppColors.statusText,
+                  ),
+                )
+              : Icon(
+                  icon,
+                  size: 13,
+                  color: enabled ? AppColors.statusText : AppColors.inkMuted,
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepperButton({
+    required Key key,
+    required IconData icon,
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      key: key,
+      borderRadius: BorderRadius.circular(4),
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: 22,
+        height: 22,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: enabled ? const Color(0xFF3B3430) : const Color(0xFF24201E),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: enabled
+                ? AppColors.statusBarBorder.withValues(alpha: 0.8)
+                : AppColors.statusBarBorder.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Icon(
+          icon,
+          size: 13,
+          color: enabled ? AppColors.statusText : AppColors.inkMuted,
+        ),
       ),
     );
   }

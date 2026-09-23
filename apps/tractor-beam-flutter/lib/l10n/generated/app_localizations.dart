@@ -3397,6 +3397,24 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'Relay 测速完成：{total} 个节点均无法连接'**
   String latencyBatchAllFailed(int total);
+
+  /// No description provided for @lightweightBackToMain.
+  ///
+  /// In zh, this message translates to:
+  /// **'← 主界面'**
+  String get lightweightBackToMain;
+
+  /// No description provided for @lightweightApplyDelay.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用'**
+  String get lightweightApplyDelay;
+
+  /// No description provided for @framesCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'{frames} 帧'**
+  String framesCount(int frames);
 }
 
 class _AppLocalizationsDelegate

@@ -81,17 +81,38 @@ class TractorBeamController extends ChangeNotifier {
   bool get isSessionRunning =>
       _snapshot?.session.status == bridge.SessionStatusDto.running;
   bridge.SnapshotProfileDto get snapshotProfile =>
-      _snapshot?.profile ?? bridge.SnapshotProfileDto.full;
-  LightweightViewState get lightweightViewState => LightweightViewState(
-    sessionRunning: isSessionRunning,
-    hookReady: _snapshot?.launch.status == bridge.LaunchStatusDto.ready,
-    route: _snapshot?.room.route,
-    transport: _snapshot?.room.transport,
-    members: List<bridge.RoomMemberDto>.unmodifiable(
-      _snapshot?.room.members ?? const <bridge.RoomMemberDto>[],
-    ),
-    roomCode: _snapshot?.room.joinCode,
-  );
+      snapshot?.profile ?? bridge.SnapshotProfileDto.full;
+  bool isOfficialMode({bridge.SessionModeDto? configuredMode}) {
+    if (isSessionRunning) {
+      final active = snapshot?.session.activeMode;
+      if (active != null) {
+        return active == bridge.SessionModeDto.official;
+      }
+    }
+    final mode = configuredMode ?? snapshot?.clientConfig.mode;
+    return mode == bridge.SessionModeDto.official;
+  }
+
+  bool canEditInputDelay({bridge.SessionModeDto? configuredMode}) {
+    return isSessionRunning && !isOfficialMode(configuredMode: configuredMode);
+  }
+
+  LightweightViewState get lightweightViewState {
+    final snap = snapshot;
+    return LightweightViewState(
+      sessionRunning: isSessionRunning,
+      hookReady: snap?.launch.status == bridge.LaunchStatusDto.ready,
+      route: snap?.room.route,
+      transport: snap?.room.transport,
+      members: List<bridge.RoomMemberDto>.unmodifiable(
+        snap?.room.members ?? const <bridge.RoomMemberDto>[],
+      ),
+      roomCode: snap?.room.joinCode,
+      activeMode: snap?.session.activeMode ?? snap?.clientConfig.mode,
+      inputDelay: snap?.hook.inputDelay,
+      inputDelayError: snap?.hook.inputDelayError,
+    );
+  }
   bool get isHookReady =>
       _snapshot?.launch.status == bridge.LaunchStatusDto.ready;
   bool get isLaunching => switch (_snapshot?.launch.status) {
@@ -1031,6 +1052,9 @@ class LightweightViewState {
     required this.transport,
     required this.members,
     this.roomCode,
+    this.activeMode,
+    this.inputDelay,
+    this.inputDelayError,
   });
 
   final bool sessionRunning;
@@ -1039,6 +1063,12 @@ class LightweightViewState {
   final bridge.TransportSelection? transport;
   final List<bridge.RoomMemberDto> members;
   final String? roomCode;
+  final bridge.SessionModeDto? activeMode;
+  final int? inputDelay;
+  final String? inputDelayError;
+
+  bool get isOfficial => activeMode == bridge.SessionModeDto.official;
+  bool get canEditInputDelay => sessionRunning && !isOfficial;
 
   @override
   int get hashCode => Object.hash(
@@ -1047,6 +1077,9 @@ class LightweightViewState {
     route,
     transport,
     roomCode,
+    activeMode,
+    inputDelay,
+    inputDelayError,
     Object.hashAll(members),
   );
 
@@ -1059,6 +1092,9 @@ class LightweightViewState {
           route == other.route &&
           transport == other.transport &&
           roomCode == other.roomCode &&
+          activeMode == other.activeMode &&
+          inputDelay == other.inputDelay &&
+          inputDelayError == other.inputDelayError &&
           listEquals(members, other.members);
 }
 

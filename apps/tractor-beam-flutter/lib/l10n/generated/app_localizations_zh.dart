@@ -1763,4 +1763,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String latencyBatchAllFailed(int total) {
     return 'Relay 测速完成：$total 个节点均无法连接';
   }
+
+  @override
+  String get lightweightBackToMain => '← 主界面';
+
+  @override
+  String get lightweightApplyDelay => '应用';
+
+  @override
+  String framesCount(int frames) {
+    return '$frames 帧';
+  }
 }
