@@ -38,19 +38,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isReadingDelay = false;
   bool _isWritingDelay = false;
 
+  bridge.SessionModeDto _currentConfiguredMode() => switch (_workMode) {
+    _WorkMode.official => bridge.SessionModeDto.official,
+    _WorkMode.fallback => bridge.SessionModeDto.fallback,
+    _WorkMode.pure => bridge.SessionModeDto.pure,
+  };
+
   bool _isOfficialSession(TractorBeamController? app) {
-    if (app != null && app.isSessionRunning) {
-      final activeMode = app.snapshot?.session.activeMode;
-      if (activeMode != null) {
-        return activeMode == bridge.SessionModeDto.official;
-      }
+    if (app != null) {
+      return app.isOfficialMode(configuredMode: _currentConfiguredMode());
     }
     return _workMode == _WorkMode.official;
   }
 
   bool _canEditDelay(TractorBeamController? app) {
-    final isGameRunning = app == null || app.isSessionRunning;
-    return !_isOfficialSession(app) && isGameRunning;
+    if (app == null) return !_isOfficialSession(null);
+    return app.canEditInputDelay(configuredMode: _currentConfiguredMode());
   }
 
   @override

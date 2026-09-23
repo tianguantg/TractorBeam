@@ -1800,4 +1800,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String latencyBatchAllFailed(int total) {
     return 'Relay test complete: none of $total servers could be reached';
   }
+
+  @override
+  String get lightweightBackToMain => '← Main UI';
+
+  @override
+  String get lightweightApplyDelay => 'Apply';
+
+  @override
+  String framesCount(int frames) {
+    String _temp0 = intl.Intl.pluralLogic(
+      frames,
+      locale: localeName,
+      other: '$frames frames',
+      one: '1 frame',
+    );
+    return '$_temp0';
+  }
 }

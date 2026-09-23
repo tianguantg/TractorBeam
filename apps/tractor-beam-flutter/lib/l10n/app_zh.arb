@@ -837,5 +837,15 @@
         "type": "int"
       }
     }
+  },
+  "lightweightBackToMain": "← 主界面",
+  "lightweightApplyDelay": "应用",
+  "framesCount": "{frames} 帧",
+  "@framesCount": {
+    "placeholders": {
+      "frames": {
+        "type": "int"
+      }
+    }
   }
 }
