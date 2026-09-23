@@ -39,10 +39,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AppUpdate dco_decode_app_update(dynamic raw);
 
   @protected
+  AvailableUpdateDto dco_decode_available_update_dto(dynamic raw);
+
+  @protected
   bool dco_decode_bool(dynamic raw);
 
   @protected
   BootstrapStateDto dco_decode_bootstrap_state_dto(dynamic raw);
+
+  @protected
+  AvailableUpdateDto dco_decode_box_autoadd_available_update_dto(dynamic raw);
 
   @protected
   CommandRejection dco_decode_box_autoadd_command_rejection(dynamic raw);
@@ -155,6 +161,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? dco_decode_opt_String(dynamic raw);
 
   @protected
+  AvailableUpdateDto? dco_decode_opt_box_autoadd_available_update_dto(
+    dynamic raw,
+  );
+
+  @protected
   CommandRejection? dco_decode_opt_box_autoadd_command_rejection(dynamic raw);
 
   @protected
@@ -239,6 +250,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void dco_decode_unit(dynamic raw);
 
   @protected
+  UpdateSnapshotDto dco_decode_update_snapshot_dto(dynamic raw);
+
+  @protected
+  UpdateStatusDto dco_decode_update_status_dto(dynamic raw);
+
+  @protected
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
@@ -259,10 +276,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AppUpdate sse_decode_app_update(SseDeserializer deserializer);
 
   @protected
+  AvailableUpdateDto sse_decode_available_update_dto(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
   BootstrapStateDto sse_decode_bootstrap_state_dto(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  AvailableUpdateDto sse_decode_box_autoadd_available_update_dto(
     SseDeserializer deserializer,
   );
 
@@ -403,6 +430,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
+  AvailableUpdateDto? sse_decode_opt_box_autoadd_available_update_dto(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   CommandRejection? sse_decode_opt_box_autoadd_command_rejection(
     SseDeserializer deserializer,
   );
@@ -503,6 +535,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_decode_unit(SseDeserializer deserializer);
 
   @protected
+  UpdateSnapshotDto sse_decode_update_snapshot_dto(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  UpdateStatusDto sse_decode_update_status_dto(SseDeserializer deserializer);
+
+  @protected
   void sse_encode_AnyhowException(
     AnyhowException self,
     SseSerializer serializer,
@@ -527,11 +567,23 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_app_update(AppUpdate self, SseSerializer serializer);
 
   @protected
+  void sse_encode_available_update_dto(
+    AvailableUpdateDto self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
   void sse_encode_bootstrap_state_dto(
     BootstrapStateDto self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_available_update_dto(
+    AvailableUpdateDto self,
     SseSerializer serializer,
   );
 
@@ -707,6 +759,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_box_autoadd_available_update_dto(
+    AvailableUpdateDto? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_command_rejection(
     CommandRejection? self,
     SseSerializer serializer,
@@ -828,6 +886,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_unit(void self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_update_snapshot_dto(
+    UpdateSnapshotDto self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_update_status_dto(
+    UpdateStatusDto self,
+    SseSerializer serializer,
+  );
 }
 
 // Section: wire_class

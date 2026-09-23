@@ -77,6 +77,7 @@ bridge.AppSnapshot _snapshot({int? latencyMs}) => bridge.AppSnapshot(
   buildInfo: const bridge.BuildInfoDto(
     version: '0.5.2',
     versionLabel: '0.5.2',
+    releaseVersion: '0.5.2-tb.1',
     relayProtocol: 'v5',
     directProtocol: 'v6',
     license: 'AGPL-3.0-or-later',
@@ -167,4 +168,8 @@ bridge.AppSnapshot _snapshot({int? latencyMs}) => bridge.AppSnapshot(
     ),
   ],
   lanJoinEndpoints: List<String>.of(const ['192.0.2.1:25910']),
+  update: const bridge.UpdateSnapshotDto(
+    status: bridge.UpdateStatusDto.idle,
+    channelUrl: 'https://github.com/tianguantg/TractorBeam/releases',
+  ),
 );

@@ -837,5 +837,29 @@
         "type": "int"
       }
     }
+  },
+  "aboutReleaseVersion": "Release Version",
+  "aboutUpdateStatusLabel": "Update Status",
+  "aboutUpdateUpToDate": "Up to date",
+  "aboutUpdateAvailable": "New version available: v{version}",
+  "@aboutUpdateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutUpdateChecking": "Checking for updates…",
+  "aboutUpdateFailed": "Update check failed",
+  "aboutCheckUpdateBtn": "Check for Updates",
+  "aboutViewUpdateBtn": "View Release",
+  "aboutRetryUpdateBtn": "Retry",
+  "startupUpdateAvailableNotice": "New version available: v{version}",
+  "@startupUpdateAvailableNotice": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   }
 }

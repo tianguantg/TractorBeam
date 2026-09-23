@@ -107,6 +107,8 @@ class _FakeBuildInfoDto implements bridge.BuildInfoDto {
   @override
   String get version => '0.5.2';
   @override
+  String get releaseVersion => '0.5.2-tb.1';
+  @override
   String get license => 'GPL-3.0';
   @override
   String get sourceUrl => 'https://github.com/mcthesw/TractorBeam';

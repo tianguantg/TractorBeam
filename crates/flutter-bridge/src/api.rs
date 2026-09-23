@@ -12,7 +12,8 @@ use std::{
 use crate::frb_generated::StreamSink;
 use crate::room_history::{RoomHistoryStore, StoredRoomRoute};
 use tractor_beam_application::{
-    ApplicationEvent, ApplicationHandle, ApplicationOperation, ApplicationSnapshot, BootstrapState,
+    check_for_update_with_channel, ApplicationEvent, ApplicationHandle, ApplicationOperation,
+    ApplicationSnapshot, BootstrapState, FLUTTER_CHANNEL,
 };
 use tractor_beam_core::{
     ClientConfigPreferences, ClientConfigSelection, ExternalRelayConfig, HookStartupPhase,
@@ -24,6 +25,12 @@ use tractor_beam_core::{
 };
 
 static APPLICATION: OnceLock<Arc<BridgeRuntime>> = OnceLock::new();
+const DEFAULT_FLUTTER_RELEASE_VERSION: &str = "0.5.2-tb.1";
+
+fn flutter_release_version() -> &'static str {
+    option_env!("TB_RELEASE_VERSION").unwrap_or(DEFAULT_FLUTTER_RELEASE_VERSION)
+}
+
 const LAUNCH_TIMEOUT: Duration = Duration::from_mins(2);
 const LIGHTWEIGHT_UPDATE_INTERVAL: Duration = Duration::from_millis(250);
 const BACKGROUND_UPDATE_INTERVAL: Duration = Duration::from_secs(1);
@@ -67,6 +74,9 @@ struct BridgeState {
     launch_cancelled: bool,
     launch_error: Option<String>,
     launch_started_at: Option<Instant>,
+    update_status: UpdateStatusDto,
+    available_update: Option<AvailableUpdateDto>,
+    update_error: Option<String>,
 }
 
 impl Default for BridgeState {
@@ -92,6 +102,9 @@ impl Default for BridgeState {
             launch_cancelled: false,
             launch_error: None,
             launch_started_at: None,
+            update_status: UpdateStatusDto::Idle,
+            available_update: None,
+            update_error: None,
         }
     }
 }
@@ -215,6 +228,7 @@ struct CriticalUpdateState {
     shutdown_complete: bool,
     launch: LaunchStatusDto,
     room: RoomStatusDto,
+    update: UpdateStatusDto,
 }
 
 #[derive(Clone, Debug)]
@@ -259,6 +273,30 @@ pub struct AppEvent {
     pub message: LocalizedMessageDto,
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum UpdateStatusDto {
+    #[default]
+    Idle,
+    Checking,
+    UpToDate,
+    Available,
+    Failed,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AvailableUpdateDto {
+    pub version: String,
+    pub url: String,
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct UpdateSnapshotDto {
+    pub status: UpdateStatusDto,
+    pub available_update: Option<AvailableUpdateDto>,
+    pub error: Option<String>,
+    pub channel_url: String,
+}
+
 #[derive(Clone, Debug)]
 pub struct AppSnapshot {
     pub profile: SnapshotProfileDto,
@@ -280,6 +318,7 @@ pub struct AppSnapshot {
     pub lan_adapters: Vec<LanAdapterDto>,
     pub lan_join_endpoints: Vec<String>,
     pub bootstrap_error: Option<String>,
+    pub update: UpdateSnapshotDto,
 }
 
 #[derive(Clone, Debug)]
@@ -287,6 +326,7 @@ pub struct BuildInfoDto {
     pub version: String,
     pub git_hash: Option<String>,
     pub version_label: String,
+    pub release_version: String,
     pub relay_protocol: String,
     pub direct_protocol: String,
     pub license: String,
@@ -465,6 +505,7 @@ pub fn initialize() -> CommandReceipt {
     if APPLICATION.set(Arc::clone(&runtime)).is_err() {
         return rejected("already_initialized", "TractorBeam 已经初始化");
     }
+    trigger_update_check(&runtime);
     thread::Builder::new()
         .name("tractor-beam-flutter-updates".to_owned())
         .spawn(move || {
@@ -519,6 +560,7 @@ fn critical_update_state(runtime: &BridgeRuntime) -> CriticalUpdateState {
         shutdown_complete: snapshot.shutdown_complete,
         launch: map_launch_progress(&snapshot.runtime, &state).status,
         room: state.room_status,
+        update: state.update_status,
     }
 }
 
@@ -1338,6 +1380,55 @@ pub fn bridge_version() -> String {
     tractor_beam_core::build_info::version_label()
 }
 
+fn trigger_update_check(runtime: &Arc<BridgeRuntime>) {
+    let mut state = runtime.state.lock().expect("state lock");
+    if state.update_status == UpdateStatusDto::Checking {
+        return;
+    }
+    state.update_status = UpdateStatusDto::Checking;
+    state.update_error = None;
+    drop(state);
+    let _ = runtime.wake_tx.try_send(());
+
+    let runtime = Arc::clone(runtime);
+    let _ = thread::Builder::new()
+        .name("tractor-beam-flutter-update-check".to_owned())
+        .spawn(move || {
+            let result = check_for_update_with_channel(flutter_release_version(), FLUTTER_CHANNEL);
+            let mut state = runtime.state.lock().expect("state lock");
+            match result {
+                Ok(Some(update)) => {
+                    state.update_status = UpdateStatusDto::Available;
+                    state.available_update = Some(AvailableUpdateDto {
+                        version: update.version,
+                        url: update.url,
+                    });
+                    state.update_error = None;
+                }
+                Ok(None) => {
+                    state.update_status = UpdateStatusDto::UpToDate;
+                    state.available_update = None;
+                    state.update_error = None;
+                }
+                Err(err) => {
+                    state.update_status = UpdateStatusDto::Failed;
+                    state.update_error = Some(err);
+                }
+            }
+            drop(state);
+            let _ = runtime.wake_tx.try_send(());
+        });
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn check_update() -> CommandReceipt {
+    let Some(runtime) = APPLICATION.get() else {
+        return not_initialized();
+    };
+    trigger_update_check(runtime);
+    accepted()
+}
+
 fn publish_update(runtime: &BridgeRuntime) {
     let (snapshot, events) = {
         let application = runtime.application.lock().expect("application lock");
@@ -1719,7 +1810,14 @@ fn process_events(
                 Ok(text) => result.push(event("clipboard_read", true, "已读取剪贴板", Some(text))),
                 Err(error) => result.push(event("clipboard_read", false, &error, None)),
             },
-            ApplicationEvent::UpdateAvailable(_) => {}
+            ApplicationEvent::UpdateAvailable(update) => {
+                state.update_status = UpdateStatusDto::Available;
+                state.available_update = Some(AvailableUpdateDto {
+                    version: update.version,
+                    url: update.url,
+                });
+                state.update_error = None;
+            }
         }
     }
     result
@@ -1868,6 +1966,7 @@ fn map_snapshot(
             version: build.version.to_owned(),
             git_hash: build.git_hash.map(str::to_owned),
             version_label: build.version_label(),
+            release_version: flutter_release_version().to_owned(),
             relay_protocol: "v5".to_owned(),
             direct_protocol: "v6".to_owned(),
             license: "AGPL-3.0-or-later".to_owned(),
@@ -2061,6 +2160,12 @@ fn map_snapshot(
             Vec::new()
         },
         bootstrap_error: snapshot.bootstrap_error.clone(),
+        update: UpdateSnapshotDto {
+            status: state.update_status,
+            available_update: state.available_update.clone(),
+            error: state.update_error.clone(),
+            channel_url: FLUTTER_CHANNEL.release_url_prefix.trim_end_matches('/').to_owned(),
+        },
     }
 }
 
@@ -2076,6 +2181,7 @@ fn unavailable_snapshot(message: &str) -> AppSnapshot {
             version: build.version.to_owned(),
             git_hash: build.git_hash.map(str::to_owned),
             version_label: build.version_label(),
+            release_version: flutter_release_version().to_owned(),
             relay_protocol: "v5".into(),
             direct_protocol: "v6".into(),
             license: "AGPL-3.0-or-later".into(),
@@ -2144,6 +2250,12 @@ fn unavailable_snapshot(message: &str) -> AppSnapshot {
         lan_adapters: vec![],
         lan_join_endpoints: vec![],
         bootstrap_error: Some(message.to_owned()),
+        update: UpdateSnapshotDto {
+            status: UpdateStatusDto::Idle,
+            available_update: None,
+            error: None,
+            channel_url: FLUTTER_CHANNEL.release_url_prefix.trim_end_matches('/').to_owned(),
+        },
     }
 }
 
@@ -2245,6 +2357,9 @@ fn snapshot_and_draft(runtime: &BridgeRuntime) -> (ApplicationSnapshot, BridgeSt
             launch_cancelled: state.launch_cancelled,
             launch_error: state.launch_error.clone(),
             launch_started_at: state.launch_started_at,
+            update_status: state.update_status,
+            available_update: state.available_update.clone(),
+            update_error: state.update_error.clone(),
         },
     )
 }
@@ -3265,6 +3380,15 @@ mod tests {
         assert_eq!(
             snapshot.build_info.source_url,
             "https://github.com/tianguantg/TractorBeam"
+        );
+        assert_eq!(
+            snapshot.build_info.release_version,
+            DEFAULT_FLUTTER_RELEASE_VERSION
+        );
+        assert_eq!(snapshot.update.status, UpdateStatusDto::Idle);
+        assert_eq!(
+            snapshot.update.channel_url,
+            "https://github.com/tianguantg/TractorBeam/releases"
         );
         let exposed = format!("{snapshot:?}");
         for forbidden in [

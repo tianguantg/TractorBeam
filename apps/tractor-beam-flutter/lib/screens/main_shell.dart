@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 import '../bridge/generated/api.dart' as bridge;
 import '../l10n/bridge_message_localizer.dart';
@@ -72,6 +73,7 @@ class _MainShellState extends State<MainShell> {
   int _handledEventSerial = 0;
   BigInt? _foregroundedLaunchFailureGeneration;
   bool _udpFallbackDialogOpen = false;
+  bool _updateNotificationShown = false;
 
   static final Map<int, Offset> _pageOrigins = {
     0: Offset.zero,
@@ -132,6 +134,7 @@ class _MainShellState extends State<MainShell> {
   void _handleApplicationUpdate() {
     _surfaceLaunchFailureIfNeeded();
     _trackRoomVisualVersion();
+    _notifyUpdateAvailableIfNeeded();
     final event = _controller.latestEvent;
     if (!mounted ||
         event == null ||
@@ -192,6 +195,31 @@ class _MainShellState extends State<MainShell> {
     } finally {
       _udpFallbackDialogOpen = false;
     }
+  }
+
+  void _notifyUpdateAvailableIfNeeded() {
+    if (_updateNotificationShown) return;
+    final update = _controller.availableUpdate;
+    if (_controller.updateStatus != bridge.UpdateStatusDto.available ||
+        update == null) {
+      return;
+    }
+    _updateNotificationShown = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      AppNotification.info(
+        context,
+        context.l10n.startupUpdateAvailableNotice(update.version),
+        duration: const Duration(milliseconds: 6000),
+        actionLabel: context.l10n.aboutViewUpdateBtn,
+        onAction: () async {
+          final uri = Uri.tryParse(update.url);
+          if (uri != null && await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        },
+      );
+    });
   }
 
   void _trackRoomVisualVersion() {
