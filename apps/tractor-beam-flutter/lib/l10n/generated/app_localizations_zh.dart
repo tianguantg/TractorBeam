@@ -1774,4 +1774,38 @@ class AppLocalizationsZh extends AppLocalizations {
   String framesCount(int frames) {
     return '$frames 帧';
   }
+
+  @override
+  String get aboutReleaseVersion => '发布版本';
+
+  @override
+  String get aboutUpdateStatusLabel => '更新状态';
+
+  @override
+  String get aboutUpdateUpToDate => '已是最新版本';
+
+  @override
+  String aboutUpdateAvailable(String version) {
+    return '发现新版本：v$version';
+  }
+
+  @override
+  String get aboutUpdateChecking => '正在检查更新…';
+
+  @override
+  String get aboutUpdateFailed => '检查更新失败';
+
+  @override
+  String get aboutCheckUpdateBtn => '检查更新';
+
+  @override
+  String get aboutViewUpdateBtn => '查看更新';
+
+  @override
+  String get aboutRetryUpdateBtn => '重试';
+
+  @override
+  String startupUpdateAvailableNotice(String version) {
+    return '发现新版本 v$version';
+  }
 }

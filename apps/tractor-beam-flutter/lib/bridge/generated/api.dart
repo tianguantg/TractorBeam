@@ -6,9 +6,9 @@
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `accepted`, `account_display_name`, `build_session_config`, `clone_room`, `critical_update_state`, `deduplicate_light_ping_targets`, `duration_ms`, `effective_transport`, `enforce_launch_timeout`, `event`, `initialize_draft`, `is_udp_fallback_error`, `launch_timeout_elapsed`, `localize_input_delay_error`, `localize_launch_error`, `localize_network_error`, `map_connection_test_report`, `map_connection_tests`, `map_lan_adapter`, `map_launch_progress`, `map_relay`, `map_snapshot`, `merged_accounts`, `mode_from_dto`, `mode_to_dto`, `mutate_draft`, `normalize_selections`, `not_initialized`, `operation_name`, `path_event`, `persist_preferences`, `persist_selection`, `process_events`, `publish_update`, `receipt`, `record_active_room`, `rejected`, `relay_input`, `relay_transport_for_endpoint`, `result_event`, `same_physical_light_ping_target`, `saturating_u64`, `save_relay`, `selected_identity_and_relay`, `selected_identity`, `snapshot_and_draft`, `submit`, `transport_from_dto`, `transport_to_dto`, `unavailable_snapshot`, `validate_select_relay`
+// These functions are ignored because they are not marked as `pub`: `accepted`, `account_display_name`, `build_session_config`, `clone_room`, `critical_update_state`, `deduplicate_light_ping_targets`, `duration_ms`, `effective_transport`, `enforce_launch_timeout`, `event`, `flutter_release_version`, `initialize_draft`, `is_udp_fallback_error`, `launch_timeout_elapsed`, `localize_input_delay_error`, `localize_launch_error`, `localize_network_error`, `map_connection_test_report`, `map_connection_tests`, `map_lan_adapter`, `map_launch_progress`, `map_relay`, `map_snapshot`, `merged_accounts`, `mode_from_dto`, `mode_to_dto`, `mutate_draft`, `normalize_selections`, `not_initialized`, `operation_name`, `path_event`, `persist_preferences`, `persist_selection`, `process_events`, `publish_update`, `receipt`, `record_active_room`, `rejected`, `relay_input`, `relay_transport_for_endpoint`, `result_event`, `same_physical_light_ping_target`, `saturating_u64`, `save_relay`, `selected_identity_and_relay`, `selected_identity`, `snapshot_and_draft`, `submit`, `transport_from_dto`, `transport_to_dto`, `trigger_update_check`, `unavailable_snapshot`, `validate_select_relay`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `BridgeRuntime`, `BridgeState`, `CriticalUpdateState`, `PendingLanJoin`, `PendingRelayOperation`, `RoomSecret`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
 // These functions are ignored (category: IgnoreBecauseOwnerTyShouldIgnore): `default`
 
 CommandReceipt initialize() => RustLib.instance.api.crateApiInitialize();
@@ -134,6 +134,8 @@ CommandReceipt shutdown() => RustLib.instance.api.crateApiShutdown();
 
 String bridgeVersion() => RustLib.instance.api.crateApiBridgeVersion();
 
+CommandReceipt checkUpdate() => RustLib.instance.api.crateApiCheckUpdate();
+
 class AppEvent {
   final String code;
   final bool success;
@@ -189,6 +191,7 @@ class AppSnapshot {
   final List<LanAdapterDto> lanAdapters;
   final List<String> lanJoinEndpoints;
   final String? bootstrapError;
+  final UpdateSnapshotDto update;
 
   const AppSnapshot({
     required this.profile,
@@ -210,6 +213,7 @@ class AppSnapshot {
     required this.lanAdapters,
     required this.lanJoinEndpoints,
     this.bootstrapError,
+    required this.update,
   });
 
   @override
@@ -232,7 +236,8 @@ class AppSnapshot {
       logs.hashCode ^
       lanAdapters.hashCode ^
       lanJoinEndpoints.hashCode ^
-      bootstrapError.hashCode;
+      bootstrapError.hashCode ^
+      update.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -257,7 +262,8 @@ class AppSnapshot {
           logs == other.logs &&
           lanAdapters == other.lanAdapters &&
           lanJoinEndpoints == other.lanJoinEndpoints &&
-          bootstrapError == other.bootstrapError;
+          bootstrapError == other.bootstrapError &&
+          update == other.update;
 }
 
 class AppUpdate {
@@ -284,12 +290,31 @@ class AppUpdate {
           events == other.events;
 }
 
+class AvailableUpdateDto {
+  final String version;
+  final String url;
+
+  const AvailableUpdateDto({required this.version, required this.url});
+
+  @override
+  int get hashCode => version.hashCode ^ url.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AvailableUpdateDto &&
+          runtimeType == other.runtimeType &&
+          version == other.version &&
+          url == other.url;
+}
+
 enum BootstrapStateDto { initializing, ready, failed, unknown }
 
 class BuildInfoDto {
   final String version;
   final String? gitHash;
   final String versionLabel;
+  final String releaseVersion;
   final String relayProtocol;
   final String directProtocol;
   final String license;
@@ -299,6 +324,7 @@ class BuildInfoDto {
     required this.version,
     this.gitHash,
     required this.versionLabel,
+    required this.releaseVersion,
     required this.relayProtocol,
     required this.directProtocol,
     required this.license,
@@ -310,6 +336,7 @@ class BuildInfoDto {
       version.hashCode ^
       gitHash.hashCode ^
       versionLabel.hashCode ^
+      releaseVersion.hashCode ^
       relayProtocol.hashCode ^
       directProtocol.hashCode ^
       license.hashCode ^
@@ -323,6 +350,7 @@ class BuildInfoDto {
           version == other.version &&
           gitHash == other.gitHash &&
           versionLabel == other.versionLabel &&
+          releaseVersion == other.releaseVersion &&
           relayProtocol == other.relayProtocol &&
           directProtocol == other.directProtocol &&
           license == other.license &&
@@ -1047,4 +1075,49 @@ enum TransportSelection {
 
   static Future<TransportSelection> default_() =>
       RustLib.instance.api.crateApiTransportSelectionDefault();
+}
+
+class UpdateSnapshotDto {
+  final UpdateStatusDto status;
+  final AvailableUpdateDto? availableUpdate;
+  final String? error;
+  final String channelUrl;
+
+  const UpdateSnapshotDto({
+    required this.status,
+    this.availableUpdate,
+    this.error,
+    required this.channelUrl,
+  });
+
+  static Future<UpdateSnapshotDto> default_() =>
+      RustLib.instance.api.crateApiUpdateSnapshotDtoDefault();
+
+  @override
+  int get hashCode =>
+      status.hashCode ^
+      availableUpdate.hashCode ^
+      error.hashCode ^
+      channelUrl.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UpdateSnapshotDto &&
+          runtimeType == other.runtimeType &&
+          status == other.status &&
+          availableUpdate == other.availableUpdate &&
+          error == other.error &&
+          channelUrl == other.channelUrl;
+}
+
+enum UpdateStatusDto {
+  idle,
+  checking,
+  upToDate,
+  available,
+  failed;
+
+  static Future<UpdateStatusDto> default_() =>
+      RustLib.instance.api.crateApiUpdateStatusDtoDefault();
 }

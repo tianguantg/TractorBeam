@@ -217,6 +217,24 @@ class TractorBeamController extends ChangeNotifier {
       ? serverLatency
       : null;
 
+  bridge.UpdateSnapshotDto? get updateSnapshot => _snapshot?.update;
+  bridge.UpdateStatusDto get updateStatus =>
+      _snapshot?.update.status ?? bridge.UpdateStatusDto.idle;
+  bridge.AvailableUpdateDto? get availableUpdate =>
+      _snapshot?.update.availableUpdate;
+  String? get updateError => _snapshot?.update.error;
+  String get updateChannelUrl =>
+      _snapshot?.update.channelUrl ??
+      'https://github.com/tianguantg/TractorBeam/releases';
+  String get releaseVersion =>
+      _snapshot?.buildInfo.releaseVersion ?? '0.5.2-tb.1';
+
+  Future<bool> checkUpdate() async {
+    if (!isNative) return false;
+    final receipt = bridge.checkUpdate();
+    return receipt.accepted;
+  }
+
   void _acceptUpdate(bridge.AppUpdate update) {
     if (update.revision <= _revision) return;
     final previousSnapshot = _snapshot;
@@ -998,7 +1016,8 @@ bool _appSnapshotsSemanticallyEqual(
       listEquals(previous.logs, next.logs) &&
       _lanAdaptersEqual(previous.lanAdapters, next.lanAdapters) &&
       listEquals(previous.lanJoinEndpoints, next.lanJoinEndpoints) &&
-      previous.bootstrapError == next.bootstrapError;
+      previous.bootstrapError == next.bootstrapError &&
+      previous.update == next.update;
 }
 
 bool _clientConfigsEqual(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../bridge/generated/api.dart' as bridge;
 import '../l10n/l10n.dart';
 import '../models/tractor_beam_controller.dart';
 import '../theme/app_theme.dart';
@@ -144,7 +145,10 @@ class _AboutScreenState extends State<AboutScreen> {
 
   Widget _identity(BuildContext context) {
     final l10n = context.l10n;
-    final info = TractorBeamScope.maybeOf(context)?.snapshot?.buildInfo;
+    final controller = TractorBeamScope.maybeOf(context);
+    final info = controller?.snapshot?.buildInfo;
+    final releaseVersion =
+        info?.releaseVersion ?? controller?.releaseVersion ?? '0.5.2-tb.1';
     final rawVersion = info?.versionLabel.trim();
     final version = (rawVersion != null && rawVersion.isNotEmpty) ? rawVersion : '0.5.2';
     final cleanVersion = version.startsWith('v') || version.startsWith('V')
@@ -161,7 +165,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
     final gitHash = info?.gitHash?.trim();
     final fullDiagText =
-        'Tractor Beam v$cleanVersion${gitHash != null && gitHash.isNotEmpty ? " ($gitHash)" : ""}, ${l10n.aboutCoreProtocol}: $protocol';
+        'Tractor Beam v$releaseVersion (core:$cleanVersion${gitHash != null && gitHash.isNotEmpty ? ", git:$gitHash" : ""}), ${l10n.aboutCoreProtocol}: $protocol';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -191,16 +195,16 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 3),
         TbIcons.roomDashedLine(height: 6),
-        const SizedBox(height: 5),
+        const SizedBox(height: 3),
         Text(
           l10n.aboutIdentitySlogan,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.body.copyWith(fontSize: 12.5),
+          style: AppTextStyles.body.copyWith(fontSize: 12),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 3),
         Row(
           children: [
             Expanded(
@@ -248,7 +252,7 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 3),
         InkWell(
           onTap: () => _safeCopy(
             context,
@@ -261,15 +265,154 @@ class _AboutScreenState extends State<AboutScreen> {
             preferBelow: false,
             child: _InfoRow(
               label: l10n.aboutVersionLabel,
-              value: gitHash != null && gitHash.length >= 7
-                  ? '$cleanVersion (${gitHash.substring(0, 7)})'
-                  : cleanVersion,
+              value: releaseVersion,
             ),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 3),
+        _buildUpdateRow(context),
+        const SizedBox(height: 3),
         _InfoRow(label: l10n.aboutCoreProtocol, value: protocol, accent: true),
       ],
+    );
+  }
+
+  Widget _buildUpdateRow(BuildContext context) {
+    final l10n = context.l10n;
+    final controller = TractorBeamScope.maybeOf(context);
+    final status = controller?.updateStatus ?? bridge.UpdateStatusDto.idle;
+    final available = controller?.availableUpdate;
+    final channelUrl = controller?.updateChannelUrl ?? AboutScreen.forkRepoUrl;
+
+    String statusText;
+    Color statusColor = AppColors.ink;
+    Widget actionButton;
+
+    switch (status) {
+      case bridge.UpdateStatusDto.checking:
+        statusText = l10n.aboutUpdateChecking;
+        actionButton = const SizedBox(
+          width: 14,
+          height: 14,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.ink),
+          ),
+        );
+        break;
+      case bridge.UpdateStatusDto.available:
+        final ver = available?.version ?? '';
+        statusText = l10n.aboutUpdateAvailable(ver);
+        statusColor = AppColors.accentRed;
+        final targetUrl = available?.url ?? channelUrl;
+        actionButton = TornPaperButton(
+          onTap: () => _openOrCopyLink(
+            context,
+            title: l10n.aboutViewUpdateBtn,
+            url: targetUrl,
+          ),
+          seed: 'view-update'.hashCode,
+          roughness: 1.0,
+          borderWidth: 1.2,
+          fillColor: AppColors.peachPaper,
+          hoverFillColor: AppColors.peachPaperHover,
+          borderColor: AppColors.paperBorder,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          child: Text(
+            l10n.aboutViewUpdateBtn,
+            style: AppTextStyles.buttonText.copyWith(fontSize: 12),
+          ),
+        );
+        break;
+      case bridge.UpdateStatusDto.upToDate:
+        statusText = l10n.aboutUpdateUpToDate;
+        statusColor = AppColors.latencyExcellent;
+        actionButton = TornPaperButton(
+          onTap: () => controller?.checkUpdate(),
+          seed: 'check-update'.hashCode,
+          roughness: 1.0,
+          borderWidth: 1.2,
+          fillColor: AppColors.peachPaper,
+          hoverFillColor: AppColors.peachPaperHover,
+          borderColor: AppColors.paperBorder,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          child: Text(
+            l10n.aboutCheckUpdateBtn,
+            style: AppTextStyles.buttonText.copyWith(fontSize: 12),
+          ),
+        );
+        break;
+      case bridge.UpdateStatusDto.failed:
+        statusText = l10n.aboutUpdateFailed;
+        statusColor = AppColors.accentRed;
+        actionButton = TornPaperButton(
+          onTap: () => controller?.checkUpdate(),
+          seed: 'retry-update'.hashCode,
+          roughness: 1.0,
+          borderWidth: 1.2,
+          fillColor: AppColors.peachPaper,
+          hoverFillColor: AppColors.peachPaperHover,
+          borderColor: AppColors.paperBorder,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          child: Text(
+            l10n.aboutRetryUpdateBtn,
+            style: AppTextStyles.buttonText.copyWith(fontSize: 12),
+          ),
+        );
+        break;
+      case bridge.UpdateStatusDto.idle:
+        statusText = l10n.aboutUpdateStatusLabel;
+        actionButton = TornPaperButton(
+          onTap: () => controller?.checkUpdate(),
+          seed: 'check-update'.hashCode,
+          roughness: 1.0,
+          borderWidth: 1.2,
+          fillColor: AppColors.peachPaper,
+          hoverFillColor: AppColors.peachPaperHover,
+          borderColor: AppColors.paperBorder,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          child: Text(
+            l10n.aboutCheckUpdateBtn,
+            style: AppTextStyles.buttonText.copyWith(fontSize: 12),
+          ),
+        );
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.paperInnerBg,
+        border: Border.all(
+          color: AppColors.paperBorder.withValues(alpha: .35),
+          width: 1.2,
+        ),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  statusText,
+                  maxLines: 1,
+                  style: AppTextStyles.mono.copyWith(
+                    fontSize: 13.5,
+                    color: statusColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          actionButton,
+        ],
+      ),
     );
   }
 
@@ -660,7 +803,7 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget content = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: AppColors.paperInnerBg,
         border: Border.all(

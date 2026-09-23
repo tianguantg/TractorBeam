@@ -1871,4 +1871,38 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get aboutReleaseVersion => 'Release Version';
+
+  @override
+  String get aboutUpdateStatusLabel => 'Update Status';
+
+  @override
+  String get aboutUpdateUpToDate => 'Up to date';
+
+  @override
+  String aboutUpdateAvailable(String version) {
+    return 'New version available: v$version';
+  }
+
+  @override
+  String get aboutUpdateChecking => 'Checking for updates…';
+
+  @override
+  String get aboutUpdateFailed => 'Update check failed';
+
+  @override
+  String get aboutCheckUpdateBtn => 'Check for Updates';
+
+  @override
+  String get aboutViewUpdateBtn => 'View Release';
+
+  @override
+  String get aboutRetryUpdateBtn => 'Retry';
+
+  @override
+  String startupUpdateAvailableNotice(String version) {
+    return 'New version available: v$version';
+  }
 }

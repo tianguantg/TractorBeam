@@ -23,6 +23,8 @@ class AppNotification {
     String message, {
     NotificationType type = NotificationType.info,
     Duration duration = const Duration(milliseconds: 2500),
+    String? actionLabel,
+    VoidCallback? onAction,
   }) {
     // Clear any currently running notification cleanly
     dismiss();
@@ -43,6 +45,8 @@ class AppNotification {
         message: message,
         type: type,
         duration: duration,
+        actionLabel: actionLabel,
+        onAction: onAction,
         onDismiss: () {
           if (_activeEntry == entry) {
             _activeEntry = null;
@@ -65,8 +69,17 @@ class AppNotification {
     BuildContext context,
     String message, {
     Duration duration = const Duration(milliseconds: 2500),
+    String? actionLabel,
+    VoidCallback? onAction,
   }) {
-    show(context, message, type: NotificationType.info, duration: duration);
+    show(
+      context,
+      message,
+      type: NotificationType.info,
+      duration: duration,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
   }
 
   /// Convenience helper for success messages.
@@ -74,8 +87,17 @@ class AppNotification {
     BuildContext context,
     String message, {
     Duration duration = const Duration(milliseconds: 2500),
+    String? actionLabel,
+    VoidCallback? onAction,
   }) {
-    show(context, message, type: NotificationType.success, duration: duration);
+    show(
+      context,
+      message,
+      type: NotificationType.success,
+      duration: duration,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
   }
 
   /// Convenience helper for warning messages.
@@ -83,8 +105,17 @@ class AppNotification {
     BuildContext context,
     String message, {
     Duration duration = const Duration(milliseconds: 2800),
+    String? actionLabel,
+    VoidCallback? onAction,
   }) {
-    show(context, message, type: NotificationType.warning, duration: duration);
+    show(
+      context,
+      message,
+      type: NotificationType.warning,
+      duration: duration,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
   }
 
   /// Convenience helper for error messages.
@@ -92,8 +123,17 @@ class AppNotification {
     BuildContext context,
     String message, {
     Duration duration = const Duration(milliseconds: 3200),
+    String? actionLabel,
+    VoidCallback? onAction,
   }) {
-    show(context, message, type: NotificationType.error, duration: duration);
+    show(
+      context,
+      message,
+      type: NotificationType.error,
+      duration: duration,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
   }
 
   /// Dismisses the active notification.
@@ -119,12 +159,16 @@ class _TopToastHost extends StatefulWidget {
   final String message;
   final NotificationType type;
   final Duration duration;
+  final String? actionLabel;
+  final VoidCallback? onAction;
   final VoidCallback onDismiss;
 
   const _TopToastHost({
     required this.message,
     required this.type,
     required this.duration,
+    this.actionLabel,
+    this.onAction,
     required this.onDismiss,
   });
 
@@ -300,6 +344,44 @@ class _TopToastHostState extends State<_TopToastHost>
                                     ),
                                   ),
                                 ),
+                                if (widget.actionLabel != null &&
+                                    widget.onAction != null) ...[
+                                  const SizedBox(width: 10),
+                                  MouseRegion(
+                                    cursor: SystemMouseCursors.click,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        widget.onAction?.call();
+                                        dismiss();
+                                      },
+                                      behavior: HitTestBehavior.opaque,
+                                      child: Semantics(
+                                        button: true,
+                                        label: widget.actionLabel,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.ink,
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            widget.actionLabel!,
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.dialogPaper,
+                                              height: 1.2,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(width: 10),
                                 ExcludeSemantics(
                                   child: TbIcons.close(

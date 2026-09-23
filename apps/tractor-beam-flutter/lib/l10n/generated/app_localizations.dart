@@ -3415,6 +3415,66 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'{frames} 帧'**
   String framesCount(int frames);
+
+  /// No description provided for @aboutReleaseVersion.
+  ///
+  /// In zh, this message translates to:
+  /// **'发布版本'**
+  String get aboutReleaseVersion;
+
+  /// No description provided for @aboutUpdateStatusLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'更新状态'**
+  String get aboutUpdateStatusLabel;
+
+  /// No description provided for @aboutUpdateUpToDate.
+  ///
+  /// In zh, this message translates to:
+  /// **'已是最新版本'**
+  String get aboutUpdateUpToDate;
+
+  /// No description provided for @aboutUpdateAvailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'发现新版本：v{version}'**
+  String aboutUpdateAvailable(String version);
+
+  /// No description provided for @aboutUpdateChecking.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在检查更新…'**
+  String get aboutUpdateChecking;
+
+  /// No description provided for @aboutUpdateFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'检查更新失败'**
+  String get aboutUpdateFailed;
+
+  /// No description provided for @aboutCheckUpdateBtn.
+  ///
+  /// In zh, this message translates to:
+  /// **'检查更新'**
+  String get aboutCheckUpdateBtn;
+
+  /// No description provided for @aboutViewUpdateBtn.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看更新'**
+  String get aboutViewUpdateBtn;
+
+  /// No description provided for @aboutRetryUpdateBtn.
+  ///
+  /// In zh, this message translates to:
+  /// **'重试'**
+  String get aboutRetryUpdateBtn;
+
+  /// No description provided for @startupUpdateAvailableNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'发现新版本 v{version}'**
+  String startupUpdateAvailableNotice(String version);
 }
 
 class _AppLocalizationsDelegate
