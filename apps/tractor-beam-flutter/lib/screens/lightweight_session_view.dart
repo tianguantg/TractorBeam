@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
@@ -31,6 +33,7 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
   bool _hasUserEditedDelay = false;
   bool _isApplying = false;
   bool _isReadingDelay = false;
+  Timer? _readDelayTimer;
   BigInt _lastHandledEventRevision = BigInt.zero;
 
   @override
@@ -63,17 +66,27 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
 
   void _handleUpdate() {
     final next = widget.controller.lightweightViewState;
+    var stateChanged = false;
 
     if (widget.controller.revision > _lastHandledEventRevision) {
       _lastHandledEventRevision = widget.controller.revision;
       final event = widget.controller.latestEvent;
       if (event != null && event.code == 'input_delay_read') {
-        _isReadingDelay = false;
+        _readDelayTimer?.cancel();
+        _readDelayTimer = null;
+        if (_isReadingDelay) {
+          _isReadingDelay = false;
+          stateChanged = true;
+        }
         if (event.success) {
           final readVal = int.tryParse(event.value ?? '');
           if (readVal != null) {
-            _draftDelay = readVal.clamp(0, 5);
-            _hasUserEditedDelay = false;
+            final clamped = readVal.clamp(0, 5);
+            if (_draftDelay != clamped || _hasUserEditedDelay) {
+              _draftDelay = clamped;
+              _hasUserEditedDelay = false;
+              stateChanged = true;
+            }
           }
           if (mounted) {
             AppNotification.show(
@@ -100,16 +113,20 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
       }
     }
 
-    if (next != _viewState && mounted) {
-      setState(() {
-        _viewState = next;
-        _syncDelayFromState();
-      });
+    if (next != _viewState) {
+      _viewState = next;
+      _syncDelayFromState();
+      stateChanged = true;
+    }
+
+    if (stateChanged && mounted) {
+      setState(() {});
     }
   }
 
   @override
   void dispose() {
+    _readDelayTimer?.cancel();
     widget.controller.removeListener(_handleUpdate);
     super.dispose();
   }
@@ -421,6 +438,7 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
     if (!_viewState.canEditInputDelay || _isReadingDelay || _isApplying) return;
     final l10n = context.l10n;
     setState(() => _isReadingDelay = true);
+    var pendingNativeEvent = false;
     try {
       final receipt = widget.controller.readInputDelay();
       if (!receipt.accepted) {
@@ -456,13 +474,20 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
         }
         return;
       }
-      Future<void>.delayed(const Duration(seconds: 3), () {
+      pendingNativeEvent = true;
+      _readDelayTimer?.cancel();
+      _readDelayTimer = Timer(const Duration(seconds: 3), () {
         if (mounted && _isReadingDelay) {
           setState(() => _isReadingDelay = false);
+          AppNotification.show(
+            context,
+            l10n.errInputDelayTimedOut,
+            duration: const Duration(milliseconds: 2000),
+          );
         }
       });
     } finally {
-      if (!widget.controller.isNative && mounted) {
+      if (!pendingNativeEvent && mounted) {
         setState(() => _isReadingDelay = false);
       }
     }

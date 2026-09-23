@@ -34,11 +34,17 @@ class _FakeLightweightController extends TractorBeamController {
 
   int? lastWrittenDelay;
   bool shouldRejectWrite = false;
+  bool shouldRejectRead = false;
   bool readCalled = false;
+  bool fakeIsNative = false;
+  bridge.AppEvent? fakeLatestEvent;
   BigInt _rev = BigInt.one;
 
   @override
-  bool get isNative => false;
+  bool get isNative => fakeIsNative;
+
+  @override
+  bridge.AppEvent? get latestEvent => fakeLatestEvent;
 
   @override
   bool get isSessionRunning => running;
@@ -87,7 +93,27 @@ class _FakeLightweightController extends TractorBeamController {
     readCalled = true;
     _rev = _rev + BigInt.one;
     notifyListeners();
+    if (shouldRejectRead) {
+      return const bridge.CommandReceipt(
+        accepted: false,
+        rejection: bridge.CommandRejection(
+          code: 'rejected',
+          displayText: 'Read rejected',
+          message: bridge.LocalizedMessageDto(
+            key: 'error.hook_not_ready',
+            args: [],
+            fallbackZh: 'Hook 尚未就绪，请稍后再试。',
+          ),
+        ),
+      );
+    }
     return const bridge.CommandReceipt(accepted: true, rejection: null);
+  }
+
+  void emitEvent(bridge.AppEvent event) {
+    fakeLatestEvent = event;
+    _rev = _rev + BigInt.one;
+    notifyListeners();
   }
 
   void updateDelay(int? newDelay, {String? newError}) {
@@ -423,6 +449,126 @@ void main() {
 
         // Draft resets back to 2 帧
         expect(find.text('2 帧'), findsOneWidget);
+
+        controller.dispose();
+      },
+    );
+
+    testWidgets(
+      'In native mode, when input_delay_read arrives with identical value, spinner stops',
+      (tester) async {
+        final controller = _FakeLightweightController(delay: 2);
+        controller.fakeIsNative = true;
+
+        await tester.pumpWidget(
+          _wrap(
+            LightweightSessionView(
+              controller: controller,
+              onOpenFull: () {},
+              onHideToTray: () {},
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final readBtn = find.byKey(const ValueKey('lightweight-delay-read'));
+        expect(readBtn, findsOneWidget);
+
+        // Tap read button -> enters loading state
+        await tester.tap(readBtn);
+        await tester.pump();
+
+        // While reading in native mode, CircularProgressIndicator is displayed
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+        // Native backend sends input_delay_read with identical delay value '2'
+        controller.emitEvent(
+          const bridge.AppEvent(
+            code: 'input_delay_read',
+            success: true,
+            displayText: '读取成功',
+            value: '2',
+            message: bridge.LocalizedMessageDto(
+              key: 'event.input_delay_read.success',
+              args: [],
+              fallbackZh: '读取成功',
+            ),
+          ),
+        );
+        await tester.pump();
+
+        // Loading spinner must stop even though delay did not change
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byIcon(Icons.refresh), findsOneWidget);
+        expect(find.text('2 帧'), findsOneWidget);
+
+        controller.dispose();
+      },
+    );
+
+    testWidgets(
+      'When readInputDelay is rejected, loading state does not remain stuck',
+      (tester) async {
+        final controller = _FakeLightweightController(delay: 2);
+        controller.fakeIsNative = true;
+        controller.shouldRejectRead = true;
+
+        await tester.pumpWidget(
+          _wrap(
+            LightweightSessionView(
+              controller: controller,
+              onOpenFull: () {},
+              onHideToTray: () {},
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final readBtn = find.byKey(const ValueKey('lightweight-delay-read'));
+        await tester.tap(readBtn);
+        await tester.pump();
+
+        // Because it was rejected immediately, it shouldn't spin
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byIcon(Icons.refresh), findsOneWidget);
+
+        controller.dispose();
+      },
+    );
+
+    testWidgets(
+      'When read times out after 3 seconds, spinner stops and timeout notice is shown',
+      (tester) async {
+        final controller = _FakeLightweightController(delay: 2);
+        controller.fakeIsNative = true;
+
+        await tester.pumpWidget(
+          _wrap(
+            LightweightSessionView(
+              controller: controller,
+              onOpenFull: () {},
+              onHideToTray: () {},
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final readBtn = find.byKey(const ValueKey('lightweight-delay-read'));
+        await tester.tap(readBtn);
+        await tester.pump();
+
+        // While waiting, spinner is shown
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+        // Fast forward 3 seconds without event
+        await tester.pump(const Duration(seconds: 3));
+
+        // Spinner must be stopped, refresh icon returned
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byIcon(Icons.refresh), findsOneWidget);
+
+        // Timeout notification message is shown
+        expect(find.text('读写输入延迟超时，请稍后重试'), findsOneWidget);
 
         controller.dispose();
       },

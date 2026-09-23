@@ -1,10 +1,12 @@
 param(
   [string]$Version = '0.5.2',
-  [int]$BuildNumber = 1
+  [int]$BuildNumber = 2,
+  [string]$ReleaseVersion = '0.5.2-tb.2'
 )
 
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
+$env:TB_RELEASE_VERSION = $ReleaseVersion
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $flutterRoot = Join-Path $repoRoot 'apps/tractor-beam-flutter'
 $releaseRoot = Join-Path $flutterRoot 'build/windows/x64/runner/Release'

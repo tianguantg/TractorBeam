@@ -285,6 +285,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Future<void>.delayed(const Duration(seconds: 3), () {
       if (mounted && _isReadingDelay) {
         setState(() => _isReadingDelay = false);
+        _notice(l10n.errInputDelayTimedOut);
       }
     });
   }
@@ -613,10 +614,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: canEditDelay
                   ? null
                   : () => _notice(
-                        isOfficial
-                            ? l10n.settingsInputDelayOfficialNotice
-                            : l10n.settingsInputDelayNotRunningNotice,
-                      ),
+                      isOfficial
+                          ? l10n.settingsInputDelayOfficialNotice
+                          : l10n.settingsInputDelayNotRunningNotice,
+                    ),
               child: IgnorePointer(
                 ignoring: !canEditDelay,
                 child: TornPaperContainer(
@@ -647,7 +648,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           label: '${_inputLatency.toInt()} 帧',
                           semanticFormatterCallback: (double value) =>
                               '${value.toInt()} 帧',
-                          onChanged: canEditDelay &&
+                          onChanged:
+                              canEditDelay &&
                                   !_isReadingDelay &&
                                   !_isWritingDelay
                               ? (value) => setState(() {
@@ -688,11 +690,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       label: '$index 帧',
                                       child: GestureDetector(
                                         behavior: HitTestBehavior.opaque,
-                                        onTap: canEditDelay &&
+                                        onTap:
+                                            canEditDelay &&
                                                 !_isReadingDelay &&
                                                 !_isWritingDelay
                                             ? () => setState(() {
-                                                _inputLatency = index.toDouble();
+                                                _inputLatency = index
+                                                    .toDouble();
                                                 _hasUserEditedDelay = true;
                                               })
                                             : null,
@@ -707,7 +711,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                                   borderRadius:
                                                       BorderRadius.circular(4),
                                                   border: Border.all(
-                                                    color: AppColors.paperBorder,
+                                                    color:
+                                                        AppColors.paperBorder,
                                                     width: 1.2,
                                                   ),
                                                 )
@@ -765,15 +770,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: hasHookError
                     ? AppTextStyles.warning.copyWith(color: AppColors.accentRed)
-                    : ((canEditDelay &&
-                            !_isReadingDelay &&
-                            !_isWritingDelay)
-                        ? AppTextStyles.warning
-                        : AppTextStyles.metadata.copyWith(
-                            fontSize: 13,
-                            height: 1.35,
-                            color: AppColors.inkMuted,
-                          )),
+                    : ((canEditDelay && !_isReadingDelay && !_isWritingDelay)
+                          ? AppTextStyles.warning
+                          : AppTextStyles.metadata.copyWith(
+                              fontSize: 13,
+                              height: 1.35,
+                              color: AppColors.inkMuted,
+                            )),
               ),
             ),
           ),
@@ -785,10 +788,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: canEditDelay
                   ? null
                   : () => _notice(
-                        isOfficial
-                            ? l10n.settingsInputDelayOfficialNotice
-                            : l10n.settingsInputDelayNotRunningNotice,
-                      ),
+                      isOfficial
+                          ? l10n.settingsInputDelayOfficialNotice
+                          : l10n.settingsInputDelayNotRunningNotice,
+                    ),
               child: Row(
                 children: [
                   Expanded(
@@ -799,8 +802,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               height: 16,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation(AppColors.ink),
+                                valueColor: AlwaysStoppedAnimation(
+                                  AppColors.ink,
+                                ),
                               ),
                             )
                           : TbIcons.settingsReadGame(
@@ -809,9 +813,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                       label: l10n.settingsInputDelayRead,
                       seed: 11,
-                      onTap: canEditDelay &&
-                              !_isReadingDelay &&
-                              !_isWritingDelay
+                      onTap:
+                          canEditDelay && !_isReadingDelay && !_isWritingDelay
                           ? _readInputDelay
                           : null,
                     ),
@@ -836,9 +839,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                       label: l10n.settingsInputDelayWrite,
                       seed: 22,
-                      onTap: canEditDelay &&
-                              !_isReadingDelay &&
-                              !_isWritingDelay
+                      onTap:
+                          canEditDelay && !_isReadingDelay && !_isWritingDelay
                           ? _writeInputDelay
                           : null,
                     ),
@@ -935,9 +937,7 @@ class _SettingsPanel extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  ExcludeSemantics(
-                    child: TbIcons.sectionTriangle(size: 18),
-                  ),
+                  ExcludeSemantics(child: TbIcons.sectionTriangle(size: 18)),
                   const SizedBox(width: 6),
                   Flexible(
                     child: FittedBox(
@@ -984,10 +984,7 @@ class _SettingsPanel extends StatelessWidget {
                 ],
               ),
             ),
-            if (trailing != null) ...[
-              const SizedBox(width: 8),
-              trailing!,
-            ],
+            if (trailing != null) ...[const SizedBox(width: 8), trailing!],
           ],
         ),
         const SizedBox(height: 8),
