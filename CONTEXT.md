@@ -91,6 +91,14 @@ _Avoid_: room name, relay registry key, lobby code
 The measured round-trip latency, variation, and probe loss between two Bridge Clients over their selected gameplay path.
 _Avoid_: Relay latency, game packet loss, connection score
 
+**Relay Control RTT**:
+The measured round-trip time of the control ping/pong loop between the Bridge Client and the active room's Relay Server. It reflects server reachability and control-plane latency, and is displayed in the bottom status bar and lightweight monitor window (e.g. `31ms`).
+_Avoid_: UDP data path RTT, Peer Path latency, game ping
+
+**Steam Identity Mismatch Handling**:
+The runtime protection flow triggered when Isaac's running Steam identity differs from the identity admitted to the Room. The Bridge Client pauses gameplay traffic while intentionally retaining the Native Hook in memory; upon synchronizing the Steam account through the Bridge GUI, gameplay resumes automatically without restarting Isaac.
+_Avoid_: hook ejection, crash recovery, game restart requirement
+
 **Join Code**:
 The single player-shareable value that carries one Room entry point and one Session Credential.
 _Avoid_: room code, invite code, admission code
@@ -181,3 +189,5 @@ _Avoid_: normal relay mode
 - "mode" was used for both session behavior and network carriage. Resolved: use **Official Mode**, **Fallback Mode**, and **Pure Mode** for session behavior; use **Transport Choice** for UDP or TCP carriage.
 - "room", "room name", "admission", and "join code" described overlapping parts of one player-visible join flow. Resolved: **Room** remains the player-facing co-op group, but it has no separately editable name; use **Session Credential** for its single high-entropy routing/admission secret and **Join Code** for the value players copy or import.
 - "host" can mean the Isaac game/lobby host or a Tractor Beam discovery entry point. Resolved: avoid **Room Host**; use **Room Creator** only for room creation and **Introducer** for the Peer named by a particular LAN Join Code.
+- "Relay latency" or monitor window latency was ambiguous as to whether it measured the peer-to-peer data transport or the server control loop. Resolved: latency displayed in the status bar and lightweight monitor window is the **Relay Control RTT** to the active room's Relay Server, not UDP data path RTT.
+- Steam account mismatch handling was ambiguous as to whether the Native Hook needed to be reinjected. Resolved: upon a mismatch, the Bridge Client pauses gameplay and preserves the loaded **Native Hook**; synchronizing the account automatically resumes gameplay without an Isaac restart.

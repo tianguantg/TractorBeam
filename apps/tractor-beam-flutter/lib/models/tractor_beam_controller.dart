@@ -8,6 +8,8 @@ import 'request_cache.dart';
 
 enum ConnectionMode { relay, lan }
 
+enum RelayLatencySource { activeRoom, selectedNodeProbe, none }
+
 enum PrimarySessionAction {
   resolveSteamMismatch,
   running,
@@ -120,8 +122,10 @@ class TractorBeamController extends ChangeNotifier {
       activeMode: snap?.session.activeMode ?? snap?.clientConfig.mode,
       inputDelay: snap?.hook.inputDelay,
       inputDelayError: snap?.hook.inputDelayError,
+      activeRelay: snap?.room.activeRelay,
     );
   }
+
   bool get isHookReady =>
       launchProgress?.status == bridge.LaunchStatusDto.ready;
   bool get isLaunching => switch (launchProgress?.status) {
@@ -187,6 +191,11 @@ class TractorBeamController extends ChangeNotifier {
     return null;
   }
 
+  /// Active Steam identity mismatch between Isaac's running account and the room identity.
+  ///
+  /// When this occurs, gameplay traffic is paused while the Native Hook remains loaded
+  /// in the Isaac process. Synchronizing the account resumes gameplay automatically without
+  /// requiring an Isaac restart.
   bridge.SteamIdentityMismatchDto? get steamIdentityMismatch =>
       _snapshot?.room.steamIdentityMismatch;
 
@@ -241,10 +250,32 @@ class TractorBeamController extends ChangeNotifier {
     return null;
   }
 
-  int? get activeServerLatency =>
-      _connectionMode == ConnectionMode.relay && serverLatency != null
-      ? serverLatency
-      : null;
+  bridge.ActiveRelayDto? get activeRelay => _snapshot?.room.activeRelay;
+
+  RelayLatencySource get relayLatencySource {
+    if (isInRoom && activeRelay != null) {
+      return RelayLatencySource.activeRoom;
+    }
+    if (!isInRoom &&
+        _connectionMode == ConnectionMode.relay &&
+        serverLatency != null) {
+      return RelayLatencySource.selectedNodeProbe;
+    }
+    return RelayLatencySource.none;
+  }
+
+  int? get activeServerLatency {
+    if (isInRoom) {
+      if (_snapshot?.room.activeRelay != null) {
+        return _snapshot?.room.activeRelay?.latencyMs?.toInt();
+      }
+      return null;
+    }
+    if (_connectionMode == ConnectionMode.relay) {
+      return serverLatency;
+    }
+    return null;
+  }
 
   bridge.UpdateSnapshotDto? get updateSnapshot => _snapshot?.update;
   bridge.UpdateStatusDto get updateStatus =>
@@ -1069,7 +1100,8 @@ bool _roomsEqual(bridge.RoomSnapshot previous, bridge.RoomSnapshot next) =>
     previous.transport == next.transport &&
     previous.joinCode == next.joinCode &&
     listEquals(previous.members, next.members) &&
-    previous.steamIdentityMismatch == next.steamIdentityMismatch;
+    previous.steamIdentityMismatch == next.steamIdentityMismatch &&
+    previous.activeRelay == next.activeRelay;
 
 bool _lanAdaptersEqual(
   List<bridge.LanAdapterDto> previous,
@@ -1103,6 +1135,7 @@ class LightweightViewState {
     this.activeMode,
     this.inputDelay,
     this.inputDelayError,
+    this.activeRelay,
   });
 
   final bool sessionRunning;
@@ -1114,6 +1147,7 @@ class LightweightViewState {
   final bridge.SessionModeDto? activeMode;
   final int? inputDelay;
   final String? inputDelayError;
+  final bridge.ActiveRelayDto? activeRelay;
 
   bool get isOfficial => activeMode == bridge.SessionModeDto.official;
   bool get canEditInputDelay => sessionRunning && !isOfficial;
@@ -1128,6 +1162,7 @@ class LightweightViewState {
     activeMode,
     inputDelay,
     inputDelayError,
+    activeRelay,
     Object.hashAll(members),
   );
 
@@ -1143,6 +1178,7 @@ class LightweightViewState {
           activeMode == other.activeMode &&
           inputDelay == other.inputDelay &&
           inputDelayError == other.inputDelayError &&
+          activeRelay == other.activeRelay &&
           listEquals(members, other.members);
 }
 

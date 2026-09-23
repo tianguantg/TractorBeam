@@ -3481,6 +3481,30 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'发现新版本 v{version}'**
   String startupUpdateAvailableNotice(String version);
+
+  /// No description provided for @activeRelayLatencyTooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前 Relay 往返延迟：{latency}ms ({grade})'**
+  String activeRelayLatencyTooltip(int latency, String grade);
+
+  /// No description provided for @selectedRelayLatencyTooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'节点测速延迟：{latency}ms ({grade})'**
+  String selectedRelayLatencyTooltip(int latency, String grade);
+
+  /// No description provided for @relayReconnecting.
+  ///
+  /// In zh, this message translates to:
+  /// **'重连中…'**
+  String get relayReconnecting;
+
+  /// No description provided for @relayReconnectingTooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'Relay 连接已断开，正在尝试重连…'**
+  String get relayReconnectingTooltip;
 }
 
 class _AppLocalizationsDelegate

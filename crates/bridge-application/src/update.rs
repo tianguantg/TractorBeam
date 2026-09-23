@@ -157,8 +157,12 @@ pub fn available_update_with_channel(
     let current = ParsedReleaseVersion::parse(current_version)
         .map_err(|error| format!("Current version {current_version:?} is invalid: {error}"))?;
     let tag = release.tag_name.trim();
-    let latest = ParsedReleaseVersion::parse(tag)
-        .map_err(|error| format!("Release tag {:?} is not a valid version: {error}", release.tag_name))?;
+    let latest = ParsedReleaseVersion::parse(tag).map_err(|error| {
+        format!(
+            "Release tag {:?} is not a valid version: {error}",
+            release.tag_name
+        )
+    })?;
     if latest <= current {
         return Ok(None);
     }
@@ -324,9 +328,7 @@ mod tests {
             tag_name: "v0.5.2-tb.2".to_owned(),
             html_url: "https://github.com/mcthesw/TractorBeam/releases/tag/v0.5.2-tb.2".to_owned(),
         };
-        assert!(
-            available_update_with_channel("0.5.2-tb.1", &mismatched, FLUTTER_CHANNEL).is_err()
-        );
+        assert!(available_update_with_channel("0.5.2-tb.1", &mismatched, FLUTTER_CHANNEL).is_err());
     }
 
     #[test]

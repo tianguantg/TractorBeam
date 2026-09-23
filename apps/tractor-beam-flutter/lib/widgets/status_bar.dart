@@ -183,29 +183,79 @@ class _BottomStatusBarState extends State<BottomStatusBar> {
                           // Client-to-server latency (底部的延迟和relay服务器处的延迟是同一个)
                           // When LAN is selected, latency is null (当选择局域网联机不会有这个值)
                           if (effectiveLatency != null) ...[
+                            () {
+                              final gradeLabel = LatencyTheme.ofServer(
+                                effectiveLatency,
+                              ).grade.localizedLabel(context);
+                              final tooltip = switch (app?.relayLatencySource) {
+                                RelayLatencySource.activeRoom =>
+                                  context.l10n.activeRelayLatencyTooltip(
+                                    effectiveLatency,
+                                    gradeLabel,
+                                  ),
+                                RelayLatencySource.selectedNodeProbe =>
+                                  context.l10n.selectedRelayLatencyTooltip(
+                                    effectiveLatency,
+                                    gradeLabel,
+                                  ),
+                                _ => '$gradeLabel: ${effectiveLatency}ms',
+                              };
+                              return Semantics(
+                                label: tooltip,
+                                child: Tooltip(
+                                  message: tooltip,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      TbIcons.latencyIconForGrade(
+                                        LatencyTheme.evaluateServer(
+                                          effectiveLatency,
+                                        ),
+                                        size: 17,
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        '${effectiveLatency}ms',
+                                        style: AppTextStyles.statusLatency
+                                            .copyWith(
+                                              color: LatencyTheme.ofServer(
+                                                effectiveLatency,
+                                              ).statusColor,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }(),
+                            const SizedBox(width: 16),
+                          ] else if (app?.activeRelay?.link ==
+                              bridge.RelayLinkStatusDto.reconnecting) ...[
                             Semantics(
-                              label:
-                                  '${LatencyTheme.ofServer(effectiveLatency).grade.localizedLabel(context)}: ${effectiveLatency}ms',
+                              label: context.l10n.relayReconnecting,
                               child: Tooltip(
-                                message:
-                                    '${LatencyTheme.ofServer(effectiveLatency).grade.localizedLabel(context)}: ${effectiveLatency}ms',
+                                message: context.l10n.relayReconnectingTooltip,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    TbIcons.latencyIconForGrade(
-                                      LatencyTheme.evaluateServer(
-                                        effectiveLatency,
+                                    const SizedBox(
+                                      width: 12,
+                                      height: 12,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              AppColors.latencyYellow,
+                                            ),
                                       ),
-                                      size: 17,
                                     ),
-                                    const SizedBox(width: 3),
+                                    const SizedBox(width: 5),
                                     Text(
-                                      '${effectiveLatency}ms',
+                                      context.l10n.relayReconnecting,
                                       style: AppTextStyles.statusLatency
                                           .copyWith(
-                                            color: LatencyTheme.ofServer(
-                                              effectiveLatency,
-                                            ).statusColor,
+                                            color: AppColors.latencyYellow,
+                                            fontSize: 12.5,
                                           ),
                                     ),
                                   ],
@@ -335,9 +385,10 @@ class _BottomStatusBarState extends State<BottomStatusBar> {
                                 onShowHoverHighlight: (v) =>
                                     setState(() => _launchHovered = v),
                                 actions: {
-                                  ActivateIntent: CallbackAction<ActivateIntent>(
-                                    onInvoke: (_) => onTrigger?.call(),
-                                  ),
+                                  ActivateIntent:
+                                      CallbackAction<ActivateIntent>(
+                                        onInvoke: (_) => onTrigger?.call(),
+                                      ),
                                 },
                                 shortcuts: const {
                                   SingleActivator(LogicalKeyboardKey.enter):
@@ -350,7 +401,9 @@ class _BottomStatusBarState extends State<BottomStatusBar> {
                                   child: GestureDetector(
                                     onTap: onTrigger,
                                     child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 120),
+                                      duration: const Duration(
+                                        milliseconds: 120,
+                                      ),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 14,
                                         vertical: 7,

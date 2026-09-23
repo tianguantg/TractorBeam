@@ -1230,6 +1230,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ActiveRelayDto dco_decode_active_relay_dto(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 6)
+      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
+    return ActiveRelayDto(
+      relayId: dco_decode_opt_String(arr[0]),
+      displayName: dco_decode_opt_String(arr[1]),
+      endpoint: dco_decode_String(arr[2]),
+      transport: dco_decode_transport_selection(arr[3]),
+      latencyMs: dco_decode_opt_box_autoadd_u_64(arr[4]),
+      link: dco_decode_relay_link_status_dto(arr[5]),
+    );
+  }
+
+  @protected
   AppEvent dco_decode_app_event(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -1309,6 +1325,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BootstrapStateDto dco_decode_bootstrap_state_dto(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return BootstrapStateDto.values[raw as int];
+  }
+
+  @protected
+  ActiveRelayDto dco_decode_box_autoadd_active_relay_dto(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_active_relay_dto(raw);
   }
 
   @protected
@@ -1653,6 +1675,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ActiveRelayDto? dco_decode_opt_box_autoadd_active_relay_dto(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_active_relay_dto(raw);
+  }
+
+  @protected
   AvailableUpdateDto? dco_decode_opt_box_autoadd_available_update_dto(
     dynamic raw,
   ) {
@@ -1749,6 +1777,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  RelayLinkStatusDto dco_decode_relay_link_status_dto(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return RelayLinkStatusDto.values[raw as int];
+  }
+
+  @protected
   RoomHistoryEntryDto dco_decode_room_history_entry_dto(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -1789,8 +1823,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   RoomSnapshot dco_decode_room_snapshot(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 8)
-      throw Exception('unexpected arr length: expect 8 but see ${arr.length}');
+    if (arr.length != 9)
+      throw Exception('unexpected arr length: expect 9 but see ${arr.length}');
     return RoomSnapshot(
       active: dco_decode_bool(arr[0]),
       status: dco_decode_room_status_dto(arr[1]),
@@ -1801,6 +1835,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       members: dco_decode_list_room_member_dto(arr[6]),
       steamIdentityMismatch:
           dco_decode_opt_box_autoadd_steam_identity_mismatch_dto(arr[7]),
+      activeRelay: dco_decode_opt_box_autoadd_active_relay_dto(arr[8]),
     );
   }
 
@@ -1948,6 +1983,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ActiveRelayDto sse_decode_active_relay_dto(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_relayId = sse_decode_opt_String(deserializer);
+    var var_displayName = sse_decode_opt_String(deserializer);
+    var var_endpoint = sse_decode_String(deserializer);
+    var var_transport = sse_decode_transport_selection(deserializer);
+    var var_latencyMs = sse_decode_opt_box_autoadd_u_64(deserializer);
+    var var_link = sse_decode_relay_link_status_dto(deserializer);
+    return ActiveRelayDto(
+      relayId: var_relayId,
+      displayName: var_displayName,
+      endpoint: var_endpoint,
+      transport: var_transport,
+      latencyMs: var_latencyMs,
+      link: var_link,
+    );
+  }
+
+  @protected
   AppEvent sse_decode_app_event(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_code = sse_decode_String(deserializer);
@@ -2047,6 +2101,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_i_32(deserializer);
     return BootstrapStateDto.values[inner];
+  }
+
+  @protected
+  ActiveRelayDto sse_decode_box_autoadd_active_relay_dto(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_active_relay_dto(deserializer));
   }
 
   @protected
@@ -2510,6 +2572,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ActiveRelayDto? sse_decode_opt_box_autoadd_active_relay_dto(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_active_relay_dto(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   AvailableUpdateDto? sse_decode_opt_box_autoadd_available_update_dto(
     SseDeserializer deserializer,
   ) {
@@ -2662,6 +2737,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  RelayLinkStatusDto sse_decode_relay_link_status_dto(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return RelayLinkStatusDto.values[inner];
+  }
+
+  @protected
   RoomHistoryEntryDto sse_decode_room_history_entry_dto(
     SseDeserializer deserializer,
   ) {
@@ -2720,6 +2804,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_members = sse_decode_list_room_member_dto(deserializer);
     var var_steamIdentityMismatch =
         sse_decode_opt_box_autoadd_steam_identity_mismatch_dto(deserializer);
+    var var_activeRelay = sse_decode_opt_box_autoadd_active_relay_dto(
+      deserializer,
+    );
     return RoomSnapshot(
       active: var_active,
       status: var_status,
@@ -2729,6 +2816,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       joinCode: var_joinCode,
       members: var_members,
       steamIdentityMismatch: var_steamIdentityMismatch,
+      activeRelay: var_activeRelay,
     );
   }
 
@@ -2907,6 +2995,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_active_relay_dto(
+    ActiveRelayDto self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_opt_String(self.relayId, serializer);
+    sse_encode_opt_String(self.displayName, serializer);
+    sse_encode_String(self.endpoint, serializer);
+    sse_encode_transport_selection(self.transport, serializer);
+    sse_encode_opt_box_autoadd_u_64(self.latencyMs, serializer);
+    sse_encode_relay_link_status_dto(self.link, serializer);
+  }
+
+  @protected
   void sse_encode_app_event(AppEvent self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.code, serializer);
@@ -2972,6 +3074,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_active_relay_dto(
+    ActiveRelayDto self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_active_relay_dto(self, serializer);
   }
 
   @protected
@@ -3363,6 +3474,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_active_relay_dto(
+    ActiveRelayDto? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_active_relay_dto(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_box_autoadd_available_update_dto(
     AvailableUpdateDto? self,
     SseSerializer serializer,
@@ -3494,6 +3618,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_relay_link_status_dto(
+    RelayLinkStatusDto self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
   void sse_encode_room_history_entry_dto(
     RoomHistoryEntryDto self,
     SseSerializer serializer,
@@ -3540,6 +3673,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       self.steamIdentityMismatch,
       serializer,
     );
+    sse_encode_opt_box_autoadd_active_relay_dto(self.activeRelay, serializer);
   }
 
   @protected

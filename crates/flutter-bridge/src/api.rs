@@ -12,15 +12,15 @@ use std::{
 use crate::frb_generated::StreamSink;
 use crate::room_history::{RoomHistoryStore, StoredRoomRoute};
 use tractor_beam_application::{
-    check_for_update_with_channel, ApplicationEvent, ApplicationHandle, ApplicationOperation,
-    ApplicationSnapshot, BootstrapState, FLUTTER_CHANNEL,
+    ApplicationEvent, ApplicationHandle, ApplicationOperation, ApplicationSnapshot, BootstrapState,
+    FLUTTER_CHANNEL, check_for_update_with_channel,
 };
 use tractor_beam_core::{
     ClientConfigPreferences, ClientConfigSelection, ExternalRelayConfig, HookStartupPhase,
     InputDelayError, JoinCode, LanAdapter, LanDirectConfig, LanJoinCode, LightPingReport,
     LightPingTarget, LogLevel, ManualSteamAccount, RelayCatalogChange, RelayEndpoint,
-    RelayJoinCode, RelayProfileInput, SessionConfig, SessionCredential, SessionMode,
-    SessionRouteConfig, SessionStatus, TransportChoice, bundle_config_path,
+    RelayJoinCode, RelayLinkState, RelayProfileInput, SessionConfig, SessionCredential,
+    SessionMode, SessionRouteConfig, SessionStatus, TransportChoice, bundle_config_path,
     delete_client_manual_steam_account_to, save_client_manual_steam_account_to,
 };
 
@@ -388,6 +388,25 @@ pub struct SessionSnapshot {
     pub last_stop_reason: Option<String>,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RelayLinkStatusDto {
+    Inactive,
+    Connected,
+    Reconnecting,
+    Recovered,
+    RecoveryExhausted,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ActiveRelayDto {
+    pub relay_id: Option<String>,
+    pub display_name: Option<String>,
+    pub endpoint: String,
+    pub transport: TransportSelection,
+    pub latency_ms: Option<u64>,
+    pub link: RelayLinkStatusDto,
+}
+
 #[derive(Clone, Debug)]
 pub struct RoomSnapshot {
     pub active: bool,
@@ -398,6 +417,7 @@ pub struct RoomSnapshot {
     pub join_code: Option<String>,
     pub members: Vec<RoomMemberDto>,
     pub steam_identity_mismatch: Option<SteamIdentityMismatchDto>,
+    pub active_relay: Option<ActiveRelayDto>,
 }
 
 #[derive(Clone, Debug)]
@@ -1519,13 +1539,9 @@ fn process_events(
                     state.room = None;
                     state.room_status = RoomStatusDto::Failed;
                     let (error_key, error_text) = classify_relay_join_error(&error_string);
-                    let mut failure = event(
-                        "relay_room_joined",
-                        false,
-                        &error_text,
-                        failed_join_code,
-                    );
-                    failure.message.key = error_key.to_owned();
+                    let mut failure =
+                        event("relay_room_joined", false, &error_text, failed_join_code);
+                    error_key.clone_into(&mut failure.message.key);
                     if udp_fallback_suggested {
                         "event.relay_room_joined.udp_unavailable"
                             .clone_into(&mut failure.message.key);
@@ -1941,6 +1957,43 @@ fn map_snapshot(
             join_code.clone()
         }
     });
+    let active_relay = if snapshot.room_active() {
+        if let Some(RoomSecret::Relay { route, .. }) = &state.room {
+            let preset = config.and_then(|loaded| {
+                loaded.config.relays.iter().find(|relay| {
+                    relay.endpoint.host.eq_ignore_ascii_case(&route.relay.host)
+                        && relay.endpoint.port == route.relay.port
+                })
+            });
+            let relay_id = preset.map(|p| p.id.clone());
+            let display_name = preset
+                .map(|p| p.name.clone())
+                .or_else(|| route.relay_name.clone());
+            let link = match &runtime.relay_link {
+                RelayLinkState::Inactive => RelayLinkStatusDto::Inactive,
+                RelayLinkState::Connected => RelayLinkStatusDto::Connected,
+                RelayLinkState::Reconnecting { .. } => RelayLinkStatusDto::Reconnecting,
+                RelayLinkState::Recovered { .. } => RelayLinkStatusDto::Recovered,
+                RelayLinkState::RecoveryExhausted { .. } => RelayLinkStatusDto::RecoveryExhausted,
+            };
+            Some(ActiveRelayDto {
+                relay_id,
+                display_name,
+                endpoint: format!("{}:{}", route.relay.host, route.relay.port),
+                transport: transport_to_dto(route.transport),
+                latency_ms: if link == RelayLinkStatusDto::Reconnecting {
+                    None
+                } else {
+                    runtime.relay_rtt.map(duration_ms)
+                },
+                link,
+            })
+        } else {
+            None
+        }
+    } else {
+        None
+    };
     let input_delay = runtime
         .latest_input_delay_status
         .as_ref()
@@ -2038,6 +2091,7 @@ fn map_snapshot(
                     game_steam_id64: mismatch.game_steam_id64.to_string(),
                 }
             }),
+            active_relay,
         },
         room_history: if full {
             let history = bridge_runtime.history.lock().expect("history lock");
@@ -2167,7 +2221,10 @@ fn map_snapshot(
             status: state.update_status,
             available_update: state.available_update.clone(),
             error: state.update_error.clone(),
-            channel_url: FLUTTER_CHANNEL.release_url_prefix.trim_end_matches('/').to_owned(),
+            channel_url: FLUTTER_CHANNEL
+                .release_url_prefix
+                .trim_end_matches('/')
+                .to_owned(),
         },
     }
 }
@@ -2215,6 +2272,7 @@ fn unavailable_snapshot(message: &str) -> AppSnapshot {
             join_code: None,
             members: vec![],
             steam_identity_mismatch: None,
+            active_relay: None,
         },
         room_history: vec![],
         restore_history_id: None,
@@ -2257,7 +2315,10 @@ fn unavailable_snapshot(message: &str) -> AppSnapshot {
             status: UpdateStatusDto::Idle,
             available_update: None,
             error: None,
-            channel_url: FLUTTER_CHANNEL.release_url_prefix.trim_end_matches('/').to_owned(),
+            channel_url: FLUTTER_CHANNEL
+                .release_url_prefix
+                .trim_end_matches('/')
+                .to_owned(),
         },
     }
 }
@@ -2854,7 +2915,8 @@ fn classify_relay_join_error(message: &str) -> (&'static str, String) {
     {
         return (
             "event.relay_room_joined.invalid_admission",
-            "无法验证联机码：联机码可能无效或已经失效，请让房主重新复制并发送最新的联机码。".to_owned(),
+            "无法验证联机码：联机码可能无效或已经失效，请让房主重新复制并发送最新的联机码。"
+                .to_owned(),
         );
     }
     if message.contains("不知道这样的主机")
@@ -3485,6 +3547,75 @@ mod tests {
         ] {
             assert!(!exposed.contains(forbidden));
         }
+    }
+
+    #[test]
+    fn active_relay_dto_maps_and_never_exposes_credentials() {
+        let (wake_tx, _wake_rx) = mpsc::sync_channel(1);
+        let runtime = BridgeRuntime {
+            application: Mutex::new(ApplicationHandle::spawn_without_update(|| {})),
+            state: Mutex::new(BridgeState::default()),
+            history: Mutex::new(RoomHistoryStore::load()),
+            sinks: Mutex::new(Vec::new()),
+            wake_tx,
+            revision: AtomicU64::new(0),
+        };
+        let mut snapshot = ApplicationSnapshot::default();
+        snapshot.relay_room_active = true;
+        snapshot.runtime.relay_rtt = Some(Duration::from_millis(38));
+        snapshot.runtime.relay_link = RelayLinkState::Connected;
+
+        let state = BridgeState {
+            room: Some(RoomSecret::Relay {
+                route: ExternalRelayConfig {
+                    relay: RelayEndpoint::new("relay.example.com", 9000),
+                    relay_name: Some("Tokyo Relay".to_owned()),
+                    transport: TransportChoice::Udp,
+                    session_credential: SessionCredential::from_bytes([42; 16]),
+                },
+                join_code: "Code12345".to_owned(),
+            }),
+            room_status: RoomStatusDto::Active,
+            ..BridgeState::default()
+        };
+
+        let mapped = map_snapshot(&snapshot, &state, &runtime);
+        let active = mapped
+            .room
+            .active_relay
+            .as_ref()
+            .expect("active relay should be populated");
+        assert_eq!(active.display_name.as_deref(), Some("Tokyo Relay"));
+        assert_eq!(active.endpoint, "relay.example.com:9000");
+        assert_eq!(active.transport, TransportSelection::Udp);
+        assert_eq!(active.latency_ms, Some(38));
+        assert_eq!(active.link, RelayLinkStatusDto::Connected);
+
+        let exposed = format!("{mapped:?}");
+        assert!(!exposed.contains("session_credential"));
+
+        // If reconnecting, latency_ms must be None
+        let mut reconnecting_snapshot = snapshot;
+        reconnecting_snapshot.runtime.relay_link = RelayLinkState::Reconnecting {
+            attempt: 1,
+            elapsed_ms: 500,
+            last_error: "timeout".to_owned(),
+            data_continues: false,
+        };
+        let reconnecting_mapped = map_snapshot(&reconnecting_snapshot, &state, &runtime);
+        let reconnecting_active = reconnecting_mapped
+            .room
+            .active_relay
+            .as_ref()
+            .expect("active relay");
+        assert_eq!(reconnecting_active.latency_ms, None);
+        assert_eq!(reconnecting_active.link, RelayLinkStatusDto::Reconnecting);
+
+        runtime
+            .application
+            .lock()
+            .expect("application lock")
+            .request_shutdown();
     }
 
     #[test]

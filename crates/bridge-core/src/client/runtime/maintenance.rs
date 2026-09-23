@@ -61,7 +61,8 @@ impl BridgeClient {
                 | state::RuntimeEvent::LightPingFinished(_)
                 | state::RuntimeEvent::RoomPeersUpdated(_)
                 | state::RuntimeEvent::RoomPathQualityUpdated(_)
-                | state::RuntimeEvent::RelayLinkChanged(_) => {}
+                | state::RuntimeEvent::RelayLinkChanged(_)
+                | state::RuntimeEvent::RelayRttUpdated(_) => {}
             }
         }
         if game_exited {
@@ -283,6 +284,7 @@ impl BridgeClient {
             self.state.room_peers.clear();
             self.state.room_path_quality.clear();
             self.state.relay_link = state::RelayLinkState::Inactive;
+            self.state.relay_rtt = None;
         }
         self.active_log_context = Some(ClientSessionLogContext { route, mode });
     }

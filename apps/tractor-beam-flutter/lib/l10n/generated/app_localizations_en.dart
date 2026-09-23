@@ -1908,4 +1908,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String startupUpdateAvailableNotice(String version) {
     return 'New version available: v$version';
   }
+
+  @override
+  String activeRelayLatencyTooltip(int latency, String grade) {
+    return 'Current Relay RTT: ${latency}ms ($grade)';
+  }
+
+  @override
+  String selectedRelayLatencyTooltip(int latency, String grade) {
+    return 'Relay probe latency: ${latency}ms ($grade)';
+  }
+
+  @override
+  String get relayReconnecting => 'Reconnecting…';
+
+  @override
+  String get relayReconnectingTooltip =>
+      'Relay connection lost, attempting to reconnect…';
 }

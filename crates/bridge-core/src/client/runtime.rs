@@ -261,10 +261,21 @@ impl BridgeClient {
                     self.refresh_smoothness();
                 }
                 state::RuntimeEvent::RelayLinkChanged(link) => {
+                    if matches!(
+                        link,
+                        state::RelayLinkState::Reconnecting { .. }
+                            | state::RelayLinkState::RecoveryExhausted { .. }
+                            | state::RelayLinkState::Inactive
+                    ) {
+                        self.state.relay_rtt = None;
+                    }
                     if let state::RelayLinkState::RecoveryExhausted { reason, .. } = &link {
                         relay_recovery_exhausted = Some(reason.clone());
                     }
                     self.state.relay_link = link;
+                }
+                state::RuntimeEvent::RelayRttUpdated(rtt) => {
+                    self.state.relay_rtt = rtt;
                 }
             }
         }
@@ -388,6 +399,7 @@ impl BridgeClient {
         self.state.missing_game_targets.clear();
         self.state.room_path_quality.clear();
         self.state.relay_link = state::RelayLinkState::Inactive;
+        self.state.relay_rtt = None;
         self.resume_gameplay_after_rejoin = false;
     }
 

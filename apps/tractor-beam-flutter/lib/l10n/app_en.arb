@@ -887,5 +887,29 @@
         "type": "String"
       }
     }
-  }
+  },
+  "activeRelayLatencyTooltip": "Current Relay RTT: {latency}ms ({grade})",
+  "@activeRelayLatencyTooltip": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      },
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "selectedRelayLatencyTooltip": "Relay probe latency: {latency}ms ({grade})",
+  "@selectedRelayLatencyTooltip": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      },
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "relayReconnecting": "Reconnecting…",
+  "relayReconnectingTooltip": "Relay connection lost, attempting to reconnect…"
 }

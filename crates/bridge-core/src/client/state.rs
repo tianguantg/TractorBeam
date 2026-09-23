@@ -1,6 +1,7 @@
 use std::{
     fmt::{self, Display},
     path::PathBuf,
+    time::Duration,
 };
 
 use tokio::sync::mpsc::Sender;
@@ -385,6 +386,7 @@ pub struct RuntimeState {
     pub lan_peers: Vec<super::LanPeerState>,
     pub lan_paths: Vec<super::LanPeerPathState>,
     pub relay_link: RelayLinkState,
+    pub relay_rtt: Option<Duration>,
 }
 
 #[derive(Debug)]
@@ -405,6 +407,7 @@ pub(super) enum RuntimeEvent {
     RoomPeersUpdated(Vec<crate::protocol::PeerPresenceInfo>),
     RoomPathQualityUpdated(Vec<super::RoomPathQualitySnapshot>),
     RelayLinkChanged(RelayLinkState),
+    RelayRttUpdated(Option<Duration>),
 }
 
 pub(super) type RuntimeEventSender = Sender<RuntimeEvent>;

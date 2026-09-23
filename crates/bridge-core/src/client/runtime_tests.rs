@@ -799,10 +799,12 @@ fn game_exit_after_mismatch_detach_resets_hook_and_mismatch() {
             pid: 1234,
         })
     );
-    assert_eq!(client.state.hook_startup, state::HookStartupState::default());
+    assert_eq!(
+        client.state.hook_startup,
+        state::HookStartupState::default()
+    );
     assert_eq!(client.state.hook_ipc, state::HookIpcState::default());
     assert_eq!(client.state.steam_identity_mismatch, None);
     assert!(!client.resume_gameplay_after_rejoin);
     assert_eq!(client.state.status, state::SessionStatus::Idle);
 }
-
