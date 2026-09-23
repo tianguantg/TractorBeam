@@ -501,6 +501,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roomJoinFailed => 'Failed to join room';
 
   @override
+  String get roomJoinRoomFull =>
+      'Room is full: the room has reached its player limit. Please wait for other players to leave and try again.';
+
+  @override
+  String get roomJoinRelayFull =>
+      'Relay is temporarily full: the relay server has reached its room capacity. Please try again later or choose another relay node.';
+
+  @override
+  String get roomJoinInvalidAdmission =>
+      'Could not verify room code: the code may be invalid or expired. Ask the host to send a new room code.';
+
+  @override
+  String get roomJoinDnsFailed =>
+      'Could not resolve relay server address. Check host configuration, DNS, and network connectivity.';
+
+  @override
+  String get roomJoinConnectionRefused =>
+      'Relay server refused connection. Check address, port, and server status.';
+
+  @override
+  String get roomJoinTimeout =>
+      'Connection to relay server timed out. Check network, firewall, or server status.';
+
+  @override
+  String get roomJoinNetworkUnreachable =>
+      'Relay server is unreachable from current network. Check network connection and routing.';
+
+  @override
+  String get roomJoinConnectionReset =>
+      'Relay connection was reset. Check network or try again later.';
+
+  @override
+  String get roomJoinUdpUnavailable =>
+      'UDP communication is restricted. You can retry with TCP.';
+
+  @override
+  String get roomJoinRetry => 'Retry Join';
+
+  @override
+  String get roomJoinClear => 'Clear';
+
+  @override
+  String get roomJoinFailedTitle => 'Failed to Join Room';
+
+  @override
+  String get roomJoinJoining => 'Joining room…';
+
+  @override
+  String get clipboardEmpty => 'Clipboard is empty';
+
+  @override
+  String get dialogPaste => 'Paste';
+
+  @override
   String get roomCreateFailed => 'Failed to create room';
 
   @override

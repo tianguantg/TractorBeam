@@ -212,7 +212,10 @@ class _MockStateController extends TractorBeamController {
   );
 
   @override
-  bridge.CommandReceipt leaveRoom({bool clearPending = false}) {
+  bridge.CommandReceipt leaveRoom({
+    bool clearPending = false,
+    bool reportRejection = true,
+  }) {
     leaveRoomCalled = true;
     inRoomState = false;
     sessionRunningState = false;

@@ -21,8 +21,24 @@ String localizeBridgeEvent(
     'event.relay_room_joined.success' ||
     'event.lan_room_joined.success' => l10n.connected,
     'event.lan_room_created.success' => l10n.roomCreatedSuccess,
+    'event.relay_room_joined.room_full' => l10n.roomJoinRoomFull,
+    'event.relay_room_joined.relay_full' => l10n.roomJoinRelayFull,
+    'event.relay_room_joined.invalid_admission' =>
+      l10n.roomJoinInvalidAdmission,
+    'event.relay_room_joined.dns_failed' => l10n.roomJoinDnsFailed,
+    'event.relay_room_joined.connection_refused' =>
+      l10n.roomJoinConnectionRefused,
+    'event.relay_room_joined.timeout' => l10n.roomJoinTimeout,
+    'event.relay_room_joined.network_unreachable' =>
+      l10n.roomJoinNetworkUnreachable,
+    'event.relay_room_joined.connection_reset' =>
+      l10n.roomJoinConnectionReset,
+    'event.relay_room_joined.udp_unavailable' => l10n.roomJoinUdpUnavailable,
     'event.relay_room_joined.failure' ||
-    'event.lan_room_joined.failure' => l10n.roomJoinFailed,
+    'event.lan_room_joined.failure' =>
+      event.displayText.trim().isNotEmpty
+          ? event.displayText
+          : l10n.roomJoinFailed,
     'event.lan_room_created.failure' => l10n.roomCreateFailed,
     'event.input_delay_read.success' => l10n.settingsInputDelayReadSuccess,
     'event.input_delay_written.success' => l10n.settingsInputDelayWriteSuccess,

@@ -4733,7 +4733,10 @@ class _RoomScreenTestController extends TractorBeamController {
   bridge.SteamAccountDto? get mostRecentAccount => customMostRecent;
 
   @override
-  bridge.CommandReceipt leaveRoom({bool clearPending = false}) {
+  bridge.CommandReceipt leaveRoom({
+    bool clearPending = false,
+    bool reportRejection = true,
+  }) {
     leaveRoomCalled = true;
     inRoom = false;
     notifyListeners();

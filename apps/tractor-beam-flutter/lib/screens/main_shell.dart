@@ -158,7 +158,11 @@ class _MainShellState extends State<MainShell> {
         type: event.success || isInputDelayWarning
             ? NotificationType.info
             : NotificationType.error,
-        duration: Duration(milliseconds: isInputDelayWarning ? 3600 : 2200),
+        duration: Duration(
+          milliseconds: !event.success
+              ? (isInputDelayWarning ? 3600 : 4500)
+              : 2200,
+        ),
       );
     });
   }

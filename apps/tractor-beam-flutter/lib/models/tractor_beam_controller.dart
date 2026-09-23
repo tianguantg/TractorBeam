@@ -714,8 +714,13 @@ class TractorBeamController extends ChangeNotifier {
 
   bridge.CommandReceipt createLanRoom(List<String> adapterIds) =>
       _native(() => bridge.createLanRoom(adapterIds: adapterIds));
-  bridge.CommandReceipt joinRoom(String code, {String? lanEndpoint}) => _native(
+  bridge.CommandReceipt joinRoom(
+    String code, {
+    String? lanEndpoint,
+    bool reportRejection = true,
+  }) => _native(
     () => bridge.joinRoom(joinCode: code, selectedLanEndpoint: lanEndpoint),
+    reportRejection: reportRejection,
   );
   bridge.CommandReceipt retryRelayRoomWithTcp(String code) =>
       _native(() => bridge.retryRelayRoomWithTcp(joinCode: code));
@@ -726,34 +731,53 @@ class TractorBeamController extends ChangeNotifier {
     () => bridge.joinHistoryRoom(historyId: historyId),
     reportRejection: reportRejection,
   );
-  bridge.CommandReceipt joinHistoryRoom(BigInt historyId) =>
-      _joinHistoryRoom(historyId);
-  bridge.CommandReceipt switchToHistoryRoom(BigInt historyId) {
-    if (!isInRoom) return joinHistoryRoom(historyId);
+  bridge.CommandReceipt joinHistoryRoom(
+    BigInt historyId, {
+    bool reportRejection = true,
+  }) => _joinHistoryRoom(historyId, reportRejection: reportRejection);
+  bridge.CommandReceipt switchToHistoryRoom(
+    BigInt historyId, {
+    bool reportRejection = true,
+  }) {
+    if (!isInRoom) {
+      return joinHistoryRoom(historyId, reportRejection: reportRejection);
+    }
     _pendingHistoryRoomId = historyId;
     _pendingJoinCode = null;
-    final receipt = leaveRoom(clearPending: false);
+    final receipt = leaveRoom(
+      clearPending: false,
+      reportRejection: reportRejection,
+    );
     if (!receipt.accepted) _pendingHistoryRoomId = null;
     return receipt;
   }
 
-  bridge.CommandReceipt switchRoom(String joinCode) {
-    if (!isInRoom) return joinRoom(joinCode);
+  bridge.CommandReceipt switchRoom(
+    String joinCode, {
+    bool reportRejection = true,
+  }) {
+    if (!isInRoom) return joinRoom(joinCode, reportRejection: reportRejection);
     _pendingJoinCode = joinCode;
     _pendingHistoryRoomId = null;
-    final receipt = leaveRoom(clearPending: false);
+    final receipt = leaveRoom(
+      clearPending: false,
+      reportRejection: reportRejection,
+    );
     if (!receipt.accepted) _pendingJoinCode = null;
     return receipt;
   }
 
   bridge.CommandReceipt continueLanJoin(String endpoint) =>
       _native(() => bridge.continueLanJoin(selectedLanEndpoint: endpoint));
-  bridge.CommandReceipt leaveRoom({bool clearPending = true}) {
+  bridge.CommandReceipt leaveRoom({
+    bool clearPending = true,
+    bool reportRejection = true,
+  }) {
     if (clearPending) {
       _pendingHistoryRoomId = null;
       _pendingJoinCode = null;
     }
-    return _native(bridge.leaveRoom);
+    return _native(bridge.leaveRoom, reportRejection: reportRejection);
   }
 
   bridge.CommandReceipt startGame() => _native(bridge.startGame);

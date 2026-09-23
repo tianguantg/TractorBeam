@@ -1418,20 +1418,23 @@ fn process_events(
                         Some(RoomSecret::Relay { join_code, .. }) => Some(join_code.clone()),
                         _ => None,
                     };
+                    let error_string = error.to_string();
                     let udp_fallback_suggested = matches!(
                         state.pending_room.as_ref(),
                         Some(RoomSecret::Relay { route, .. })
                             if route.transport == TransportChoice::Udp
-                    ) && is_udp_fallback_error(&error.to_string());
+                    ) && is_udp_fallback_error(&error_string);
                     state.pending_room = None;
                     state.room = None;
                     state.room_status = RoomStatusDto::Failed;
+                    let (error_key, error_text) = classify_relay_join_error(&error_string);
                     let mut failure = event(
                         "relay_room_joined",
                         false,
-                        &localize_network_error(&error.to_string()),
+                        &error_text,
                         failed_join_code,
                     );
+                    failure.message.key = error_key.to_owned();
                     if udp_fallback_suggested {
                         "event.relay_room_joined.udp_unavailable"
                             .clone_into(&mut failure.message.key);
@@ -2711,47 +2714,91 @@ fn launch_timeout_elapsed(started_at: Option<Instant>) -> bool {
     started_at.is_some_and(|started| started.elapsed() >= LAUNCH_TIMEOUT)
 }
 
-fn localize_network_error(message: &str) -> String {
+fn classify_relay_join_error(message: &str) -> (&'static str, String) {
     let normalized = message.to_ascii_lowercase();
+    if normalized.contains("room is full") || message.contains("房间已满") {
+        return (
+            "event.relay_room_joined.room_full",
+            "房间已满：当前房间已达到人数上限，请等待其他玩家退出后重试。".to_owned(),
+        );
+    }
+    if normalized.contains("relay room limit reached")
+        || normalized.contains("relay is full")
+        || message.contains("Relay 暂时已满")
+        || message.contains("Relay已满")
+    {
+        return (
+            "event.relay_room_joined.relay_full",
+            "Relay 暂时已满：当前 Relay 服务器已达到房间容量上限。请稍后重试，或更换其他 Relay 节点。".to_owned(),
+        );
+    }
+    if normalized.contains("join proof was rejected")
+        || normalized.contains("admissionrejected")
+        || normalized.contains("admission rejected")
+        || message.contains("无法验证联机码")
+    {
+        return (
+            "event.relay_room_joined.invalid_admission",
+            "无法验证联机码：联机码可能无效或已经失效，请让房主重新复制并发送最新的联机码。".to_owned(),
+        );
+    }
     if message.contains("不知道这样的主机")
         || normalized.contains("no such host is known")
         || normalized.contains("name or service not known")
         || normalized.contains("failed to lookup address information")
         || normalized.contains("nodename nor servname provided")
     {
-        return "无法解析 Relay 服务器地址，请检查主机名是否正确以及 DNS 和网络是否可用。"
-            .to_owned();
+        return (
+            "event.relay_room_joined.dns_failed",
+            "无法解析 Relay 服务器地址，请检查主机名是否正确以及 DNS 和网络是否可用。".to_owned(),
+        );
     }
     if message.contains("由于目标计算机积极拒绝")
         || normalized.contains("connection refused")
         || normalized.contains("actively refused")
     {
-        return "Relay 服务器拒绝连接，请检查地址、端口和服务器运行状态。".to_owned();
+        return (
+            "event.relay_room_joined.connection_refused",
+            "Relay 服务器拒绝连接，请检查地址、端口和服务器运行状态。".to_owned(),
+        );
     }
     if normalized.contains("timed out")
         || normalized.contains("timeout")
         || message.contains("超时")
+        || normalized == "no pongs received"
+        || normalized.contains("ping timed out")
     {
-        return "连接 Relay 服务器超时，请检查网络、防火墙或服务器状态。".to_owned();
+        return (
+            "event.relay_room_joined.timeout",
+            "连接 Relay 服务器超时，请检查网络、防火墙或服务器状态。".to_owned(),
+        );
     }
     if normalized.contains("network is unreachable")
         || normalized.contains("no route to host")
         || message.contains("网络不可达")
     {
-        return "当前网络无法到达 Relay 服务器，请检查网络连接和路由设置。".to_owned();
+        return (
+            "event.relay_room_joined.network_unreachable",
+            "当前网络无法到达 Relay 服务器，请检查网络连接和路由设置。".to_owned(),
+        );
     }
     if normalized.contains("connection reset") || message.contains("连接被重置") {
-        return "Relay 连接被中断，请检查网络或稍后重试。".to_owned();
-    }
-    if normalized == "no pongs received" || normalized.contains("ping timed out") {
-        return "Relay 服务器未响应测速请求，请检查节点状态、网络或防火墙。".to_owned();
+        return (
+            "event.relay_room_joined.connection_reset",
+            "Relay 连接被中断，请检查网络或稍后重试。".to_owned(),
+        );
     }
     let trimmed = message.trim();
-    if trimmed.is_empty() {
+    let text = if trimmed.is_empty() {
         "无法连接到 Relay 服务器，请检查节点配置和网络状态。".to_owned()
     } else {
         format!("无法连接到 Relay 服务器：{trimmed}")
-    }
+    };
+    ("event.relay_room_joined.failure", text)
+}
+
+fn localize_network_error(message: &str) -> String {
+    classify_relay_join_error(message).1
 }
 
 fn is_udp_fallback_error(message: &str) -> bool {
@@ -3253,6 +3300,45 @@ mod tests {
             localize_network_error("connect failed: connection refused"),
             "Relay 服务器拒绝连接，请检查地址、端口和服务器运行状态。"
         );
+    }
+
+    #[test]
+    fn classify_relay_join_error_distinguishes_admission_and_network_failures() {
+        let (key, text) = classify_relay_join_error("AdmissionRejected: room is full");
+        assert_eq!(key, "event.relay_room_joined.room_full");
+        assert!(text.contains("房间已满"));
+
+        let (key, text) = classify_relay_join_error("AdmissionRejected: relay room limit reached");
+        assert_eq!(key, "event.relay_room_joined.relay_full");
+        assert!(text.contains("Relay 暂时已满"));
+
+        let (key, text) = classify_relay_join_error("AdmissionRejected: join proof was rejected");
+        assert_eq!(key, "event.relay_room_joined.invalid_admission");
+        assert!(text.contains("无法验证联机码"));
+
+        let (key, text) = classify_relay_join_error("不知道这样的主机。 (os error 11001)");
+        assert_eq!(key, "event.relay_room_joined.dns_failed");
+        assert!(text.contains("无法解析 Relay 服务器地址"));
+
+        let (key, text) = classify_relay_join_error("connection refused");
+        assert_eq!(key, "event.relay_room_joined.connection_refused");
+        assert!(text.contains("拒绝连接"));
+
+        let (key, text) = classify_relay_join_error("connection timed out");
+        assert_eq!(key, "event.relay_room_joined.timeout");
+        assert!(text.contains("超时"));
+
+        let (key, text) = classify_relay_join_error("network is unreachable");
+        assert_eq!(key, "event.relay_room_joined.network_unreachable");
+        assert!(text.contains("网络无法到达"));
+
+        let (key, text) = classify_relay_join_error("connection reset by peer");
+        assert_eq!(key, "event.relay_room_joined.connection_reset");
+        assert!(text.contains("连接被中断"));
+
+        let (key, text) = classify_relay_join_error("some mysterious unexpected protocol error");
+        assert_eq!(key, "event.relay_room_joined.failure");
+        assert!(text.contains("some mysterious unexpected protocol error"));
     }
 
     #[test]

@@ -44,6 +44,9 @@ class _RoomScreenState extends State<RoomScreen>
   bool? _lastCoreRoomState;
   BigInt? _lastRoomGeneration;
   BigInt _handledLanSelectionRevision = BigInt.from(-1);
+  int _handledEventSerial = -1;
+  String? _lastJoinFailedCode;
+  String? _lastJoinErrorMessage;
   bool _isDialogOpen = false;
 
   TractorBeamController? get _app => TractorBeamScope.maybeOf(context);
@@ -136,6 +139,27 @@ class _RoomScreenState extends State<RoomScreen>
         if (mounted) _selectLanEndpoint(app.snapshot!.lanJoinEndpoints);
       });
     }
+
+    final currentEventSerial = app?.eventSerial ?? 0;
+    if (currentEventSerial != _handledEventSerial) {
+      _handledEventSerial = currentEventSerial;
+      final event = app?.latestEvent;
+      if (event != null &&
+          (event.code == 'relay_room_joined' ||
+              event.code == 'lan_room_joined')) {
+        if (event.success) {
+          _lastJoinFailedCode = null;
+          _lastJoinErrorMessage = null;
+        } else {
+          _lastJoinFailedCode = event.value;
+          _lastJoinErrorMessage = localizeBridgeEvent(context, event);
+        }
+      }
+    }
+    if (_inRoom) {
+      _lastJoinFailedCode = null;
+      _lastJoinErrorMessage = null;
+    }
   }
 
   @override
@@ -187,19 +211,26 @@ class _RoomScreenState extends State<RoomScreen>
         }
         if (!mounted) return;
         if (_app?.snapshot != null) {
+          setState(() {
+            _lastJoinFailedCode = null;
+            _lastJoinErrorMessage = null;
+          });
           final receipt = replacingCurrentRoom
-              ? _app!.switchRoom(code)
-              : _app!.joinRoom(code);
+              ? _app!.switchRoom(code, reportRejection: false)
+              : _app!.joinRoom(code, reportRejection: false);
           if (!receipt.accepted) {
-            _notice(
-              localizeBridgeRejection(
-                context,
-                receipt.rejection,
-                fallback: replacingCurrentRoom
-                    ? l10n.roomSwitchFailed
-                    : l10n.roomJoinFailed,
-              ),
+            final errorText = localizeBridgeRejection(
+              context,
+              receipt.rejection,
+              fallback: replacingCurrentRoom
+                  ? l10n.roomSwitchFailed
+                  : l10n.roomJoinFailed,
             );
+            setState(() {
+              _lastJoinFailedCode = code;
+              _lastJoinErrorMessage = errorText;
+            });
+            _notice(errorText);
           }
           return;
         }
@@ -217,6 +248,28 @@ class _RoomScreenState extends State<RoomScreen>
       }
     } finally {
       if (mounted) _isDialogOpen = false;
+    }
+  }
+
+  Future<void> _retryJoinRoom(String code) async {
+    final app = _app;
+    if (app == null || _roomBusy) return;
+    setState(() {
+      _lastJoinFailedCode = null;
+      _lastJoinErrorMessage = null;
+    });
+    final receipt = app.joinRoom(code, reportRejection: false);
+    if (!receipt.accepted) {
+      final errorText = localizeBridgeRejection(
+        context,
+        receipt.rejection,
+        fallback: context.l10n.roomJoinFailed,
+      );
+      setState(() {
+        _lastJoinFailedCode = code;
+        _lastJoinErrorMessage = errorText;
+      });
+      _notice(errorText);
     }
   }
 
@@ -252,6 +305,10 @@ class _RoomScreenState extends State<RoomScreen>
     _isDialogOpen = true;
     try {
       final l10n = context.l10n;
+      setState(() {
+        _lastJoinFailedCode = null;
+        _lastJoinErrorMessage = null;
+      });
       final isLan =
           TractorBeamScope.maybeOf(context)?.connectionMode == ConnectionMode.lan;
       if (isLan) {
@@ -375,6 +432,10 @@ class _RoomScreenState extends State<RoomScreen>
     }
 
     if (_app?.snapshot != null) {
+      setState(() {
+        _lastJoinFailedCode = null;
+        _lastJoinErrorMessage = null;
+      });
       final receipt = _app!.leaveRoom();
       if (!receipt.accepted) {
         _notice(
@@ -749,6 +810,132 @@ class _RoomScreenState extends State<RoomScreen>
                     ),
                   ),
                 ],
+              ),
+            )
+          else if (_app?.snapshot?.room.status == bridge.RoomStatusDto.joining)
+            Expanded(
+              child: TornPaperContainer(
+                seed: 31,
+                roughness: 1.25,
+                fillColor: AppColors.paperBg,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 12,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        l10n.roomJoinJoining,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.bodyBold.copyWith(fontSize: 15),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else if (_lastJoinErrorMessage != null)
+            Expanded(
+              child: TornPaperContainer(
+                seed: 31,
+                roughness: 1.25,
+                fillColor: AppColors.paperBg,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TbIcons.noticeAlert(
+                            size: 15,
+                            color: AppColors.accentRed,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            l10n.roomJoinFailedTitle,
+                            style: AppTextStyles.bodyBold.copyWith(
+                              fontSize: 13,
+                              color: AppColors.accentRed,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        _lastJoinErrorMessage!,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.metadata.copyWith(
+                          fontSize: 12,
+                          color: AppColors.accentRed,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_lastJoinFailedCode != null &&
+                              _lastJoinFailedCode!.isNotEmpty) ...[
+                            _SmallButton(
+                              icon: const Icon(
+                                Icons.refresh_rounded,
+                                size: 13,
+                                color: AppColors.paperBg,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 9,
+                                vertical: 3,
+                              ),
+                              label: l10n.roomJoinRetry,
+                              onTap: _roomBusy
+                                  ? () => _notice(l10n.roomProcessingWait)
+                                  : () => _retryJoinRoom(_lastJoinFailedCode!),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          _SmallButton(
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              size: 13,
+                              color: AppColors.paperBg,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 3,
+                            ),
+                            label: l10n.roomJoinClear,
+                            onTap: () {
+                              setState(() {
+                                _lastJoinFailedCode = null;
+                                _lastJoinErrorMessage = null;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             )
           else
@@ -1681,7 +1868,13 @@ class _SmallButton extends StatelessWidget {
   final Widget icon;
   final String label;
   final VoidCallback? onTap;
-  const _SmallButton({required this.icon, required this.label, this.onTap});
+  final EdgeInsetsGeometry padding;
+  const _SmallButton({
+    required this.icon,
+    required this.label,
+    this.onTap,
+    this.padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+  });
   @override
   Widget build(BuildContext context) => TornPaperButton(
     onTap: onTap ?? () {},
@@ -1690,7 +1883,7 @@ class _SmallButton extends StatelessWidget {
     borderWidth: 1.8,
     fillColor: AppColors.canvasDarker,
     hoverFillColor: const Color(0xFF383331),
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    padding: padding,
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [

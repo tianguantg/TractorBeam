@@ -998,6 +998,96 @@ abstract class AppLocalizations {
   /// **'加入房间失败'**
   String get roomJoinFailed;
 
+  /// No description provided for @roomJoinRoomFull.
+  ///
+  /// In zh, this message translates to:
+  /// **'房间已满：当前房间已达到人数上限，请等待其他玩家退出后重试。'**
+  String get roomJoinRoomFull;
+
+  /// No description provided for @roomJoinRelayFull.
+  ///
+  /// In zh, this message translates to:
+  /// **'Relay 暂时已满：当前 Relay 服务器已达到房间容量上限。请稍后重试，或更换其他 Relay 节点。'**
+  String get roomJoinRelayFull;
+
+  /// No description provided for @roomJoinInvalidAdmission.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法验证联机码：联机码可能无效或已经失效，请让房主重新复制并发送最新的联机码。'**
+  String get roomJoinInvalidAdmission;
+
+  /// No description provided for @roomJoinDnsFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法解析 Relay 服务器地址，请检查主机名是否正确以及 DNS 和网络是否可用。'**
+  String get roomJoinDnsFailed;
+
+  /// No description provided for @roomJoinConnectionRefused.
+  ///
+  /// In zh, this message translates to:
+  /// **'Relay 服务器拒绝连接，请检查地址、端口和服务器运行状态。'**
+  String get roomJoinConnectionRefused;
+
+  /// No description provided for @roomJoinTimeout.
+  ///
+  /// In zh, this message translates to:
+  /// **'连接 Relay 服务器超时，请检查网络、防火墙或服务器状态。'**
+  String get roomJoinTimeout;
+
+  /// No description provided for @roomJoinNetworkUnreachable.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前网络无法到达 Relay 服务器，请检查网络连接和路由设置。'**
+  String get roomJoinNetworkUnreachable;
+
+  /// No description provided for @roomJoinConnectionReset.
+  ///
+  /// In zh, this message translates to:
+  /// **'Relay 连接被中断，请检查网络或稍后重试。'**
+  String get roomJoinConnectionReset;
+
+  /// No description provided for @roomJoinUdpUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'UDP 通信受限，可尝试改用 TCP 重新连接。'**
+  String get roomJoinUdpUnavailable;
+
+  /// No description provided for @roomJoinRetry.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新加入'**
+  String get roomJoinRetry;
+
+  /// No description provided for @roomJoinClear.
+  ///
+  /// In zh, this message translates to:
+  /// **'清除'**
+  String get roomJoinClear;
+
+  /// No description provided for @roomJoinFailedTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'加入房间失败'**
+  String get roomJoinFailedTitle;
+
+  /// No description provided for @roomJoinJoining.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在加入房间…'**
+  String get roomJoinJoining;
+
+  /// No description provided for @clipboardEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'剪贴板为空'**
+  String get clipboardEmpty;
+
+  /// No description provided for @dialogPaste.
+  ///
+  /// In zh, this message translates to:
+  /// **'粘贴'**
+  String get dialogPaste;
+
   /// No description provided for @roomCreateFailed.
   ///
   /// In zh, this message translates to:

@@ -228,6 +228,7 @@ class PaperDialogShell extends StatelessWidget {
   final Widget? leadingAction;
   final double maxWidth;
   final int seed;
+  final bool autofocus;
 
   const PaperDialogShell({
     super.key,
@@ -238,6 +239,7 @@ class PaperDialogShell extends StatelessWidget {
     this.leadingAction,
     this.maxWidth = 440,
     this.seed = 58,
+    this.autofocus = true,
   });
 
   @override
@@ -257,7 +259,7 @@ class PaperDialogShell extends StatelessWidget {
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: maxWidth),
             child: Focus(
-              autofocus: true,
+              autofocus: autofocus,
               onKeyEvent: (node, event) {
                 if (event is KeyDownEvent &&
                     event.logicalKey == LogicalKeyboardKey.escape) {
@@ -356,6 +358,8 @@ Widget _buildDialogButton({
 Widget _buildPaperTextField({
   required String label,
   required TextEditingController controller,
+  FocusNode? focusNode,
+  bool autofocus = false,
   String? hintText,
   TextInputType? keyboardType,
   bool isMono = false,
@@ -363,6 +367,7 @@ Widget _buildPaperTextField({
   List<TextInputFormatter>? inputFormatters,
   ValueChanged<String>? onSubmitted,
   ValueChanged<String>? onChanged,
+  Widget? trailing,
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,23 +381,32 @@ Widget _buildPaperTextField({
           borderRadius: BorderRadius.circular(5),
           border: Border.all(color: AppColors.paperBorder, width: 1.4),
         ),
-        child: TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          textCapitalization: textCapitalization,
-          inputFormatters: inputFormatters,
-          onSubmitted: onSubmitted,
-          onChanged: onChanged,
-          style: isMono
-              ? DialogTextStyles.inputMono
-              : DialogTextStyles.inputText,
-          decoration: InputDecoration(
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(vertical: 6),
-            hintText: hintText,
-            hintStyle: DialogTextStyles.inputHint,
-            border: InputBorder.none,
-          ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                autofocus: autofocus,
+                keyboardType: keyboardType,
+                textCapitalization: textCapitalization,
+                inputFormatters: inputFormatters,
+                onSubmitted: onSubmitted,
+                onChanged: onChanged,
+                style: isMono
+                    ? DialogTextStyles.inputMono
+                    : DialogTextStyles.inputText,
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 6),
+                  hintText: hintText,
+                  hintStyle: DialogTextStyles.inputHint,
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+            ?trailing,
+          ],
         ),
       ),
     ],
@@ -1552,12 +1566,36 @@ class _JoinRoomDialogWidget extends StatefulWidget {
 
 class _JoinRoomDialogWidgetState extends State<_JoinRoomDialogWidget> {
   final _codeController = TextEditingController();
+  final _codeFocusNode = FocusNode();
   String? _errorMessage;
 
   @override
   void dispose() {
     _codeController.dispose();
+    _codeFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _pasteJoinCode() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text?.trim();
+    if (text == null || text.isEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = context.l10n.clipboardEmpty;
+      });
+      return;
+    }
+    _codeController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    _codeFocusNode.requestFocus();
+    if (_errorMessage != null) {
+      setState(() {
+        _errorMessage = null;
+      });
+    }
   }
 
   void _onJoin() {
@@ -1578,6 +1616,7 @@ class _JoinRoomDialogWidgetState extends State<_JoinRoomDialogWidget> {
     return PaperDialogShell(
       seed: 94,
       maxWidth: 380,
+      autofocus: false,
       icon: TbIcons.joinRoom(size: 20, color: AppColors.accentRedLight),
       title: l10n.dialogJoinRoomTitle,
       content: Column(
@@ -1588,8 +1627,37 @@ class _JoinRoomDialogWidgetState extends State<_JoinRoomDialogWidget> {
           _buildPaperTextField(
             label: l10n.dialogJoinRoomCodeLabel,
             controller: _codeController,
+            focusNode: _codeFocusNode,
+            autofocus: true,
             isMono: true,
             textCapitalization: TextCapitalization.none,
+            trailing: InkWell(
+              key: const ValueKey('join-room-paste-button'),
+              onTap: _pasteJoinCode,
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.content_paste_rounded,
+                      size: 14,
+                      color: AppColors.inkLight,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      l10n.dialogPaste,
+                      style: DialogTextStyles.label.copyWith(
+                        fontSize: 12,
+                        color: AppColors.inkLight,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             onChanged: (_) {
               if (_errorMessage != null) {
                 setState(() => _errorMessage = null);

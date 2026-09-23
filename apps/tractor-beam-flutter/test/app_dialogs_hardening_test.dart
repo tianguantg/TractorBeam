@@ -135,6 +135,86 @@ void main() {
     );
 
     testWidgets(
+      'showJoinRoomDialog autofocuses text field and provides functional paste button',
+      (tester) async {
+        String? result;
+        String clipboardText = '';
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (MethodCall methodCall) async {
+            if (methodCall.method == 'Clipboard.setData') {
+              clipboardText =
+                  (methodCall.arguments as Map)['text'] as String? ?? '';
+              return null;
+            }
+            if (methodCall.method == 'Clipboard.getData') {
+              return <String, dynamic>{
+                'text': clipboardText,
+              };
+            }
+            return null;
+          },
+        );
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          );
+        });
+
+        await tester.pumpWidget(
+          _wrapWithApp(
+            Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () async {
+                  result = await showJoinRoomDialog(context);
+                },
+                child: const Text('Open'),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        final textFieldFinder = find.byType(TextField);
+        expect(textFieldFinder, findsOneWidget);
+        final textField = tester.widget<TextField>(textFieldFinder);
+        expect(textField.autofocus, isTrue);
+        expect(textField.focusNode?.hasFocus, isTrue);
+
+        // Clicking paste when clipboard is empty shows inline error.
+        await Clipboard.setData(const ClipboardData(text: ''));
+        await tester.tap(find.byKey(const ValueKey('join-room-paste-button')));
+        await tester.pump();
+
+        expect(find.text('剪贴板为空'), findsOneWidget);
+
+        // Set clipboard to a case-sensitive Base58 string with whitespace.
+        const mixedCaseCode = '  TB58CodeWithMixedCaseAndTrailingSpaces  ';
+        await Clipboard.setData(const ClipboardData(text: mixedCaseCode));
+
+        await tester.tap(find.byKey(const ValueKey('join-room-paste-button')));
+        await tester.pump();
+
+        // The error disappears and the trimmed text is inserted with preserved case.
+        expect(find.text('剪贴板为空'), findsNothing);
+        expect(
+          find.text('TB58CodeWithMixedCaseAndTrailingSpaces'),
+          findsOneWidget,
+        );
+
+        // Submit via join button.
+        await tester.tap(find.text('加入'));
+        await tester.pumpAndSettle();
+
+        expect(result, 'TB58CodeWithMixedCaseAndTrailingSpaces');
+        expect(find.byType(PaperDialogShell), findsNothing);
+      },
+    );
+
+    testWidgets(
       'showManualSteamAccountDialog autofills from history and restricts steamId64 to digits and 17 length',
       (tester) async {
         SteamAccountData? result;

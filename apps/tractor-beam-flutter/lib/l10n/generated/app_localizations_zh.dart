@@ -475,6 +475,53 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roomJoinFailed => '加入房间失败';
 
   @override
+  String get roomJoinRoomFull => '房间已满：当前房间已达到人数上限，请等待其他玩家退出后重试。';
+
+  @override
+  String get roomJoinRelayFull =>
+      'Relay 暂时已满：当前 Relay 服务器已达到房间容量上限。请稍后重试，或更换其他 Relay 节点。';
+
+  @override
+  String get roomJoinInvalidAdmission =>
+      '无法验证联机码：联机码可能无效或已经失效，请让房主重新复制并发送最新的联机码。';
+
+  @override
+  String get roomJoinDnsFailed => '无法解析 Relay 服务器地址，请检查主机名是否正确以及 DNS 和网络是否可用。';
+
+  @override
+  String get roomJoinConnectionRefused => 'Relay 服务器拒绝连接，请检查地址、端口和服务器运行状态。';
+
+  @override
+  String get roomJoinTimeout => '连接 Relay 服务器超时，请检查网络、防火墙或服务器状态。';
+
+  @override
+  String get roomJoinNetworkUnreachable => '当前网络无法到达 Relay 服务器，请检查网络连接和路由设置。';
+
+  @override
+  String get roomJoinConnectionReset => 'Relay 连接被中断，请检查网络或稍后重试。';
+
+  @override
+  String get roomJoinUdpUnavailable => 'UDP 通信受限，可尝试改用 TCP 重新连接。';
+
+  @override
+  String get roomJoinRetry => '重新加入';
+
+  @override
+  String get roomJoinClear => '清除';
+
+  @override
+  String get roomJoinFailedTitle => '加入房间失败';
+
+  @override
+  String get roomJoinJoining => '正在加入房间…';
+
+  @override
+  String get clipboardEmpty => '剪贴板为空';
+
+  @override
+  String get dialogPaste => '粘贴';
+
+  @override
   String get roomCreateFailed => '创建房间失败';
 
   @override
