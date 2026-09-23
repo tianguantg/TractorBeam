@@ -43,6 +43,7 @@ use super::{
 
 mod data_plane;
 mod lan_route;
+mod relay_rtt;
 
 use data_plane::{
     RelayTransportTaskContext, emit_health_summary, health_snapshot_task, hook_dispatch_task,

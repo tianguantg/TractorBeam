@@ -1811,4 +1811,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String startupUpdateAvailableNotice(String version) {
     return '发现新版本 v$version';
   }
+
+  @override
+  String activeRelayLatencyTooltip(int latency, String grade) {
+    return '当前 Relay 往返延迟：${latency}ms ($grade)';
+  }
+
+  @override
+  String selectedRelayLatencyTooltip(int latency, String grade) {
+    return '节点测速延迟：${latency}ms ($grade)';
+  }
+
+  @override
+  String get relayReconnecting => '重连中…';
+
+  @override
+  String get relayReconnectingTooltip => 'Relay 连接已断开，正在尝试重连…';
 }

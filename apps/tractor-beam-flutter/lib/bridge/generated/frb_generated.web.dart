@@ -30,6 +30,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String dco_decode_String(dynamic raw);
 
   @protected
+  ActiveRelayDto dco_decode_active_relay_dto(dynamic raw);
+
+  @protected
   AppEvent dco_decode_app_event(dynamic raw);
 
   @protected
@@ -46,6 +49,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   BootstrapStateDto dco_decode_bootstrap_state_dto(dynamic raw);
+
+  @protected
+  ActiveRelayDto dco_decode_box_autoadd_active_relay_dto(dynamic raw);
 
   @protected
   AvailableUpdateDto dco_decode_box_autoadd_available_update_dto(dynamic raw);
@@ -161,6 +167,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? dco_decode_opt_String(dynamic raw);
 
   @protected
+  ActiveRelayDto? dco_decode_opt_box_autoadd_active_relay_dto(dynamic raw);
+
+  @protected
   AvailableUpdateDto? dco_decode_opt_box_autoadd_available_update_dto(
     dynamic raw,
   );
@@ -197,6 +206,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RelayDto dco_decode_relay_dto(dynamic raw);
+
+  @protected
+  RelayLinkStatusDto dco_decode_relay_link_status_dto(dynamic raw);
 
   @protected
   RoomHistoryEntryDto dco_decode_room_history_entry_dto(dynamic raw);
@@ -267,6 +279,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String sse_decode_String(SseDeserializer deserializer);
 
   @protected
+  ActiveRelayDto sse_decode_active_relay_dto(SseDeserializer deserializer);
+
+  @protected
   AppEvent sse_decode_app_event(SseDeserializer deserializer);
 
   @protected
@@ -285,6 +300,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   BootstrapStateDto sse_decode_bootstrap_state_dto(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ActiveRelayDto sse_decode_box_autoadd_active_relay_dto(
     SseDeserializer deserializer,
   );
 
@@ -430,6 +450,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
+  ActiveRelayDto? sse_decode_opt_box_autoadd_active_relay_dto(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   AvailableUpdateDto? sse_decode_opt_box_autoadd_available_update_dto(
     SseDeserializer deserializer,
   );
@@ -474,6 +499,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RelayDto sse_decode_relay_dto(SseDeserializer deserializer);
+
+  @protected
+  RelayLinkStatusDto sse_decode_relay_link_status_dto(
+    SseDeserializer deserializer,
+  );
 
   @protected
   RoomHistoryEntryDto sse_decode_room_history_entry_dto(
@@ -558,6 +588,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_String(String self, SseSerializer serializer);
 
   @protected
+  void sse_encode_active_relay_dto(
+    ActiveRelayDto self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_app_event(AppEvent self, SseSerializer serializer);
 
   @protected
@@ -578,6 +614,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_bootstrap_state_dto(
     BootstrapStateDto self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_active_relay_dto(
+    ActiveRelayDto self,
     SseSerializer serializer,
   );
 
@@ -759,6 +801,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_box_autoadd_active_relay_dto(
+    ActiveRelayDto? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_available_update_dto(
     AvailableUpdateDto? self,
     SseSerializer serializer,
@@ -808,6 +856,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_relay_dto(RelayDto self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_relay_link_status_dto(
+    RelayLinkStatusDto self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_room_history_entry_dto(

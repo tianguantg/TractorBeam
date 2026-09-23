@@ -258,10 +258,7 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
             borderRadius: BorderRadius.circular(4),
             onTap: widget.onOpenFull,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: const Color(0xFF3B3430),
                 borderRadius: BorderRadius.circular(4),
@@ -298,6 +295,10 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
     );
   }
 
+  /// Builds the compact status line in the lightweight monitor window.
+  ///
+  /// For Relay rooms, latency reflects the active Relay control link RTT
+  /// (not the peer-to-peer UDP data path RTT).
   Widget _buildStatus(BuildContext context) {
     final route = switch (_viewState.route) {
       bridge.RoomRouteDto.relay => context.l10n.relayConnectionRoute,
@@ -310,6 +311,23 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
       bridge.TransportSelection.relayDefault => context.l10n.relayDefault,
       _ => '—',
     };
+    final String routeInfo;
+    if (_viewState.route == bridge.RoomRouteDto.lan) {
+      routeInfo = route;
+    } else if (_viewState.route == bridge.RoomRouteDto.relay) {
+      final activeRelay = _viewState.activeRelay;
+      if (activeRelay?.link == bridge.RelayLinkStatusDto.reconnecting) {
+        routeInfo =
+            '$route  ·  $transport  ·  ${context.l10n.relayReconnecting}';
+      } else if (activeRelay?.latencyMs != null) {
+        routeInfo = '$route  ·  $transport  ·  ${activeRelay!.latencyMs}ms';
+      } else {
+        routeInfo = '$route  ·  $transport';
+      }
+    } else {
+      routeInfo = '$route  ·  $transport';
+    }
+
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -322,7 +340,7 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
         children: [
           Expanded(
             child: Text(
-              '$route  ·  $transport',
+              routeInfo,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: Color(0xFFD6CEC7),
@@ -352,8 +370,8 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
                     : context.l10n.hookConnecting,
                 style: TextStyle(
                   color: _viewState.hookReady
-                    ? AppColors.statusRunningText
-                    : AppColors.latencyYellow,
+                      ? AppColors.statusRunningText
+                      : AppColors.latencyYellow,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                 ),
@@ -420,7 +438,8 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
         return;
       }
       if (!widget.controller.isNative) {
-        final currentDelay = widget.controller.lightweightViewState.inputDelay ??
+        final currentDelay =
+            widget.controller.lightweightViewState.inputDelay ??
             widget.controller.snapshot?.hook.inputDelay;
         if (currentDelay != null) {
           setState(() {
@@ -453,7 +472,8 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
     final l10n = context.l10n;
     final canEdit = _viewState.canEditInputDelay;
     final isOfficial = _viewState.isOfficial;
-    final hasError = _viewState.inputDelayError != null &&
+    final hasError =
+        _viewState.inputDelayError != null &&
         _viewState.inputDelayError!.isNotEmpty;
 
     return Container(
@@ -520,7 +540,11 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
                   _buildStepperButton(
                     key: const ValueKey('lightweight-delay-minus'),
                     icon: Icons.remove,
-                    enabled: canEdit && _draftDelay > 0 && !_isApplying && !_isReadingDelay,
+                    enabled:
+                        canEdit &&
+                        _draftDelay > 0 &&
+                        !_isApplying &&
+                        !_isReadingDelay,
                     onTap: () => setState(() {
                       _draftDelay--;
                       _hasUserEditedDelay = true;
@@ -544,7 +568,11 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
                   _buildStepperButton(
                     key: const ValueKey('lightweight-delay-plus'),
                     icon: Icons.add,
-                    enabled: canEdit && _draftDelay < 5 && !_isApplying && !_isReadingDelay,
+                    enabled:
+                        canEdit &&
+                        _draftDelay < 5 &&
+                        !_isApplying &&
+                        !_isReadingDelay,
                     onTap: () => setState(() {
                       _draftDelay++;
                       _hasUserEditedDelay = true;
@@ -563,9 +591,14 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
                   InkWell(
                     key: const ValueKey('lightweight-delay-apply'),
                     borderRadius: BorderRadius.circular(4),
-                    onTap: canEdit && !_isApplying && !_isReadingDelay ? _applyDelay : null,
+                    onTap: canEdit && !_isApplying && !_isReadingDelay
+                        ? _applyDelay
+                        : null,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: canEdit && !_isApplying && !_isReadingDelay
                             ? const Color(0xFF3B3430)
@@ -574,7 +607,9 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
                         border: Border.all(
                           color: canEdit && !_isApplying && !_isReadingDelay
                               ? AppColors.statusBarBorder.withValues(alpha: 0.8)
-                              : AppColors.statusBarBorder.withValues(alpha: 0.3),
+                              : AppColors.statusBarBorder.withValues(
+                                  alpha: 0.3,
+                                ),
                           width: 1,
                         ),
                       ),
@@ -590,7 +625,8 @@ class _LightweightSessionViewState extends State<LightweightSessionView> {
                           : Text(
                               l10n.lightweightApplyDelay,
                               style: TextStyle(
-                                color: canEdit && !_isApplying && !_isReadingDelay
+                                color:
+                                    canEdit && !_isApplying && !_isReadingDelay
                                     ? AppColors.statusText
                                     : AppColors.inkMuted,
                                 fontSize: 11.5,
@@ -727,7 +763,8 @@ class _MemberRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final initial = member.displayName.characters.firstOrNull ?? '?';
     final connLower = member.connection.trim().toLowerCase();
-    final isDisconnected = !member.isLocal &&
+    final isDisconnected =
+        !member.isLocal &&
         (connLower == 'disconnected' ||
             connLower == '已断开' ||
             connLower == 'inactive' ||

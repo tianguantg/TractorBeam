@@ -6,9 +6,9 @@
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `accepted`, `account_display_name`, `build_session_config`, `clone_room`, `critical_update_state`, `deduplicate_light_ping_targets`, `duration_ms`, `effective_transport`, `enforce_launch_timeout`, `event`, `flutter_release_version`, `initialize_draft`, `is_udp_fallback_error`, `launch_timeout_elapsed`, `localize_input_delay_error`, `localize_launch_error`, `localize_network_error`, `map_connection_test_report`, `map_connection_tests`, `map_lan_adapter`, `map_launch_progress`, `map_relay`, `map_snapshot`, `merged_accounts`, `mode_from_dto`, `mode_to_dto`, `mutate_draft`, `normalize_selections`, `not_initialized`, `operation_name`, `path_event`, `persist_preferences`, `persist_selection`, `process_events`, `publish_update`, `receipt`, `record_active_room`, `rejected`, `relay_input`, `relay_transport_for_endpoint`, `result_event`, `same_physical_light_ping_target`, `saturating_u64`, `save_relay`, `selected_identity_and_relay`, `selected_identity`, `snapshot_and_draft`, `submit`, `transport_from_dto`, `transport_to_dto`, `trigger_update_check`, `unavailable_snapshot`, `validate_select_relay`
+// These functions are ignored because they are not marked as `pub`: `accepted`, `account_display_name`, `build_session_config`, `classify_relay_join_error`, `clone_room`, `critical_update_state`, `deduplicate_light_ping_targets`, `duration_ms`, `effective_transport`, `enforce_launch_timeout`, `event`, `flutter_release_version`, `initialize_draft`, `is_udp_fallback_error`, `launch_timeout_elapsed`, `localize_input_delay_error`, `localize_launch_error`, `localize_network_error`, `map_connection_test_report`, `map_connection_tests`, `map_lan_adapter`, `map_launch_progress`, `map_relay`, `map_snapshot`, `merged_accounts`, `mode_from_dto`, `mode_to_dto`, `mutate_draft`, `normalize_selections`, `not_initialized`, `operation_name`, `path_event`, `persist_preferences`, `persist_selection`, `process_events`, `publish_update`, `receipt`, `record_active_room`, `rejected`, `relay_input`, `relay_transport_for_endpoint`, `result_event`, `same_physical_light_ping_target`, `saturating_u64`, `save_relay`, `selected_identity_and_relay`, `selected_identity`, `snapshot_and_draft`, `submit`, `transport_from_dto`, `transport_to_dto`, `trigger_update_check`, `unavailable_snapshot`, `validate_select_relay`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `BridgeRuntime`, `BridgeState`, `CriticalUpdateState`, `PendingLanJoin`, `PendingRelayOperation`, `RoomSecret`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
 // These functions are ignored (category: IgnoreBecauseOwnerTyShouldIgnore): `default`
 
 CommandReceipt initialize() => RustLib.instance.api.crateApiInitialize();
@@ -135,6 +135,45 @@ CommandReceipt shutdown() => RustLib.instance.api.crateApiShutdown();
 String bridgeVersion() => RustLib.instance.api.crateApiBridgeVersion();
 
 CommandReceipt checkUpdate() => RustLib.instance.api.crateApiCheckUpdate();
+
+class ActiveRelayDto {
+  final String? relayId;
+  final String? displayName;
+  final String endpoint;
+  final TransportSelection transport;
+  final BigInt? latencyMs;
+  final RelayLinkStatusDto link;
+
+  const ActiveRelayDto({
+    this.relayId,
+    this.displayName,
+    required this.endpoint,
+    required this.transport,
+    this.latencyMs,
+    required this.link,
+  });
+
+  @override
+  int get hashCode =>
+      relayId.hashCode ^
+      displayName.hashCode ^
+      endpoint.hashCode ^
+      transport.hashCode ^
+      latencyMs.hashCode ^
+      link.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ActiveRelayDto &&
+          runtimeType == other.runtimeType &&
+          relayId == other.relayId &&
+          displayName == other.displayName &&
+          endpoint == other.endpoint &&
+          transport == other.transport &&
+          latencyMs == other.latencyMs &&
+          link == other.link;
+}
 
 class AppEvent {
   final String code;
@@ -831,6 +870,14 @@ class RelayDto {
           defaultTransport == other.defaultTransport;
 }
 
+enum RelayLinkStatusDto {
+  inactive,
+  connected,
+  reconnecting,
+  recovered,
+  recoveryExhausted,
+}
+
 class RoomHistoryEntryDto {
   final BigInt id;
   final String joinCode;
@@ -913,6 +960,7 @@ class RoomSnapshot {
   final String? joinCode;
   final List<RoomMemberDto> members;
   final SteamIdentityMismatchDto? steamIdentityMismatch;
+  final ActiveRelayDto? activeRelay;
 
   const RoomSnapshot({
     required this.active,
@@ -923,6 +971,7 @@ class RoomSnapshot {
     this.joinCode,
     required this.members,
     this.steamIdentityMismatch,
+    this.activeRelay,
   });
 
   @override
@@ -934,7 +983,8 @@ class RoomSnapshot {
       transport.hashCode ^
       joinCode.hashCode ^
       members.hashCode ^
-      steamIdentityMismatch.hashCode;
+      steamIdentityMismatch.hashCode ^
+      activeRelay.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -948,7 +998,8 @@ class RoomSnapshot {
           transport == other.transport &&
           joinCode == other.joinCode &&
           members == other.members &&
-          steamIdentityMismatch == other.steamIdentityMismatch;
+          steamIdentityMismatch == other.steamIdentityMismatch &&
+          activeRelay == other.activeRelay;
 }
 
 enum RoomStatusDto {

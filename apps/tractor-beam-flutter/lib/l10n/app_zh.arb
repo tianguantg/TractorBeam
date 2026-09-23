@@ -887,5 +887,29 @@
         "type": "String"
       }
     }
-  }
+  },
+  "activeRelayLatencyTooltip": "当前 Relay 往返延迟：{latency}ms ({grade})",
+  "@activeRelayLatencyTooltip": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      },
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "selectedRelayLatencyTooltip": "节点测速延迟：{latency}ms ({grade})",
+  "@selectedRelayLatencyTooltip": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      },
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "relayReconnecting": "重连中…",
+  "relayReconnectingTooltip": "Relay 连接已断开，正在尝试重连…"
 }

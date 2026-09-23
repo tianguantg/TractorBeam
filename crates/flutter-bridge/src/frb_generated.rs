@@ -1346,6 +1346,26 @@ impl SseDecode for String {
     }
 }
 
+impl SseDecode for crate::api::ActiveRelayDto {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_relayId = <Option<String>>::sse_decode(deserializer);
+        let mut var_displayName = <Option<String>>::sse_decode(deserializer);
+        let mut var_endpoint = <String>::sse_decode(deserializer);
+        let mut var_transport = <crate::api::TransportSelection>::sse_decode(deserializer);
+        let mut var_latencyMs = <Option<u64>>::sse_decode(deserializer);
+        let mut var_link = <crate::api::RelayLinkStatusDto>::sse_decode(deserializer);
+        return crate::api::ActiveRelayDto {
+            relay_id: var_relayId,
+            display_name: var_displayName,
+            endpoint: var_endpoint,
+            transport: var_transport,
+            latency_ms: var_latencyMs,
+            link: var_link,
+        };
+    }
+}
+
 impl SseDecode for crate::api::AppEvent {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1872,6 +1892,17 @@ impl SseDecode for Option<String> {
     }
 }
 
+impl SseDecode for Option<crate::api::ActiveRelayDto> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::ActiveRelayDto>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<crate::api::AvailableUpdateDto> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -2015,6 +2046,21 @@ impl SseDecode for crate::api::RelayDto {
     }
 }
 
+impl SseDecode for crate::api::RelayLinkStatusDto {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::RelayLinkStatusDto::Inactive,
+            1 => crate::api::RelayLinkStatusDto::Connected,
+            2 => crate::api::RelayLinkStatusDto::Reconnecting,
+            3 => crate::api::RelayLinkStatusDto::Recovered,
+            4 => crate::api::RelayLinkStatusDto::RecoveryExhausted,
+            _ => unreachable!("Invalid variant for RelayLinkStatusDto: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for crate::api::RoomHistoryEntryDto {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -2078,6 +2124,7 @@ impl SseDecode for crate::api::RoomSnapshot {
         let mut var_members = <Vec<crate::api::RoomMemberDto>>::sse_decode(deserializer);
         let mut var_steamIdentityMismatch =
             <Option<crate::api::SteamIdentityMismatchDto>>::sse_decode(deserializer);
+        let mut var_activeRelay = <Option<crate::api::ActiveRelayDto>>::sse_decode(deserializer);
         return crate::api::RoomSnapshot {
             active: var_active,
             status: var_status,
@@ -2087,6 +2134,7 @@ impl SseDecode for crate::api::RoomSnapshot {
             join_code: var_joinCode,
             members: var_members,
             steam_identity_mismatch: var_steamIdentityMismatch,
+            active_relay: var_activeRelay,
         };
     }
 }
@@ -2352,6 +2400,26 @@ fn pde_ffi_dispatcher_sync_impl(
 
 // Section: rust2dart
 
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::ActiveRelayDto {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.relay_id.into_into_dart().into_dart(),
+            self.display_name.into_into_dart().into_dart(),
+            self.endpoint.into_into_dart().into_dart(),
+            self.transport.into_into_dart().into_dart(),
+            self.latency_ms.into_into_dart().into_dart(),
+            self.link.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::ActiveRelayDto {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::ActiveRelayDto> for crate::api::ActiveRelayDto {
+    fn into_into_dart(self) -> crate::api::ActiveRelayDto {
+        self
+    }
+}
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::AppEvent {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
@@ -2801,6 +2869,30 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::RelayDto> for crate::api::Rel
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::RelayLinkStatusDto {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Inactive => 0.into_dart(),
+            Self::Connected => 1.into_dart(),
+            Self::Reconnecting => 2.into_dart(),
+            Self::Recovered => 3.into_dart(),
+            Self::RecoveryExhausted => 4.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::RelayLinkStatusDto
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::RelayLinkStatusDto>
+    for crate::api::RelayLinkStatusDto
+{
+    fn into_into_dart(self) -> crate::api::RelayLinkStatusDto {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::RoomHistoryEntryDto {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -2873,6 +2965,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::RoomSnapshot {
             self.join_code.into_into_dart().into_dart(),
             self.members.into_into_dart().into_dart(),
             self.steam_identity_mismatch.into_into_dart().into_dart(),
+            self.active_relay.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -3129,6 +3222,18 @@ impl SseEncode for String {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <Vec<u8>>::sse_encode(self.into_bytes(), serializer);
+    }
+}
+
+impl SseEncode for crate::api::ActiveRelayDto {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Option<String>>::sse_encode(self.relay_id, serializer);
+        <Option<String>>::sse_encode(self.display_name, serializer);
+        <String>::sse_encode(self.endpoint, serializer);
+        <crate::api::TransportSelection>::sse_encode(self.transport, serializer);
+        <Option<u64>>::sse_encode(self.latency_ms, serializer);
+        <crate::api::RelayLinkStatusDto>::sse_encode(self.link, serializer);
     }
 }
 
@@ -3519,6 +3624,16 @@ impl SseEncode for Option<String> {
     }
 }
 
+impl SseEncode for Option<crate::api::ActiveRelayDto> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::ActiveRelayDto>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<crate::api::AvailableUpdateDto> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -3634,6 +3749,25 @@ impl SseEncode for crate::api::RelayDto {
     }
 }
 
+impl SseEncode for crate::api::RelayLinkStatusDto {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::RelayLinkStatusDto::Inactive => 0,
+                crate::api::RelayLinkStatusDto::Connected => 1,
+                crate::api::RelayLinkStatusDto::Reconnecting => 2,
+                crate::api::RelayLinkStatusDto::Recovered => 3,
+                crate::api::RelayLinkStatusDto::RecoveryExhausted => 4,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
 impl SseEncode for crate::api::RoomHistoryEntryDto {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -3688,6 +3822,7 @@ impl SseEncode for crate::api::RoomSnapshot {
             self.steam_identity_mismatch,
             serializer,
         );
+        <Option<crate::api::ActiveRelayDto>>::sse_encode(self.active_relay, serializer);
     }
 }
 

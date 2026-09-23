@@ -1,6 +1,7 @@
 use super::*;
 use backon::{BackoffBuilder as _, ExponentialBuilder};
 
+use super::relay_rtt::{ROOM_RTT_NAMESPACE, RelayRttTracker};
 use crate::client::Counters;
 use crate::client::relay_transport::RecoveryKind;
 
@@ -98,6 +99,7 @@ pub(super) async fn relay_transport_task(
     let local_steam_id64 = relay.local_steam_id64();
     let mut room_peers = context.initial_peers.clone();
     let mut room_path = RoomPathQuality::default();
+    let mut relay_rtt = RelayRttTracker::default();
     let mut detached_dropped = 0_u64;
     if relay.supports_room_path_probe() {
         room_path.sync_peers(&room_peers, local_steam_id64);
@@ -124,6 +126,8 @@ pub(super) async fn relay_transport_task(
                 };
                 if let Err(error) = relay.sender.send_data_datagram(packet).await {
                     reset_room_path(&context.event_tx, &mut room_path);
+                    relay_rtt.reset();
+                    send_event(&context.event_tx, RuntimeEvent::RelayRttUpdated(None));
                     room_peers = recover_relay(&mut relay, &mut outbound_rx, &context, error).await?;
                     sync_room_path(&context.event_tx, &relay, &room_peers, &mut room_path);
                     continue;
@@ -142,6 +146,8 @@ pub(super) async fn relay_transport_task(
                     Ok(raw) => raw,
                     Err(error) => {
                         reset_room_path(&context.event_tx, &mut room_path);
+                        relay_rtt.reset();
+                        send_event(&context.event_tx, RuntimeEvent::RelayRttUpdated(None));
                         room_peers = recover_relay(&mut relay, &mut outbound_rx, &context, error).await?;
                         sync_room_path(&context.event_tx, &relay, &room_peers, &mut room_path);
                         continue;
@@ -160,7 +166,16 @@ pub(super) async fn relay_transport_task(
                         }
                     }
                     Ok(Some(InboundRelayDatagram::HealthPong { id })) => {
-                        observe_health(&context.health, |health| health.observe_health_pong(id, Instant::now()));
+                        if (id & ROOM_RTT_NAMESPACE) != 0 {
+                            let now = Instant::now();
+                            let prev_rtt = relay_rtt.current_rtt(now);
+                            let new_rtt = relay_rtt.observe_pong(id, now);
+                            if new_rtt != prev_rtt {
+                                send_event(&context.event_tx, RuntimeEvent::RelayRttUpdated(new_rtt));
+                            }
+                        } else {
+                            observe_health(&context.health, |health| health.observe_health_pong(id, Instant::now()));
+                        }
                     }
                     Ok(Some(InboundRelayDatagram::PeerPresence { peers })) => {
                         room_peers = peers;
@@ -201,8 +216,20 @@ pub(super) async fn relay_transport_task(
             }
             _ = heartbeat.tick() => {
                 report_detached_relay_drops(&context.event_tx, &mut detached_dropped);
-                if let Err(error) = send_control(&mut relay.sender, &ClientControl::ControlPing { id: 0 }).await {
-                    recover_relay(&mut relay, &mut outbound_rx, &context, error).await?;
+                let now = Instant::now();
+                let was_stale = relay_rtt.is_stale(now);
+                relay_rtt.expire(now);
+                let is_stale = relay_rtt.is_stale(now);
+                if !was_stale && is_stale {
+                    send_event(&context.event_tx, RuntimeEvent::RelayRttUpdated(None));
+                }
+                let ping_id = relay_rtt.next_ping(now);
+                if let Err(error) = send_control(&mut relay.sender, &ClientControl::ControlPing { id: ping_id }).await {
+                    reset_room_path(&context.event_tx, &mut room_path);
+                    relay_rtt.reset();
+                    send_event(&context.event_tx, RuntimeEvent::RelayRttUpdated(None));
+                    room_peers = recover_relay(&mut relay, &mut outbound_rx, &context, error).await?;
+                    sync_room_path(&context.event_tx, &relay, &room_peers, &mut room_path);
                 }
             }
             _ = runtime_rtt.tick(), if context.health.is_some() => {
