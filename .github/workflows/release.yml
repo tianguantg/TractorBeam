@@ -56,61 +56,6 @@ jobs:
           fi
           echo "commit=${commit}" >>"${GITHUB_OUTPUT}"
 
-  client-windows:
-    name: Client Bundle Windows
-    needs: setup
-    runs-on: windows-latest
-    timeout-minutes: 45
-    env:
-      TRACTOR_BEAM_GIT_HASH: ${{ needs.setup.outputs.commit }}
-    steps:
-      - uses: actions/checkout@v7.0.0
-        with:
-          ref: ${{ needs.setup.outputs.ref }}
-
-      - uses: dtolnay/rust-toolchain@1.97.0
-        with:
-          targets: x86_64-pc-windows-msvc,i686-pc-windows-msvc
-
-      - uses: Swatinem/rust-cache@v2.9.1
-
-      - name: Build Bridge GUI
-        run: cargo build --locked --release -p tractor-beam-gui --target x86_64-pc-windows-msvc
-
-      - name: Build Injector
-        run: cargo build --locked --release -p tractor-beam-isaac-injector --target i686-pc-windows-msvc
-
-      - name: Build Native Hook
-        run: cargo build --locked --release -p tractor-beam-native-hook --target i686-pc-windows-msvc
-
-      - name: Package Client Bundle
-        shell: pwsh
-        run: |
-          $bundleDir = "dist/TractorBeamClient"
-          New-Item -ItemType Directory -Force $bundleDir | Out-Null
-          Copy-Item "target/x86_64-pc-windows-msvc/release/tractor-beam.exe" $bundleDir
-          Copy-Item "target/i686-pc-windows-msvc/release/tractor-beam-isaac-injector.exe" $bundleDir
-          Copy-Item "target/i686-pc-windows-msvc/release/tractor_beam_native_hook.dll" $bundleDir
-          Copy-Item "deploy/client.config.toml" (Join-Path $bundleDir "config.toml")
-          $expected = @(
-            "config.toml",
-            "tractor-beam-isaac-injector.exe",
-            "tractor-beam.exe",
-            "tractor_beam_native_hook.dll"
-          )
-          $actual = @(Get-ChildItem -LiteralPath $bundleDir -File | Sort-Object Name | ForEach-Object Name)
-          if (Compare-Object $expected $actual) {
-            throw "Client Bundle root files differ from the required four-file layout: $($actual -join ', ')"
-          }
-          Compress-Archive -Path "$bundleDir/*" -DestinationPath "dist/TractorBeam-Client-Windows-x86_64.zip"
-
-      - uses: actions/upload-artifact@v7.0.1
-        with:
-          name: release-client-windows-x86_64
-          path: dist/TractorBeam-Client-Windows-x86_64.zip
-          if-no-files-found: error
-          retention-days: 7
-
   client-flutter-windows:
     name: Flutter Client Bundle Windows
     needs: setup
@@ -313,7 +258,7 @@ jobs:
 
   assemble:
     name: Assemble release
-    needs: [setup, client-windows, client-flutter-windows, relay-linux, relay-windows, relay-image]
+    needs: [setup, client-flutter-windows, relay-linux, relay-windows, relay-image]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -330,7 +275,6 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release-assets
-          cp staging/TractorBeam-Client-Windows-x86_64.zip release-assets/
           cp staging/TractorBeam-Client-Flutter-Windows-x86_64.zip release-assets/
           cp staging/TractorBeam-Relay-Linux-x86_64 release-assets/
           cp staging/TractorBeam-Relay-Windows-x86_64.exe release-assets/
@@ -375,19 +319,11 @@ jobs:
         run: |
           set -euo pipefail
           for name in \
-            TractorBeam-Client-Windows-x86_64.zip \
             TractorBeam-Client-Flutter-Windows-x86_64.zip \
             TractorBeam-Relay-Linux-x86_64 \
             TractorBeam-Relay-Windows-x86_64.exe; do
             test -f "${name}" || { echo "missing asset: ${name}" >&2; exit 1; }
           done
-          diff -u \
-            <(printf '%s\n' \
-              config.toml \
-              tractor-beam-isaac-injector.exe \
-              tractor-beam.exe \
-              tractor_beam_native_hook.dll | sort) \
-            <(unzip -Z1 TractorBeam-Client-Windows-x86_64.zip | sort)
           python3 - <<'PY'
           import zipfile
 
